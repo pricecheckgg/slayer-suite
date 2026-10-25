@@ -1285,10 +1285,14 @@ public class SlayerSuitePanel extends PluginPanel
 			p.add(dotRow(WARN, "Not checked: " + String.join(", ", unknown), null, false));
 			p.add(wrap("    " + cap(where) + " and these fill in.", DIM));
 		}
-		if (!overlap.hasPlugin("shortestpath."))
+		p.add(gap(6));
+		if (overlap.hasPlugin("shortestpath."))
 		{
-			p.add(gap(6));
-			p.add(wrap("Shortest Path plugin (Hub) not installed: with it, this pin becomes a door-to-door route.", DIM));
+			p.add(dotRow(OK, "Shortest Path plugin found: the pin is handed to it for a door-to-door route.", null, true));
+		}
+		else
+		{
+			p.add(dotRow(INFO, "Optional: install the Shortest Path plugin from the Plugin Hub and this pin becomes a door-to-door route with doors, stairs and shortcuts. Without it you get the arrow, the floor path and the steps above.", null, true));
 		}
 		if (advisor.getDestination() != null)
 		{

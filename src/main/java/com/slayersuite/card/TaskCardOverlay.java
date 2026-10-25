@@ -352,6 +352,8 @@ public class TaskCardOverlay extends Overlay
 			{
 				text(g, draw, small, fit(fs, "Tiles stop at a door, shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
 				y += fs.getHeight();
+				text(g, draw, small, fit(fs, "Optional: the Shortest Path plugin routes through these", cw - 12), x0 + 12, y + fs.getAscent(), DIM);
+				y += fs.getHeight();
 			}
 			return y + 2;
 		}

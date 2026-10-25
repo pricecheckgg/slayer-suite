@@ -27,7 +27,7 @@ dependencies {
 }
 
 group = 'com.slayersuite'
-version = '0.5.2'
+version = '0.5.3'
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
