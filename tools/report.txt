@@ -1,0 +1,188 @@
+generated 2026-10-25
+149 tasks, 433 monsters, 501 wiki pages
+
+monster pins merged: Slayer task/Abyssal demons (filled 0, added 1)
+monster pins merged: Slayer task/Ankou (filled 0, added 1)
+variants from monster page: Slayer task/Aquanites <- Aquanite
+monster pins merged: Slayer task/Aquanites (filled 0, added 1)
+monster pins merged: Slayer task/Araxytes (filled 4, added 1)
+monster pins merged: Slayer task/Aviansie (filled 2, added 0)
+monster pins merged: Slayer task/Bandits (filled 0, added 1)
+monster pins merged: Slayer task/Bats (filled 0, added 14)
+no overrides: bats
+monster pins merged: Slayer task/Bears (filled 0, added 11)
+no overrides: bears
+monster pins merged: Slayer task/Birds (filled 0, added 64)
+no overrides: birds
+monster pins merged: Slayer task/Black demons (filled 1, added 2)
+monster pins merged: Slayer task/Black dragons (filled 1, added 0)
+monster pins merged: Slayer task/Blue dragons (filled 1, added 1)
+monster pins merged: Slayer task/Brine rats (filled 1, added 0)
+monster pins merged: Slayer task/Cave crawlers (filled 4, added 0)
+monster pins merged: Slayer task/Cave krakens (filled 0, added 1)
+monster pins merged: Slayer task/Cows (filled 7, added 9)
+no overrides: cows
+monster pins merged: Slayer task/Crabs (filled 0, added 25)
+no overrides: crabs
+monster pins merged: Slayer task/Crawling Hands (filled 2, added 0)
+monster pins merged: Slayer task/Custodian stalker (filled 0, added 2)
+no overrides: custodian-stalker
+monster pins merged: Slayer task/Dagannoth (filled 1, added 0)
+variants from monster page: Slayer task/Dark beast <- Dark beast
+monster pins merged: Slayer task/Dark beast (filled 2, added 0)
+monster pins merged: Slayer task/Dogs (filled 0, added 12)
+no overrides: dogs
+no variants table: Slayer task/Dragons
+no location table: Slayer task/Dragons
+no overrides: dragons
+variants from monster page: Slayer task/Drakes <- Drake
+monster pins merged: Slayer task/Drakes (filled 0, added 1)
+monster pins merged: Slayer task/Dust devils (filled 3, added 0)
+monster pins merged: Slayer task/Dwarves (filled 0, added 2)
+no overrides: dwarves
+monster pins merged: Slayer task/Elves (filled 0, added 4)
+variants from monster page: Slayer task/Fire giants <- Fire giant
+monster pins merged: Slayer task/Fire giants (filled 2, added 2)
+monster pins merged: Slayer task/Fossil Island wyverns (filled 0, added 1)
+no monster infobox: Revenants
+monster pins merged: Slayer task/Ghosts (filled 0, added 1)
+no variants table: Slayer task/Giants
+no location table: Slayer task/Giants
+no overrides: giants
+monster pins merged: Slayer task/Goblins (filled 9, added 15)
+no overrides: goblins
+monster pins merged: Slayer task/Greater demons (filled 1, added 3)
+monster pins merged: Slayer task/Green dragons (filled 0, added 5)
+monster pins merged: Slayer task/Gryphons (filled 0, added 2)
+no overrides: gryphons
+monster pins merged: Slayer task/Hellhounds (filled 1, added 3)
+monster pins merged: Slayer task/Hobgoblins (filled 0, added 10)
+no overrides: hobgoblins
+monster pins merged: Slayer task/Ice giants (filled 7, added 0)
+monster pins merged: Slayer task/Icefiends (filled 6, added 0)
+no overrides: icefiends
+monster pins merged: Slayer task/Jellies (filled 0, added 1)
+monster pins merged: Slayer task/Lesser Nagua (filled 2, added 3)
+no overrides: lesser-nagua
+monster pins merged: Slayer task/Lesser demon (filled 1, added 4)
+monster pins merged: Slayer task/Lizardmen (filled 5, added 0)
+monster pins merged: Slayer task/Lizards (filled 1, added 4)
+monster pins merged: Slayer task/Metal dragons (filled 2, added 0)
+monster pins merged: Slayer task/Molanisks (filled 1, added 0)
+monster pins merged: Slayer task/Monkeys (filled 0, added 2)
+no overrides: monkeys
+monster pins merged: Slayer task/Moss giants (filled 1, added 4)
+monster pins merged: Slayer task/Nechryael (filled 6, added 0)
+monster pins merged: Slayer task/Ogres (filled 0, added 3)
+no overrides: ogres
+monster pins merged: Slayer task/Pirate (filled 2, added 7)
+no monster infobox: Hell-rat behemoth
+monster pins merged: Slayer task/Rats (filled 0, added 86)
+no overrides: rats
+monster pins merged: Slayer task/Red dragons (filled 2, added 1)
+monster pins merged: Slayer task/Scabarites (filled 1, added 1)
+monster pins merged: Slayer task/Scorpions (filled 0, added 27)
+no overrides: scorpions
+monster pins merged: Slayer task/Sea snakes (filled 0, added 1)
+no overrides: shades
+monster pins merged: Slayer task/Skeletons (filled 14, added 22)
+monster pins merged: Slayer task/Spiders (filled 5, added 64)
+no overrides: spiders
+monster pins merged: Slayer task/Spiritual creatures (filled 6, added 0)
+variants from monster page: Slayer task/Suqah <- Suqah
+monster pins merged: Slayer task/Suqah (filled 0, added 2)
+monster pins merged: Slayer task/Trolls (filled 0, added 13)
+monster pins merged: Slayer task/TzHaar (filled 0, added 1)
+monster pins merged: Slayer task/Vampyres (filled 0, added 2)
+no overrides: venators
+variants from monster page: Slayer task/Wall beast <- Wall beast
+monster pins merged: Slayer task/Wall beast (filled 0, added 1)
+no overrides: warped-creatures
+monster pins merged: Slayer task/Wolves (filled 11, added 18)
+no overrides: wolves
+monster pins merged: Slayer task/Wyrms (filled 5, added 0)
+monster pins merged: Slayer task/Zombies (filled 22, added 5)
+fallback record from monster page: The Abyssal Sire <- Abyssal Sire
+fallback record from monster page: The Alchemical Hydra <- Alchemical Hydra
+fallback record from monster page: Araxxor <- Araxxor
+core task without a wiki record: Barrows Brothers
+fallback record from monster page: Black Knights <- Black Knight
+fallback record from monster page: Callisto <- Callisto
+fallback record from monster page: Catablepon <- Catablepon
+fallback record from monster page: Cave bugs <- Cave bug
+fallback record from monster page: Cave slimes <- Cave slime
+fallback record from monster page: Cerberus <- Cerberus
+fallback record from monster page: Chaos druids <- Chaos druid
+fallback record from monster page: The Chaos Elemental <- Chaos Elemental
+fallback record from monster page: The Chaos Fanatic <- Chaos Fanatic
+fallback record from monster page: Cockatrice <- Cockatrice
+fallback record from monster page: Crazy Archaeologists <- Crazy archaeologist
+fallback record from monster page: Crocodiles <- Crocodile
+core task without a wiki record: Dagannoth Kings
+fallback record from monster page: Dark warriors <- Dark warrior
+fallback record from monster page: Deranged Archaeologist <- Deranged archaeologist
+fallback record from monster page: Duke Sucellus <- Duke Sucellus
+fallback record from monster page: Ents <- Ent
+fallback record from monster page: Fever spiders <- Fever spider
+fallback record from monster page: Fleshcrawlers <- Flesh Crawler
+fallback record from monster page: Frost dragons <- Frost dragon
+fallback record from monster page: General Graardor <- General Graardor
+fallback record from monster page: Ghouls <- Ghoul
+fallback record from monster page: The Giant Mole <- Giant Mole
+core task without a wiki record: The Grotesque Guardians
+fallback record from monster page: Harpie bug swarms <- Harpie Bug Swarm
+fallback record from monster page: Ice warriors <- Ice warrior
+fallback record from monster page: Infernal mages <- Infernal Mage
+fallback record from monster page: TzTok-Jad <- TzTok-Jad
+fallback record from monster page: Jungle horrors <- Jungle horror
+fallback record from monster page: The Kalphite Queen <- Kalphite Queen
+fallback record from monster page: Killerwatts <- Killerwatt
+fallback record from monster page: The King Black Dragon <- King Black Dragon
+core task without a wiki record: The Cave Kraken Boss
+fallback record from monster page: Kree'arra <- Kree'arra
+fallback record from monster page: K'ril Tsutsaroth <- K'ril Tsutsaroth
+fallback record from monster page: Lava Dragons <- Lava dragon
+fallback record from monster page: The Maggot King <- Maggot King
+fallback record from monster page: Magic axes <- Magic axe
+fallback record from monster page: Mammoths <- Mammoth
+fallback record from monster page: Minotaurs <- Minotaur
+fallback record from monster page: Mogres <- Mogre
+fallback record from monster page: Otherworldly beings <- Otherworldly being
+fallback record from monster page: The Phantom Muspah <- Phantom Muspah
+core task without a wiki record: Revenants
+fallback record from monster page: Rockslugs <- Rockslug
+fallback record from monster page: Rogues <- Rogue
+fallback record from monster page: Sarachnis <- Sarachnis
+fallback record from monster page: Scorpia <- Scorpia
+fallback record from monster page: Shadow warriors <- Shadow warrior
+fallback record from monster page: The Shellbane Gryphon <- Shellbane gryphon
+fallback record from monster page: Skeletal wyverns <- Skeletal Wyvern
+fallback record from monster page: Sourhogs <- Sourhog
+fallback record from monster page: Terror dogs <- Terror dog
+fallback record from monster page: The Leviathan <- The Leviathan
+fallback record from monster page: The Whisperer <- The Whisperer
+fallback record from monster page: The Thermonuclear Smoke Devil <- Thermonuclear smoke devil
+fallback record from monster page: Vardorvis <- Vardorvis
+fallback record from monster page: Venenatis <- Venenatis
+fallback record from monster page: Vet'ion <- Vet'ion
+fallback record from monster page: Vorkath <- Vorkath
+fallback record from monster page: Werewolves <- Werewolf
+fallback record from monster page: Commander Zilyana <- Commander Zilyana
+fallback record from monster page: TzKal-Zuk <- TzKal-Zuk
+fallback record from monster page: Zulrah <- Zulrah
+
+GAP CHECK: 5 tasks with no locations, 9 with locations but no map regions
+  no locations: Dragons
+  no locations: Giants
+  no locations: The Maggot King
+  no locations: The Shellbane Gryphon
+  no locations: TzKal-Zuk
+  no regions: Commander Zilyana
+  no regions: Custodian stalker
+  no regions: Duke Sucellus
+  no regions: Sourhogs
+  no regions: The Leviathan
+  no regions: The Phantom Muspah
+  no regions: The Whisperer
+  no regions: Vardorvis
+  no regions: Venators

@@ -1,0 +1,153 @@
+# Task display name | item id RuneLite's core Slayer plugin uses as the task icon.
+Aberrant spectres|4144
+Abyssal demons|4149
+The Abyssal Sire|13262
+The Alchemical Hydra|22746
+Ankou|20095
+Aquanites|32885
+Araxxor|29836
+Araxytes|29788
+Aviansies|13504
+Bandits|4625
+Banshees|4135
+Barrows Brothers|4732
+Basilisks|4139
+Bats|20875
+Bears|13462
+Birds|314
+Rooster|6
+Black demons|20026
+Black dragons|12524
+Black Knights|1165
+Bloodveld|4141
+Blue dragons|12520
+Brine rats|11047
+Callisto|13178
+Catablepon|9008
+Cave bugs|4521
+Cave crawlers|4134
+Cave horrors|8900
+Cave kraken|3272
+Cave slimes|4520
+Cerberus|13247
+Chaos druids|20595
+The Chaos Elemental|11995
+The Chaos Fanatic|4675
+Cockatrice|4137
+Cows|11919
+Crabs|7537
+Frost Crab|6
+Crawling hands|4133
+Crazy Archaeologists|11990
+Crocodiles|10149
+Custodian Stalkers|30994
+Dagannoth|8141
+Dagannoth Kings|12644
+Dark beasts|6637
+Dark warriors|1151
+Deranged Archaeologist|21629
+Dogs|8132
+Drakes|23041
+Duke Sucellus|28250
+Dust devils|4145
+Dwarves|11200
+Earth warriors|12221
+Elves|6105
+Ents|8174
+Fever spiders|6709
+Fire giants|30622
+Fleshcrawlers|13459
+Fossil island wyverns|21507
+Frost dragons|31729
+Gargoyles|4147
+General Graardor|12650
+Ghosts|552
+Ghouls|6722
+The Giant Mole|12646
+Goblins|13447
+Greater demons|20023
+Green dragons|12518
+The Grotesque Guardians|21750
+Harpie bug swarms|7050
+Hellhounds|8137
+Hill giants|13474
+Hobgoblins|8133
+Hydras|23042
+Icefiends|4671
+Ice giants|30624
+Ice warriors|12293
+Infernal mages|4140
+TzTok-Jad|13225
+Jellies|4142
+Jungle horrors|13486
+Kalphites|8139
+The Kalphite Queen|12647
+Killerwatts|7160
+The King Black Dragon|12653
+The Cave Kraken Boss|12655
+Kree\'arra|12649
+K\'ril Tsutsaroth|12652
+Kurask|4146
+Lava Dragons|11992
+Lesser demons|20020
+Lesser Nagua|28823
+Lizardmen|13391
+Lizards|6695
+Magic axes|1363
+Mammoths|10516
+Metal dragons|8142
+Minotaurs|13456
+Mogres|6661
+Molanisks|10997
+Monkeys|13450
+Moss giants|22374
+Mutated zygomites|7420
+Nechryael|4148
+Ogres|13477
+Otherworldly beings|6109
+The Phantom Muspah|27590
+Pirates|8950
+Pyrefiends|4138
+Rats|300
+Red dragons|8134
+Revenants|21816
+Rockslugs|4136
+Rogues|5554
+Sarachnis|23495
+Scabarites|9028
+Scorpia|13181
+Scorpions|13459
+Sea snakes|7576
+Shades|546
+Shadow warriors|1165
+The Shellbane Gryphon|31287
+Skeletal wyverns|6811
+Skeletons|8131
+Smoke devils|5349
+Sourhogs|24944
+Spiders|8135
+Spiritual creatures|11840
+Suqahs|9079
+Terror dogs|10591
+The Leviathan|28252
+The Whisperer|28246
+The Thermonuclear Smoke Devil|12648
+Trolls|8136
+Arrg|6
+Turoth|4143
+Tzhaar|13498
+Vampyres|1549
+Vardorvis|28248
+Venenatis|13177
+Vet\'ion|13179
+Vorkath|21992
+Wall beasts|4519
+Warped Creatures|28582
+Waterfiends|571
+Werewolves|2952
+Wolves|958
+Wyrms|23040
+Commander Zilyana|12651
+Zombies|6722
+TzKal-Zuk|22319
+Zulrah|12921

@@ -1,0 +1,1008 @@
+{
+  "_comment": "Hand-maintained facts merged into monsters.json by build-dataset.py, keyed by task slug. Item rules name groups from items.json: anyOf = any one of these groups satisfies the rule; level = required or recommended. finishingItem.threshold is the Hitpoints at or below which the item finishes the kill. prayer and style are display text. reviewed = checked by hand against the wiki prose on the date given.",
+  "aberrant-spectres": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_helm",
+          "nose_peg"
+        ],
+        "why": "stops the stat-draining attack",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "herb_sack"
+        ],
+        "why": "frequent herb drops",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "seed_box"
+        ],
+        "why": "frequent seed drops",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Magic",
+    "style": "Melee",
+    "notes": [
+      "Deviant spectres in the Catacombs of Kourend also count.",
+      "Undead: a salve amulet beats the slayer helmet bonus."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "abyssal-demons": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "They teleport you next to them.",
+      "The Abyssal Sire counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "ankou": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Undead: salve amulet applies."
+    ]
+  },
+  "aquanites": {
+    "prayer": "Protect from Magic",
+    "style": "Slash once to sever the lure, then stab",
+    "notes": [
+      "Ynysdail Cavern, under Ynysdail: 73 Sailing and a boat with an adamant keel or better.",
+      "Single-way combat and no cannon (the ground is too damp).",
+      "Elder Aquanite (superior) hits 50 if Protect from Magic stays on: flick it between its attacks."
+    ],
+    "superiors": [
+      "Elder Aquanite"
+    ],
+    "locations": [
+      {
+        "name": "Ynysdail Cavern",
+        "multicombat": false,
+        "cannon": false,
+        "safespot": true,
+        "notes": [
+          "Safespottable with a 9 or 10 tile attack range."
+        ]
+      }
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "araxytes": {
+    "protection": [
+      {
+        "anyOf": [
+          "antivenom"
+        ],
+        "why": "araxytes inflict venom",
+        "level": "recommended"
+      }
+    ],
+    "notes": [
+      "Araxxor counts."
+    ]
+  },
+  "aviansie": {
+    "style": "Ranged or Magic (melee cannot reach them)",
+    "prayer": "Protect from Missiles",
+    "notes": [
+      "God Wars Dungeon; Kree'arra and his bodyguards count."
+    ]
+  },
+  "bandits": {
+    "style": "Melee",
+    "notes": [
+      "Desert bandits attack anyone wearing Saradomin or Zamorak items.",
+      "Wilderness bandits: PvP risk."
+    ]
+  },
+  "banshees": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_helm",
+          "earmuffs"
+        ],
+        "why": "stops the scream's stat drain",
+        "level": "required"
+      }
+    ],
+    "style": "Melee",
+    "notes": [
+      "Twisted banshees in the Catacombs of Kourend also count."
+    ],
+    "prayer": "Protect from Melee",
+    "reviewed": "2026-10-25"
+  },
+  "basilisks": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "mirror_shield"
+        ],
+        "why": "blocks the gaze; the slayer helmet does not",
+        "level": "required"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Basilisk Knights in Jormungand's Prison count after The Fremennik Exiles."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "bats": {},
+  "bears": {},
+  "birds": {},
+  "cows": {},
+  "crabs": {},
+  "dogs": {},
+  "dwarves": {},
+  "goblins": {},
+  "hobgoblins": {},
+  "monkeys": {},
+  "ogres": {},
+  "rats": {},
+  "scorpions": {},
+  "spiders": {},
+  "wolves": {},
+  "icefiends": {},
+  "shades": {},
+  "elves": {
+    "notes": [
+      "Iorwerth warriors and archers count."
+    ]
+  },
+  "black-demons": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Demonic gorillas count."
+    ]
+  },
+  "black-dragons": {
+    "protection": [
+      {
+        "anyOf": [
+          "antifire_shield",
+          "antifire_potion"
+        ],
+        "why": "dragonfire",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "antifire_potion"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "antifire_shield"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee (with antifire)",
+    "style": "Melee",
+    "notes": [
+      "Baby black dragons count and do not breathe fire.",
+      "Brutal black dragons in the Catacombs count."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "bloodveld": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Their tongue attack is magic-based melee: Protect from Melee blocks it, Protect from Magic does not.",
+      "Mutated bloodveld in the Catacombs of Kourend count."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "blue-dragons": {
+    "protection": [
+      {
+        "anyOf": [
+          "antifire_shield",
+          "antifire_potion"
+        ],
+        "why": "dragonfire",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "antifire_potion"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "antifire_shield"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee (with antifire)",
+    "style": "Melee",
+    "notes": [
+      "Baby blue dragons count and do not breathe fire.",
+      "Vorkath counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "brine-rats": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "spade"
+        ],
+        "why": "dig into the Brine Rat Cavern",
+        "level": "required"
+      }
+    ],
+    "style": "Melee",
+    "reviewed": "2026-10-25"
+  },
+  "cave-crawlers": {
+    "protection": [
+      {
+        "anyOf": [
+          "antipoison"
+        ],
+        "why": "they poison",
+        "level": "recommended"
+      }
+    ],
+    "style": "Melee"
+  },
+  "cave-horrors": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "witchwood_icon"
+        ],
+        "why": "or keep Protect from Melee on; without either the scream always hits 10% of your Hitpoints",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "light_source"
+        ],
+        "why": "the Mos Le'Harmless cave is dark (not needed once the fire of eternal light is lit)",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "tinderbox"
+        ],
+        "why": "relight the lantern if it goes out",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Needs Cabin Fever."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "cave-krakens": {
+    "style": "Magic only",
+    "prayer": "Protect from Magic",
+    "notes": [
+      "Only magic can damage them; you need 50 Magic to be assigned them.",
+      "Disturb a whirlpool to start the fight. The Kraken boss counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "crawling-hands": {
+    "style": "Melee"
+  },
+  "custodian-stalker": {},
+  "dagannoth": {
+    "prayer": "Protect from Melee (Lighthouse)",
+    "style": "Melee",
+    "notes": [
+      "The Dagannoth Kings count."
+    ]
+  },
+  "dark-beast": {
+    "prayer": "Protect from Magic",
+    "style": "Melee",
+    "notes": [
+      "Mourner Tunnels need Mourning's End Part II."
+    ]
+  },
+  "dragons": {},
+  "giants": {},
+  "metal-dragons": {
+    "protection": [
+      {
+        "anyOf": [
+          "antifire_shield",
+          "antifire_potion"
+        ],
+        "why": "dragonfire",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "antifire_potion"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "antifire_shield"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee (with shield and potion)",
+    "style": "Melee"
+  },
+  "drakes": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "karuulm_boots"
+        ],
+        "why": "required on the Karuulm Slayer Dungeon floor unless you have the elite Kourend & Kebos diary",
+        "level": "recommended"
+      }
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "dust-devils": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_helm",
+          "facemask"
+        ],
+        "why": "stops the stat drain",
+        "level": "required"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Smoke Dungeon needs Desert Treasure I started.",
+      "Dust devils in the Catacombs of Kourend also count."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "earth-warriors": {
+    "style": "Melee",
+    "notes": [
+      "Wilderness: PvP risk."
+    ]
+  },
+  "fire-giants": {
+    "prayer": "Protect from Melee",
+    "style": "Melee"
+  },
+  "fossil-island-wyverns": {
+    "protection": [
+      {
+        "anyOf": [
+          "wyvern_shield"
+        ],
+        "why": "reduces the icy breath",
+        "level": "required"
+      }
+    ],
+    "notes": [
+      "Only Fossil Island wyverns count, not skeletal wyverns.",
+      "Antifire potions and the anti-dragon shield do nothing against the icy breath; only the ancient wyvern shield stops the freeze.",
+      "Their ranged attack hits through protection prayers."
+    ],
+    "prayer": "Protect from Melee",
+    "reviewed": "2026-10-25"
+  },
+  "gargoyles": {
+    "finishingItem": {
+      "anyOf": [
+        "rock_hammer"
+      ],
+      "why": "finish them at 9 Hitpoints or below (automatic with the Gargoyle smasher unlock, the hammer is still needed)",
+      "threshold": 9
+    },
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "The Grotesque Guardians count."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "ghosts": {
+    "style": "Melee",
+    "notes": [
+      "Undead: salve amulet applies.",
+      "Tortured souls, forgotten souls and revenants count."
+    ]
+  },
+  "greater-demons": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "K'ril Tsutsaroth, Skotizo and tormented demons count."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "green-dragons": {
+    "protection": [
+      {
+        "anyOf": [
+          "antifire_shield",
+          "antifire_potion"
+        ],
+        "why": "dragonfire",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "antifire_potion"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "antifire_shield"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee (with antifire)",
+    "style": "Melee",
+    "notes": [
+      "Wilderness task: PvP risk.",
+      "Baby green dragons count and do not breathe fire."
+    ]
+  },
+  "gryphons": {},
+  "hellhounds": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Cerberus counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "hill-giants": {
+    "style": "Melee",
+    "notes": [
+      "Obor and cyclopes count."
+    ]
+  },
+  "hydras": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "karuulm_boots"
+        ],
+        "why": "required on the Karuulm Slayer Dungeon floor unless you have the elite Kourend & Kebos diary",
+        "level": "recommended"
+      }
+    ],
+    "notes": [
+      "The Alchemical Hydra counts.",
+      "Alternate protection prayers with the head that is attacking; the poison spit ignores prayer."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "ice-giants": {
+    "prayer": "Protect from Melee",
+    "style": "Melee"
+  },
+  "jellies": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Warped jellies in the Catacombs of Kourend count."
+    ]
+  },
+  "kalphites": {
+    "protection": [
+      {
+        "anyOf": [
+          "antipoison"
+        ],
+        "why": "soldiers and guardians poison",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "The Kalphite Queen counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "kurask": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "leaf_bladed"
+        ],
+        "why": "only leaf-bladed weapons, broad ammunition or Magic Dart can damage them",
+        "level": "required"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Leaf-bladed melee, broad ammunition or Magic Dart",
+    "reviewed": "2026-10-25"
+  },
+  "lesser-nagua": {},
+  "lesser-demon": {
+    "prayer": "Protect from Melee",
+    "style": "Melee"
+  },
+  "lizardmen": {
+    "notes": [
+      "Needs the Reptile got ripped unlock.",
+      "Lizardman shamans count."
+    ]
+  },
+  "lizards": {
+    "finishingItem": {
+      "anyOf": [
+        "ice_cooler"
+      ],
+      "why": "finish desert lizards at 4 Hitpoints or below",
+      "threshold": 4
+    },
+    "requiredItems": [
+      {
+        "anyOf": [
+          "waterskin"
+        ],
+        "why": "Kharidian Desert heat",
+        "level": "recommended"
+      }
+    ],
+    "style": "Melee",
+    "reviewed": "2026-10-25"
+  },
+  "molanisks": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_bell"
+        ],
+        "why": "rings them off the cave walls",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "light_source"
+        ],
+        "why": "the Dorgesh-Kaan South Dungeon is dark",
+        "level": "recommended"
+      }
+    ],
+    "style": "Melee",
+    "notes": [
+      "Dorgesh-Kaan South Dungeon; needs Death to the Dorgeshuun."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "moss-giants": {
+    "prayer": "Protect from Melee",
+    "style": "Melee"
+  },
+  "nechryael": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "notes": [
+      "Greater nechryael in the Catacombs of Kourend count.",
+      "Death spawns appear during the fight."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "pirate": {
+    "style": "Melee",
+    "notes": [
+      "Wilderness: PvP risk."
+    ]
+  },
+  "pyrefiends": {
+    "prayer": "Protect from Magic",
+    "style": "Melee"
+  },
+  "red-dragons": {
+    "protection": [
+      {
+        "anyOf": [
+          "antifire_shield",
+          "antifire_potion"
+        ],
+        "why": "dragonfire",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "antifire_potion"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      },
+      {
+        "anyOf": [
+          "antifire_shield"
+        ],
+        "why": "shield plus potion gives full dragonfire immunity",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Melee (with antifire)",
+    "style": "Melee",
+    "notes": [
+      "Needs the Seeing red unlock.",
+      "Baby red dragons count and do not breathe fire."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "scabarites": {
+    "prayer": "Protect from Melee",
+    "notes": [
+      "Sophanem Dungeon; needs Contact!."
+    ]
+  },
+  "sea-snakes": {
+    "protection": [
+      {
+        "anyOf": [
+          "antipoison"
+        ],
+        "why": "sea snakes poison",
+        "level": "recommended"
+      }
+    ],
+    "notes": [
+      "Needs Royal Trouble."
+    ]
+  },
+  "skeletons": {
+    "style": "Melee"
+  },
+  "smoke-devils": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_helm",
+          "facemask"
+        ],
+        "why": "stops the stat drain",
+        "level": "required"
+      }
+    ],
+    "prayer": "Protect from Missiles",
+    "style": "Melee",
+    "notes": [
+      "The Thermonuclear smoke devil counts."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "spiritual-creatures": {
+    "notes": [
+      "God Wars Dungeon; spiritual mages, rangers and warriors count."
+    ]
+  },
+  "suqah": {
+    "notes": [
+      "Lunar Isle; needs Lunar Diplomacy."
+    ]
+  },
+  "trolls": {
+    "prayer": "Protect from Melee",
+    "style": "Melee",
+    "reviewed": "2026-10-25"
+  },
+  "turoth": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "leaf_bladed"
+        ],
+        "why": "only leaf-bladed weapons, broad ammunition or Magic Dart can damage them",
+        "level": "required"
+      }
+    ],
+    "prayer": "Protect from Melee",
+    "style": "Leaf-bladed melee, broad ammunition or Magic Dart",
+    "reviewed": "2026-10-25"
+  },
+  "tzhaar": {
+    "notes": [
+      "Needs the Hot stuff unlock.",
+      "TzTok-Jad and TzKal-Zuk count.",
+      "Tz-Kih drain prayer."
+    ]
+  },
+  "vampyres": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "vampyre_weapon"
+        ],
+        "why": "vyrewatch need blisterwood or Ivandis weapons; juvinates need silver",
+        "level": "recommended"
+      }
+    ],
+    "notes": [
+      "Needs the Actual Vampyre Slayer unlock."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "venators": {},
+  "wall-beast": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_helm",
+          "spiny_helmet"
+        ],
+        "why": "blocks the grab",
+        "level": "required"
+      },
+      {
+        "anyOf": [
+          "light_source"
+        ],
+        "why": "the Lumbridge Swamp Caves are dark",
+        "level": "required"
+      }
+    ],
+    "style": "Melee",
+    "protection": [
+      {
+        "anyOf": [
+          "antipoison"
+        ],
+        "why": "cave slimes and cave crawlers next to them poison",
+        "level": "recommended"
+      }
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "warped-creatures": {},
+  "waterfiends": {
+    "prayer": "Protect from Missiles (partial)",
+    "style": "Melee",
+    "notes": [
+      "They attack with Magic and magical Ranged, so no prayer blocks everything."
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "wyrms": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "karuulm_boots"
+        ],
+        "why": "required on the Karuulm Slayer Dungeon floor unless you have the elite Kourend & Kebos diary",
+        "level": "recommended"
+      }
+    ],
+    "prayer": "Protect from Magic (from range)",
+    "style": "Ranged or Melee",
+    "reviewed": "2026-10-25"
+  },
+  "zombies": {
+    "style": "Melee"
+  },
+  "zygomites": {
+    "finishingItem": {
+      "anyOf": [
+        "fungicide_spray"
+      ],
+      "why": "finish them at 7 Hitpoints or below",
+      "threshold": 7
+    },
+    "notes": [
+      "Mutated zygomites on Fossil Island count and need the same spray."
+    ],
+    "prayer": "Protect from Melee",
+    "reviewed": "2026-10-25"
+  },
+  "skeletal-wyverns": {
+    "protection": [
+      {
+        "anyOf": [
+          "wyvern_shield"
+        ],
+        "why": "reduces the icy breath",
+        "level": "required"
+      }
+    ],
+    "notes": [
+      "Asgarnian Ice Dungeon; 72 Slayer."
+    ]
+  },
+  "rockslugs": {
+    "finishingItem": {
+      "anyOf": [
+        "bag_of_salt"
+      ],
+      "why": "finish them at 4 Hitpoints or below",
+      "threshold": 4
+    },
+    "style": "Melee"
+  },
+  "cockatrice": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "mirror_shield"
+        ],
+        "why": "blocks the gaze; the slayer helmet does not",
+        "level": "required"
+      }
+    ],
+    "style": "Melee"
+  },
+  "cave-bugs": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "light_source"
+        ],
+        "why": "the Lumbridge Swamp Caves are dark",
+        "level": "required"
+      }
+    ]
+  },
+  "cave-slimes": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "light_source"
+        ],
+        "why": "the Lumbridge Swamp Caves are dark",
+        "level": "required"
+      }
+    ],
+    "protection": [
+      {
+        "anyOf": [
+          "antipoison"
+        ],
+        "why": "they poison",
+        "level": "recommended"
+      }
+    ]
+  },
+  "mogres": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "fishing_explosive"
+        ],
+        "why": "lures them out of the water",
+        "level": "required"
+      }
+    ],
+    "notes": [
+      "Mudskipper Point; needs Skippy and the Mogres."
+    ]
+  },
+  "harpie-bug-swarms": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "bug_lantern_lit"
+        ],
+        "why": "they can only be attacked with a lit bug lantern",
+        "level": "required"
+      }
+    ]
+  },
+  "fever-spiders": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "slayer_gloves"
+        ],
+        "why": "stop the disease",
+        "level": "required"
+      }
+    ]
+  },
+  "sourhogs": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "reinforced_goggles",
+          "slayer_helm"
+        ],
+        "why": "their saliva burns your eyes without them (the slayer helmet counts after A Porcine of Interest)",
+        "level": "required"
+      }
+    ],
+    "reviewed": "2026-10-25"
+  },
+  "mutated-zygomites": {
+    "finishingItem": {
+      "anyOf": [
+        "fungicide_spray"
+      ],
+      "why": "finish them at 7 Hitpoints or below",
+      "threshold": 7
+    }
+  },
+  "zulrah": {
+    "extraLocations": [
+      {
+        "name": "Zul-Andra",
+        "page": "Zul-Andra",
+        "floor": null,
+        "plane": 0,
+        "mapId": null,
+        "regions": [
+          8751
+        ],
+        "x": 2200,
+        "y": 3056,
+        "spawnCount": 1,
+        "amount": "boss",
+        "multicombat": false,
+        "cannon": false,
+        "safespot": false,
+        "notes": [
+          "Instanced fight; the pin is the shrine where it starts."
+        ],
+        "pins": [
+          [
+            2200,
+            3056
+          ]
+        ]
+      }
+    ]
+  },
+  "tztok-jad": {
+    "extraLocations": [
+      {
+        "name": "TzHaar Fight Cave",
+        "page": "TzHaar Fight Cave",
+        "floor": null,
+        "plane": 0,
+        "mapId": null,
+        "regions": [
+          9808
+        ],
+        "x": 2438,
+        "y": 5168,
+        "spawnCount": 1,
+        "amount": "boss",
+        "multicombat": false,
+        "cannon": false,
+        "safespot": false,
+        "notes": [
+          "Instanced; the pin is the cave entrance in Mor Ul Rek."
+        ],
+        "pins": [
+          [
+            2438,
+            5168
+          ]
+        ]
+      }
+    ]
+  }
+}

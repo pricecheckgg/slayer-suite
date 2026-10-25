@@ -1,0 +1,47 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url = 'https://repo.runelite.net'
+    }
+    mavenCentral()
+}
+
+def runeLiteVersion = 'latest.release'
+
+dependencies {
+    // Provided by the RuneLite client at runtime (includes Gson and Guice); never bundled.
+    compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
+
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
+    testImplementation group: 'net.runelite', name: 'jshell', version: runeLiteVersion
+    testImplementation 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+}
+
+group = 'com.slayersuite'
+version = '0.5.2'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+    options.release.set(11)
+}
+
+// Optional: drop the built jar into RuneLite's sideload folder. Not run by default.
+tasks.register('sideload', Copy) {
+    dependsOn 'jar'
+    doFirst {
+        delete fileTree("${System.properties['user.home']}/.runelite/sideloaded-plugins") {
+            include 'slayer-suite-*.jar'
+        }
+    }
+    from tasks.named('jar').flatMap { it.archiveFile }
+    into "${System.properties['user.home']}/.runelite/sideloaded-plugins"
+}

@@ -1,0 +1,154 @@
+# Task names and NPC target names as the core RuneLite Slayer plugin spells them (net.runelite.client.plugins.slayer.Task).
+# Columns: ENUM|Display name|extra NPC names that count for the task. Regenerate with tools/dump-core-task-names.sh.
+ABERRANT_SPECTRES|Aberrant spectres|Spectre
+ABYSSAL_DEMONS|Abyssal demons|Abyssal Sire
+ABYSSAL_SIRE|The Abyssal Sire
+ALCHEMICAL_HYDRA|The Alchemical Hydra
+ANKOU|Ankou
+AQUANITES|Aquanites
+ARAXXOR|Araxxor
+ARAXYTES|Araxytes|Araxxor
+AVIANSIES|Aviansies|Kree'arra|Flight Kilisa|Flockleader Geerin|Wingman Skree
+BANDITS|Bandits|Bandit|Black Heather|Donny the Lad|Speedy Keith
+BANSHEES|Banshees
+BARROWS_BROTHERS|Barrows Brothers
+BASILISKS|Basilisks
+BATS|Bats|Death wing
+BEARS|Bears|Callisto|Artio
+BIRDS|Birds|Chicken|Rooster|Terrorbird|Seagull|Vulture|Duck|Penguin|Baby Roc
+BLACK_DEMONS|Black demons|Demonic gorilla|Balfrug Kreeyath|Skotizo|Porazdir
+BLACK_DRAGONS|Black dragons
+BLACK_KNIGHTS|Black Knights|Black Knight
+BLOODVELD|Bloodveld
+BLUE_DRAGONS|Blue dragons|Vorkath
+BRINE_RATS|Brine rats
+CALLISTO|Callisto
+CATABLEPON|Catablepon
+CAVE_BUGS|Cave bugs
+CAVE_CRAWLERS|Cave crawlers|Chasm crawler
+CAVE_HORRORS|Cave horrors|Cave abomination
+CAVE_KRAKEN|Cave kraken|Kraken
+CAVE_SLIMES|Cave slimes
+CERBERUS|Cerberus
+CHAOS_DRUIDS|Chaos druids
+CHAOS_ELEMENTAL|The Chaos Elemental
+CHAOS_FANATIC|The Chaos Fanatic
+COCKATRICE|Cockatrice|Cockathrice
+COWS|Cows|Buffalo|Brutus
+CRABS|Crabs|Ammonite Crab|Frost Crab|King Sand Crab|Rock Crab|Giant Rock Crab|Sand Crab|Swamp Crab
+CRAWLING_HANDS|Crawling hands|Crushing hand
+CRAZY_ARCHAEOLOGIST|Crazy Archaeologists
+CROCODILES|Crocodiles
+CUSTODIAN_STALKERS|Custodian Stalkers|Ancient Custodian
+DAGANNOTH|Dagannoth
+DAGANNOTH_KINGS|Dagannoth Kings
+DARK_BEASTS|Dark beasts|Night beast
+DARK_WARRIORS|Dark warriors|Dark warrior
+DERANGED_ARCHAEOLOGIST|Deranged Archaeologist
+DOGS|Dogs|Jackal|Temple Guardian
+DRAKES|Drakes
+DUKE_SUCELLUS|Duke Sucellus
+DUST_DEVILS|Dust devils|Choke devil
+DWARVES|Dwarves|Dwarf|Black Guard
+EARTH_WARRIORS|Earth warriors
+ELVES|Elves|Elf|Iorwerth Warrior|Iorwerth Archer
+ENTS|Ents
+FEVER_SPIDERS|Fever spiders
+FIRE_GIANTS|Fire giants|Branda the Fire Queen
+FLESH_CRAWLERS|Fleshcrawlers|Flesh crawler
+FOSSIL_ISLAND_WYVERNS|Fossil island wyverns|Ancient wyvern|Long-tailed wyvern|Spitting wyvern|Taloned wyvern
+FROST_DRAGONS|Frost dragons
+GARGOYLES|Gargoyles|Dusk|Dawn
+GENERAL_GRAARDOR|General Graardor
+GHOSTS|Ghosts|Death wing|Tortured soul|Forgotten Soul|Revenant
+GHOULS|Ghouls
+GIANT_MOLE|The Giant Mole
+GOBLINS|Goblins|Sergeant Strongstack|Sergeant Grimspike|Sergeant Steelwill
+GREATER_DEMONS|Greater demons|K'ril Tsutsaroth|Tstanon Karlak|Skotizo|Tormented Demon
+GREEN_DRAGONS|Green dragons|Elvarg
+GROTESQUE_GUARDIANS|The Grotesque Guardians|Dusk|Dawn
+GRYPHONS|Gryphons
+HARPIE_BUG_SWARMS|Harpie bug swarms
+HELLHOUNDS|Hellhounds|Cerberus
+HILL_GIANTS|Hill giants|Cyclops|Reanimated giant|Obor
+HOBGOBLINS|Hobgoblins
+HYDRAS|Hydras
+ICEFIENDS|Icefiends
+ICE_GIANTS|Ice giants|Eldric the Ice King
+ICE_WARRIORS|Ice warriors|Icelord
+INFERNAL_MAGES|Infernal mages|Malevolent mage
+JAD|TzTok-Jad
+JELLIES|Jellies|Jelly
+JUNGLE_HORROR|Jungle horrors
+KALPHITE|Kalphites
+KALPHITE_QUEEN|The Kalphite Queen
+KILLERWATTS|Killerwatts
+KING_BLACK_DRAGON|The King Black Dragon
+KRAKEN|The Cave Kraken Boss|Kraken
+KREEARRA|Kree'arra
+KRIL_TSUTSAROTH|K'ril Tsutsaroth
+KURASK|Kurask
+LAVA_DRAGONS|Lava Dragons|Lava dragon
+LESSER_DEMONS|Lesser demons|Zakl'n Gritch
+LESSER_NAGUA|Lesser Nagua|Sulphur Nagua|Frost Nagua|Amoxliatl
+LIZARDMEN|Lizardmen|Lizardman
+LIZARDS|Lizards
+MAGGOT_KING|The Maggot King
+MAGIC_AXES|Magic axes
+MAMMOTHS|Mammoths
+METAL_DRAGONS|Metal dragons|Bronze dragon|Iron Dragon|Steel dragon|Mithril dragon|Adamant dragon|Rune dragon
+MINOTAURS|Minotaurs
+MOGRES|Mogres
+MOLANISKS|Molanisks
+MONKEYS|Monkeys|Tortured gorilla|Demonic gorilla|Padulah
+MOSS_GIANTS|Moss giants|Bryophyta
+MUTATED_ZYGOMITES|Mutated zygomites|Zygomite|Fungi
+NECHRYAEL|Nechryael|Nechryarch
+OGRES|Ogres|Enclave guard|Mogre|Ogress|Skogre|Zogre
+OTHERWORLDLY_BEING|Otherworldly beings
+PHANTOM_MUSPAH|The Phantom Muspah
+PIRATES|Pirates|Pirate
+PYREFIENDS|Pyrefiends|Flaming pyrelord
+RATS|Rats
+RED_DRAGONS|Red dragons
+REVENANTS|Revenants
+ROCKSLUGS|Rockslugs
+ROGUES|Rogues
+SARACHNIS|Sarachnis
+SCABARITES|Scabarites|Scarab swarm|Locust rider|Scarab mage|Small Scarab
+SCORPIA|Scorpia
+SCORPIONS|Scorpions|Scorpia|Lobstrosity
+SEA_SNAKES|Sea snakes
+SHADES|Shades|Loar|Phrin|Riyl|Asyn|Fiyr|Urium
+SHADOW_WARRIORS|Shadow warriors
+SHELLBANE_GRYPHON|The Shellbane Gryphon
+SKELETAL_WYVERNS|Skeletal wyverns
+SKELETONS|Skeletons|Vet'ion|Calvar'ion|Skeletal Mystic
+SMOKE_DEVILS|Smoke devils
+SOURHOGS|Sourhogs
+SPIDERS|Spiders|Kalrag|Sarachnis|Venenatis|Spindel|Araxxor|Araxyte
+SPIRITUAL_CREATURES|Spiritual creatures|Spiritual ranger|Spiritual mage|Spiritual warrior
+SUQAHS|Suqahs
+TERROR_DOGS|Terror dogs
+THE_LEVIATHAN|The Leviathan
+THE_WHISPERER|The Whisperer
+THERMONUCLEAR_SMOKE_DEVIL|The Thermonuclear Smoke Devil
+TROLLS|Trolls|Dad|Arrg|Stick|Kraka|Pee Hat|Rock|Twig|Berry
+TUROTH|Turoth
+TZHAAR|Tzhaar|TzTok-Jad|TzKal-Zuk
+VAMPYRES|Vampyres|Vyrewatch
+VARDORVIS|Vardorvis
+VENATORS|Venators
+VENENATIS|Venenatis
+VETION|Vet'ion
+VORKATH|Vorkath
+WALL_BEASTS|Wall beasts
+WARPED_CREATURES|Warped Creatures|Warped terrorbird|Warped tortoise|Mutated terrorbird|Mutated tortoise
+WATERFIENDS|Waterfiends
+WEREWOLVES|Werewolves|Werewolf
+WOLVES|Wolves|Wolf
+WYRMS|Wyrms|Wyrmling|Strykewyrm
+ZILYANA|Commander Zilyana
+ZOMBIES|Zombies|Undead|Vorkath|Zogre
+ZUK|TzKal-Zuk
+ZULRAH|Zulrah

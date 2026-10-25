@@ -1,0 +1,962 @@
+{
+  "comment": "Hand-maintained travel and access facts per location, matched to dataset location names by prefix (case-insensitive, brackets ignored). requires: quest = net.runelite.api.Quest constant that must be FINISHED (or 'started' = at least IN_PROGRESS); diary = <AREA>_<TIER> complete varbit; skill + level = a real skill level you must have. teleports: item = item name you must own (inventory, worn or seen in bank); spell + book = a teleport on that spellbook (standard, ancient, lunar, arceuus), with the quest and Magic level it needs; fairy = fairy ring code (needs Fairytale II started and a Dramen or Lunar staff, or the Lumbridge elite diary); hops: 1 lands you there, 2 short run, 3 long run. poh = a house facility (a '<Place> Portal', 'Fairy ring', 'Xeric's Talisman', 'Digsite Pendant', 'Mythical Cape', 'Amulet of Glory', or 'Jewellery Box' with item = the jewellery it stands in for); hops already include the trip home.",
+  "locations": [
+    {
+      "name": "Slayer Tower",
+      "requires": [
+        {
+          "quest": "PRIEST_IN_PERIL"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Slayer ring",
+          "hops": 1,
+          "x": 3422,
+          "y": 3537
+        },
+        {
+          "spell": "Kharyrll Teleport",
+          "book": "ancient",
+          "hops": 2,
+          "quest": "DESERT_TREASURE_I",
+          "level": 66
+        },
+        {
+          "fairy": "CKS",
+          "hops": 2
+        },
+        {
+          "item": "Ectophial",
+          "hops": 3
+        },
+        {
+          "item": "Morytania legs",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        },
+        {
+          "poh": "Kharyrll Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Stronghold Slayer Cave",
+      "teleports": [
+        {
+          "item": "Slayer ring",
+          "hops": 1,
+          "x": 2433,
+          "y": 3423
+        },
+        {
+          "fairy": "AIQ",
+          "hops": 2
+        },
+        {
+          "item": "Spirit tree",
+          "hops": 2
+        },
+        {
+          "item": "Royal seed pod",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Catacombs of Kourend",
+      "teleports": [
+        {
+          "item": "Xeric's talisman",
+          "hops": 2
+        },
+        {
+          "spell": "Kourend Castle Teleport",
+          "book": "standard",
+          "hops": 2,
+          "quest": "CLIENT_OF_KOUREND",
+          "level": 69
+        },
+        {
+          "item": "Rada's blessing",
+          "hops": 2
+        },
+        {
+          "item": "Kharedst's memoirs",
+          "hops": 2
+        },
+        {
+          "item": "Book of the dead",
+          "hops": 2
+        },
+        {
+          "poh": "Kourend Portal",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Fremennik Slayer",
+      "teleports": [
+        {
+          "item": "Slayer ring",
+          "hops": 1,
+          "x": 2802,
+          "y": 3615
+        },
+        {
+          "fairy": "AJR",
+          "hops": 2
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Karuulm Slayer Dungeon",
+      "teleports": [
+        {
+          "item": "Rada's blessing",
+          "hops": 1
+        },
+        {
+          "fairy": "CIR",
+          "hops": 2
+        },
+        {
+          "item": "Xeric's talisman",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Mount Karuulm",
+      "teleports": [
+        {
+          "item": "Rada's blessing",
+          "hops": 1
+        },
+        {
+          "fairy": "CIR",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Smoke Dungeon",
+      "requires": [
+        {
+          "quest": "DESERT_TREASURE_I",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "fairy": "DLQ",
+          "hops": 2
+        },
+        {
+          "item": "Pharaoh's sceptre",
+          "hops": 3
+        },
+        {
+          "item": "Camulet",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Kalphite Lair",
+      "teleports": [
+        {
+          "fairy": "BIQ",
+          "hops": 2
+        },
+        {
+          "item": "Desert amulet",
+          "hops": 2
+        },
+        {
+          "item": "Pharaoh's sceptre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Kalphite Cave",
+      "teleports": [
+        {
+          "fairy": "BIQ",
+          "hops": 2
+        },
+        {
+          "item": "Pharaoh's sceptre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Wilderness Slayer Cave",
+      "wilderness": true,
+      "teleports": [
+        {
+          "item": "Burning amulet",
+          "hops": 2
+        },
+        {
+          "item": "Ring of dueling",
+          "hops": 3
+        },
+        {
+          "item": "Games necklace",
+          "hops": 3
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Ring of dueling",
+          "hops": 4
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Games necklace",
+          "hops": 4
+        }
+      ]
+    },
+    {
+      "name": "Chasm of Fire",
+      "teleports": [
+        {
+          "fairy": "DJR",
+          "hops": 2
+        },
+        {
+          "item": "Xeric's talisman",
+          "hops": 3
+        },
+        {
+          "item": "Kharedst's memoirs",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        },
+        {
+          "poh": "Kourend Portal",
+          "hops": 3
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Brimhaven Dungeon",
+      "teleports": [
+        {
+          "item": "Karamja gloves",
+          "hops": 1
+        },
+        {
+          "item": "Amulet of glory",
+          "hops": 2
+        },
+        {
+          "spell": "Ardougne Teleport",
+          "book": "standard",
+          "hops": 3,
+          "quest": "PLAGUE_CITY",
+          "level": 51
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Amulet of glory",
+          "hops": 3
+        },
+        {
+          "poh": "Ardougne Portal",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Taverley Dungeon",
+      "teleports": [
+        {
+          "item": "Falador shield",
+          "hops": 2
+        },
+        {
+          "spell": "Falador Teleport",
+          "book": "standard",
+          "hops": 3,
+          "level": 37
+        },
+        {
+          "item": "Combat bracelet",
+          "hops": 3
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Combat bracelet",
+          "hops": 4
+        },
+        {
+          "poh": "Falador Portal",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Mourner Tunnels",
+      "requires": [
+        {
+          "quest": "MOURNINGS_END_PART_II"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Slayer ring",
+          "hops": 1,
+          "x": 2028,
+          "y": 4636
+        },
+        {
+          "item": "Iorwerth camp teleport",
+          "hops": 2
+        },
+        {
+          "item": "Teleport crystal",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Iorwerth Dungeon",
+      "requires": [
+        {
+          "quest": "SONG_OF_THE_ELVES"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Iorwerth camp teleport",
+          "hops": 1
+        },
+        {
+          "item": "Teleport crystal",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Meiyerditch Laboratories",
+      "requires": [
+        {
+          "quest": "SINS_OF_THE_FATHER",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Drakan's medallion",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Lithkren Vault",
+      "requires": [
+        {
+          "quest": "DRAGON_SLAYER_II"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Digsite pendant",
+          "hops": 2
+        },
+        {
+          "item": "Rune dragon teleport",
+          "hops": 1
+        },
+        {
+          "poh": "Digsite Pendant",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Myths' Guild",
+      "requires": [
+        {
+          "quest": "DRAGON_SLAYER_II"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Mythical cape",
+          "hops": 1
+        },
+        {
+          "item": "Rune dragon teleport",
+          "hops": 2
+        },
+        {
+          "poh": "Mythical Cape",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Ancient Cavern",
+      "requires": [
+        {
+          "quest": "BARBARIAN_TRAINING",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Games necklace",
+          "hops": 2
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Games necklace",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "God Wars Dungeon",
+      "requires": [
+        {
+          "quest": "TROLL_STRONGHOLD"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Ghommal's hilt",
+          "hops": 1
+        },
+        {
+          "spell": "Trollheim Teleport",
+          "book": "standard",
+          "hops": 2,
+          "quest": "EADGARS_RUSE",
+          "level": 61
+        },
+        {
+          "item": "Combat bracelet",
+          "hops": 3
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Combat bracelet",
+          "hops": 4
+        },
+        {
+          "poh": "Troll Stronghold Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Mos Le'Harmless Cave",
+      "requires": [
+        {
+          "quest": "CABIN_FEVER"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Morytania legs",
+          "hops": 2
+        },
+        {
+          "item": "Ectophial",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Kraken Cove",
+      "teleports": [
+        {
+          "fairy": "DKP",
+          "hops": 2
+        },
+        {
+          "item": "Explorer's ring",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Dorgesh-Kaan South Dungeon",
+      "requires": [
+        {
+          "quest": "DEATH_TO_THE_DORGESHUUN"
+        }
+      ],
+      "teleports": [
+        {
+          "fairy": "AJQ",
+          "hops": 2
+        },
+        {
+          "item": "Dorgesh-kaan sphere",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Lumbridge Swamp Caves",
+      "teleports": [
+        {
+          "spell": "Lumbridge Teleport",
+          "book": "standard",
+          "hops": 2,
+          "level": 31
+        },
+        {
+          "item": "Explorer's ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Brine Rat Cavern",
+      "requires": [
+        {
+          "quest": "OLAFS_QUEST"
+        }
+      ],
+      "teleports": [
+        {
+          "fairy": "DKS",
+          "hops": 2
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Lunar Isle",
+      "requires": [
+        {
+          "quest": "LUNAR_DIPLOMACY"
+        }
+      ],
+      "teleports": [
+        {
+          "spell": "Moonclan Teleport",
+          "book": "lunar",
+          "hops": 1,
+          "quest": "LUNAR_DIPLOMACY",
+          "level": 69
+        },
+        {
+          "poh": "Lunar Isle Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Sophanem Dungeon",
+      "requires": [
+        {
+          "quest": "CONTACT"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Pharaoh's sceptre",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Asgarnian Ice Dungeon",
+      "teleports": [
+        {
+          "item": "Skills necklace",
+          "hops": 3
+        },
+        {
+          "item": "Ring of dueling",
+          "hops": 3
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Skills necklace",
+          "hops": 4
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Ring of dueling",
+          "hops": 4
+        }
+      ]
+    },
+    {
+      "name": "Zanaris",
+      "requires": [
+        {
+          "quest": "LOST_CITY"
+        }
+      ],
+      "teleports": [
+        {
+          "fairy": "BKS",
+          "hops": 1
+        },
+        {
+          "item": "Dramen staff",
+          "hops": 2
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Fossil Island",
+      "requires": [
+        {
+          "quest": "BONE_VOYAGE"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Digsite pendant",
+          "hops": 2
+        },
+        {
+          "poh": "Digsite Pendant",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Wyvern Cave",
+      "requires": [
+        {
+          "quest": "BONE_VOYAGE"
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Digsite pendant",
+          "hops": 2
+        },
+        {
+          "poh": "Digsite Pendant",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Death Plateau",
+      "requires": [
+        {
+          "quest": "TROLL_STRONGHOLD",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "spell": "Trollheim Teleport",
+          "book": "standard",
+          "hops": 2,
+          "quest": "EADGARS_RUSE",
+          "level": 61
+        },
+        {
+          "item": "Games necklace",
+          "hops": 2
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Games necklace",
+          "hops": 3
+        },
+        {
+          "poh": "Troll Stronghold Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Trollheim",
+      "teleports": [
+        {
+          "spell": "Trollheim Teleport",
+          "book": "standard",
+          "hops": 1,
+          "quest": "EADGARS_RUSE",
+          "level": 61
+        },
+        {
+          "poh": "Troll Stronghold Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Ice Troll Caves",
+      "requires": [
+        {
+          "quest": "THE_FREMENNIK_ISLES",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Enchanted lyre",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Keldagrim",
+      "teleports": [
+        {
+          "fairy": "DKS",
+          "hops": 2
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Waterbirth Island",
+      "teleports": [
+        {
+          "spell": "Waterbirth Teleport",
+          "book": "lunar",
+          "hops": 1,
+          "quest": "LUNAR_DIPLOMACY",
+          "level": 72
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 2
+        },
+        {
+          "poh": "Waterbirth Island Portal",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Lighthouse",
+      "requires": [
+        {
+          "quest": "HORROR_FROM_THE_DEEP"
+        }
+      ],
+      "teleports": [
+        {
+          "fairy": "ALP",
+          "hops": 2
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 3
+        },
+        {
+          "poh": "Fairy ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Edgeville Dungeon",
+      "teleports": [
+        {
+          "item": "Amulet of glory",
+          "hops": 2
+        },
+        {
+          "poh": "Jewellery Box",
+          "item": "Amulet of glory",
+          "hops": 3
+        },
+        {
+          "poh": "Amulet of Glory",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Forthos Dungeon",
+      "teleports": [
+        {
+          "item": "Xeric's talisman",
+          "hops": 2
+        },
+        {
+          "item": "Kharedst's memoirs",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Isle of Souls",
+      "teleports": [
+        {
+          "item": "Soul bearer",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Giants' Den",
+      "teleports": [
+        {
+          "item": "Xeric's talisman",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Wyrmscraig Cavern",
+      "requires": [
+        {
+          "quest": "FALLEN_FROM_GRACE",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Necklace of passage",
+          "hops": 2
+        },
+        {
+          "item": "Slayer ring",
+          "hops": 2
+        }
+      ]
+    },
+    {
+      "name": "Nieve's cave",
+      "teleports": [
+        {
+          "item": "Slayer ring",
+          "hops": 1,
+          "x": 2433,
+          "y": 3423
+        }
+      ]
+    },
+    {
+      "name": "Ynysdail Cavern",
+      "requires": [
+        {
+          "skill": "SAILING",
+          "level": 73
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Teleport crystal",
+          "hops": 3
+        }
+      ]
+    },
+    {
+      "name": "Ynysdail",
+      "requires": [
+        {
+          "skill": "SAILING",
+          "level": 73
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Teleport crystal",
+          "hops": 3
+        }
+      ]
+    }
+  ]
+}
