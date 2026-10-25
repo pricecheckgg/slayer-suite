@@ -30394,8 +30394,7 @@
    "style": null,
    "notes": [
     "Only Fossil Island wyverns count, not skeletal wyverns.",
-    "Antifire potions and the anti-dragon shield do nothing against the icy breath; only the ancient wyvern shield stops the freeze.",
-    "Their ranged attack hits through protection prayers."
+    "Antifire potions and the anti-dragon shield do nothing against the icy breath; only the ancient wyvern shield stops the freeze."
    ],
    "coreTargetNames": [
     "Fossil island wyverns",
@@ -38216,7 +38215,6 @@
       "Edgeville Dungeon"
      ],
      "notes": [
-      "Boss monster. Attacks with both ranged and melee depending on protection prayers.",
       "Requires a giant key to unlock access to his lair for the first time, subsequent access to his lair does not require a key.",
       "For more information see Obor."
      ]
@@ -40510,8 +40508,7 @@
    "protection": [],
    "style": null,
    "notes": [
-    "The Alchemical Hydra counts.",
-    "Alternate protection prayers with the head that is attacking; the poison spit ignores prayer."
+    "The Alchemical Hydra counts."
    ],
    "coreTargetNames": [
     "Hydras"
@@ -73037,9 +73034,7 @@
       "God Wars Dungeon",
       "Wilderness God Wars Dungeon"
      ],
-     "notes": [
-      "The Zarosian variant can occasionally launch an arrow into the air, which if hit by, will deal heavy damage, disable overhead protection prayers and bind the player for a few seconds."
-     ]
+     "notes": []
     },
     {
      "name": "Spiritual warrior",
@@ -80208,9 +80203,7 @@
      "locations": [
       "Poison Waste Dungeon"
      ],
-     "notes": [
-      "Attacks with both melee and ranged attacks, depending on what the player prays against."
-     ]
+     "notes": []
     },
     {
      "name": "Mutated Tortoise",
@@ -80937,9 +80930,7 @@
    "finishingItem": null,
    "protection": [],
    "style": "Melee",
-   "notes": [
-    "They attack with Magic and magical Ranged, so no prayer blocks everything."
-   ],
+   "notes": [],
    "coreTargetNames": [
     "Waterfiends"
    ],

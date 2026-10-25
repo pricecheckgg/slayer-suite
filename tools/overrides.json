@@ -388,8 +388,7 @@
     ],
     "notes": [
       "Only Fossil Island wyverns count, not skeletal wyverns.",
-      "Antifire potions and the anti-dragon shield do nothing against the icy breath; only the ancient wyvern shield stops the freeze.",
-      "Their ranged attack hits through protection prayers."
+      "Antifire potions and the anti-dragon shield do nothing against the icy breath; only the ancient wyvern shield stops the freeze."
     ],
     "reviewed": "2026-10-25"
   },
@@ -477,8 +476,7 @@
       }
     ],
     "notes": [
-      "The Alchemical Hydra counts.",
-      "Alternate protection prayers with the head that is attacking; the poison spit ignores prayer."
+      "The Alchemical Hydra counts."
     ],
     "reviewed": "2026-10-25"
   },
@@ -747,9 +745,7 @@
   "warped-creatures": {},
   "waterfiends": {
     "style": "Melee",
-    "notes": [
-      "They attack with Magic and magical Ranged, so no prayer blocks everything."
-    ],
+    "notes": [],
     "reviewed": "2026-10-25"
   },
   "wyrms": {

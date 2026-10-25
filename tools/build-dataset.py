@@ -886,6 +886,15 @@ def main():
         report.append(f"fallback record from monster page: {cname} <- {found['page']}")
 
     tasks.sort(key=lambda t: t["name"].lower())
+    # Notes that would amount to prayer guidance are dropped: third-party client rules forbid indicating which prayer to use.
+    guidance = re.compile(r"protection prayer|prays? against|prayer blocks|what the player prays|pray(ing)? (melee|magic|ranged|missiles)", re.I)
+    for t in tasks:
+        t["notes"] = [n for n in t.get("notes", []) if not guidance.search(n)]
+        for m in t.get("monsters", []):
+            m["notes"] = [n for n in m.get("notes", []) if not guidance.search(n)]
+        for l in t.get("locations", []):
+            if l.get("notes"):
+                l["notes"] = [n for n in l["notes"] if not guidance.search(n)]
     # Every task needs at least one location with map regions, or the card cannot place you and the pin cannot be set.
     no_loc = [t["name"] for t in tasks if not t["locations"]]
     no_regions = [t["name"] for t in tasks if t["locations"] and not any(l.get("regions") for l in t["locations"])]
