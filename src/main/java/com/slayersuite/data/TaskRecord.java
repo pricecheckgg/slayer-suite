@@ -26,7 +26,6 @@ public class TaskRecord
 	private List<ItemRule> requiredItems = new ArrayList<>();
 	private ItemRule finishingItem;
 	private List<ItemRule> protection = new ArrayList<>();
-	private String prayer;
 	private String style;
 	private List<String> notes = new ArrayList<>();
 	private List<String> coreTargetNames = new ArrayList<>();

@@ -14,7 +14,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
@@ -23,7 +22,6 @@ import net.runelite.api.MenuEntry;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Point;
-import net.runelite.api.Prayer;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
@@ -31,8 +29,8 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 
 /**
  * Hover a task monster: a solid card beside the cursor, drawn above everything else, with the
- * name and level, HP / max hit / attack style tiles, the prayer with its icon and whether it is
- * on, then weakness, Slayer xp, the finishing item and any poison or cannon warning.
+ * name and level, HP / max hit / attack style tiles, then weakness, Slayer xp, the finishing
+ * item and any poison or cannon warning.
  */
 public class NpcHoverOverlay extends Overlay
 {
@@ -56,14 +54,13 @@ public class NpcHoverOverlay extends Overlay
 	private final ReadinessChecker readiness;
 	private final SlayerSuiteConfig config;
 	private final com.slayersuite.task.SlayerMode mode;
-	private final PrayerSprites sprites;
 
 	private final Font std = FontManager.getRunescapeFont();
 	private final Font small = FontManager.getRunescapeSmallFont();
 	private final Font bold = FontManager.getRunescapeBoldFont();
 
 	@Inject
-	public NpcHoverOverlay(Client client, TaskTracker tracker, AttackGuard guard, SlayerDataset dataset, ReadinessChecker readiness, SlayerSuiteConfig config, com.slayersuite.task.SlayerMode mode, PrayerSprites sprites)
+	public NpcHoverOverlay(Client client, TaskTracker tracker, AttackGuard guard, SlayerDataset dataset, ReadinessChecker readiness, SlayerSuiteConfig config, com.slayersuite.task.SlayerMode mode)
 	{
 		this.mode = mode;
 		this.client = client;
@@ -72,7 +69,6 @@ public class NpcHoverOverlay extends Overlay
 		this.dataset = dataset;
 		this.readiness = readiness;
 		this.config = config;
-		this.sprites = sprites;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(PRIORITY_HIGHEST);
@@ -87,8 +83,6 @@ public class NpcHoverOverlay extends Overlay
 		Color tagColor;
 		List<String[]> tiles = new ArrayList<>();
 		String maxHitNote;
-		Prayer prayer;
-		boolean prayerOn;
 		List<String[]> rows = new ArrayList<>();
 		List<Object[]> warnings = new ArrayList<>();
 	}
@@ -198,8 +192,6 @@ public class NpcHoverOverlay extends Overlay
 				i.tiles.add(new String[]{String.join("/", st), st.size() > 1 ? "ATTACKS" : "ATTACK"});
 			}
 		}
-		i.prayer = PrayerHints.forNpc(rec, name);
-		i.prayerOn = i.prayer != null && client.getVarbitValue(i.prayer.getVarbit()) == 1;
 		if (m != null)
 		{
 			if (m.getElementalWeakness() != null && !m.getElementalWeakness().isEmpty())
@@ -295,31 +287,6 @@ public class NpcHoverOverlay extends Overlay
 				text(g, draw, small, fit(fs, i.maxHitNote, cw), x0, y + fs.getAscent(), DIM);
 				y += fs.getHeight() + 1;
 			}
-		}
-
-		// prayer
-		if (i.prayer != null)
-		{
-			y = rule(g, draw, x0, y, cw);
-			BufferedImage ic = sprites.get(i.prayer, 16);
-			int h = Math.max(fn.getHeight(), 16);
-			if (ic != null && draw)
-			{
-				g.drawImage(ic, x0, y + (h - 16) / 2, 16, 16, null);
-			}
-			String state = i.prayerOn ? "ON" : "OFF";
-			Color sc = i.prayerOn ? OK : BAD;
-			int sw = fs.stringWidth(state) + 8;
-			if (draw)
-			{
-				g.setColor(new Color(sc.getRed(), sc.getGreen(), sc.getBlue(), 40));
-				g.fillRect(x0 + cw - sw, y + (h - th) / 2, sw, th);
-				g.setColor(new Color(sc.getRed(), sc.getGreen(), sc.getBlue(), 150));
-				g.drawRect(x0 + cw - sw, y + (h - th) / 2, sw - 1, th - 1);
-			}
-			text(g, draw, small, state, x0 + cw - sw + 4, y + (h - th) / 2 + fs.getAscent(), sc);
-			text(g, draw, std, fit(fn, PrayerSprites.name(i.prayer), cw - 20 - sw - 6), x0 + 20, y + (h + fn.getAscent() - fn.getDescent()) / 2, PrayerSprites.color(i.prayer));
-			y += h + 2;
 		}
 
 		// rows

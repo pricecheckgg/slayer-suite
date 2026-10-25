@@ -519,7 +519,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic",
    "style": "Melee",
    "notes": [
     "Deviant spectres in the Catacombs of Kourend also count.",
@@ -1121,7 +1120,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "They teleport you next to them.",
@@ -1767,7 +1765,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Undead: salve amulet applies."
@@ -1944,7 +1941,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic",
    "style": "Slash once to sever the lure, then stab",
    "notes": [
     "Ynysdail Cavern, under Ynysdail: 73 Sailing and a boat with an adamant keel or better.",
@@ -2032,7 +2028,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -2820,7 +2815,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": null,
    "style": null,
    "notes": [
     "Araxxor counts."
@@ -3403,7 +3397,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Missiles",
    "style": "Ranged or Magic (melee cannot reach them)",
    "notes": [
     "God Wars Dungeon; Kree'arra and his bodyguards count."
@@ -3748,7 +3741,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Desert bandits attack anyone wearing Saradomin or Zamorak items.",
@@ -4057,7 +4049,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Twisted banshees in the Catacombs of Kourend also count."
@@ -4538,7 +4529,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Basilisk Knights in Jormungand's Prison count after The Fremennik Exiles."
@@ -6814,7 +6804,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -8314,7 +8303,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -12227,7 +12215,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -13112,7 +13099,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Demonic gorillas count."
@@ -13747,7 +13733,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee (with antifire)",
    "style": "Melee",
    "notes": [
     "Baby black dragons count and do not breathe fire.",
@@ -14274,7 +14259,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -15206,7 +15190,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Their tongue attack is magic-based melee: Protect from Melee blocks it, Protect from Magic does not.",
@@ -16035,7 +16018,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee (with antifire)",
    "style": "Melee",
    "notes": [
     "Baby blue dragons count and do not breathe fire.",
@@ -16178,7 +16160,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -16261,7 +16242,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -16446,7 +16426,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -16700,7 +16679,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -17020,7 +16998,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -17478,7 +17455,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Needs Cabin Fever."
@@ -17723,7 +17699,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic",
    "style": "Magic only",
    "notes": [
     "Only magic can damage them; you need 50 Magic to be assigned them.",
@@ -17946,7 +17921,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -18044,7 +18018,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -18355,7 +18328,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -18469,7 +18441,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -18545,7 +18516,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -19755,7 +19725,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -22312,7 +22281,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -22628,7 +22596,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -22711,7 +22678,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -23024,7 +22990,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -23212,7 +23177,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -24034,7 +23998,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee (Lighthouse)",
    "style": "Melee",
    "notes": [
     "The Dagannoth Kings count."
@@ -24293,7 +24256,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic",
    "style": "Melee",
    "notes": [
     "Mourner Tunnels need Mourning's End Part II."
@@ -24613,7 +24575,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -24697,7 +24658,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -25679,7 +25639,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -25709,7 +25668,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [],
@@ -25873,7 +25831,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -25956,7 +25913,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -26457,7 +26413,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Smoke Dungeon needs Desert Treasure I started.",
@@ -27722,7 +27677,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -27857,7 +27811,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Wilderness: PvP risk."
@@ -28797,7 +28750,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Iorwerth warriors and archers count."
@@ -29054,7 +29006,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -29184,7 +29135,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -29959,7 +29909,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -30146,7 +30095,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -30443,7 +30391,6 @@
      "level": "required"
     }
    ],
-   "prayer": "Protect from Melee",
    "style": null,
    "notes": [
     "Only Fossil Island wyverns count, not skeletal wyverns.",
@@ -30613,7 +30560,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -31009,7 +30955,6 @@
     "threshold": 9
    },
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "The Grotesque Guardians count."
@@ -31095,7 +31040,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -32582,7 +32526,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Undead: salve amulet applies.",
@@ -32775,7 +32718,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -32802,7 +32744,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [],
@@ -35024,7 +34965,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -35996,7 +35936,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "K'ril Tsutsaroth, Skotizo and tormented demons count."
@@ -36542,7 +36481,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee (with antifire)",
    "style": "Melee",
    "notes": [
     "Wilderness task: PvP risk.",
@@ -36958,7 +36896,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -37193,7 +37130,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -38109,7 +38045,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Cerberus counts."
@@ -39272,7 +39207,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Obor and cyclopes count."
@@ -40298,7 +40232,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -40575,7 +40508,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "The Alchemical Hydra counts.",
@@ -41107,7 +41039,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -41555,7 +41486,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -41951,7 +41881,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -42092,7 +42021,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -42751,7 +42679,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Warped jellies in the Catacombs of Kourend count."
@@ -43038,7 +42965,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -43123,7 +43049,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -43673,7 +43598,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "The Kalphite Queen counts."
@@ -43859,7 +43783,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -43945,7 +43868,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -44304,7 +44226,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Leaf-bladed melee, broad ammunition or Magic Dart",
    "notes": [],
    "coreTargetNames": [
@@ -44419,7 +44340,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -45330,7 +45250,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -45839,7 +45758,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -47119,7 +47037,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Needs the Reptile got ripped unlock.",
@@ -47868,7 +47785,6 @@
     "threshold": 4
    },
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -48069,7 +47985,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -48179,7 +48094,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -48789,7 +48703,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee (with shield and potion)",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -49054,7 +48967,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -49152,7 +49064,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Mudskipper Point; needs Skippy and the Mogres."
@@ -49297,7 +49208,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Dorgesh-Kaan South Dungeon; needs Death to the Dorgeshuun."
@@ -51545,7 +51455,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -52599,7 +52508,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -53215,7 +53123,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [
     "Greater nechryael in the Catacombs of Kourend count.",
@@ -54489,7 +54396,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -54597,7 +54503,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -55297,7 +55202,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [
     "Wilderness: PvP risk."
@@ -55966,7 +55870,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -60477,7 +60380,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -61082,7 +60984,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": "Protect from Melee (with antifire)",
    "style": "Melee",
    "notes": [
     "Needs the Seeing red unlock.",
@@ -61362,7 +61263,6 @@
     "threshold": 4
    },
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -61595,7 +61495,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -61678,7 +61577,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -62315,7 +62213,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": null,
    "notes": [
     "Sophanem Dungeon; needs Contact!."
@@ -62402,7 +62299,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -64506,7 +64402,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -64660,7 +64555,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": null,
    "style": null,
    "notes": [
     "Needs Royal Trouble."
@@ -65507,7 +65401,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -65666,7 +65559,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -65848,7 +65740,6 @@
      "level": "required"
     }
    ],
-   "prayer": null,
    "style": null,
    "notes": [
     "Asgarnian Ice Dungeon; 72 Slayer."
@@ -68149,7 +68040,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -68482,7 +68372,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Missiles",
    "style": "Melee",
    "notes": [
     "The Thermonuclear smoke devil counts."
@@ -68567,7 +68456,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -73063,7 +72951,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -74298,7 +74185,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "God Wars Dungeon; spiritual mages, rangers and warriors count."
@@ -74636,7 +74522,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Lunar Isle; needs Lunar Diplomacy."
@@ -74752,7 +74637,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -74857,7 +74741,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -74949,7 +74832,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75033,7 +74915,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75115,7 +74996,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75197,7 +75077,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75286,7 +75165,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75373,7 +75251,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75451,7 +75328,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75508,7 +75384,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75591,7 +75466,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75647,7 +75521,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75729,7 +75602,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -75806,7 +75678,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -77637,7 +77508,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -77888,7 +77758,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": "Leaf-bladed melee, broad ammunition or Magic Dart",
    "notes": [],
    "coreTargetNames": [
@@ -78362,7 +78231,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Needs the Hot stuff unlock.",
@@ -78423,7 +78291,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -78507,7 +78374,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -79587,7 +79453,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [
     "Needs the Actual Vampyre Slayer unlock."
@@ -79667,7 +79532,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -79827,7 +79691,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -79910,7 +79773,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -79996,7 +79858,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -80088,7 +79949,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -80226,7 +80086,6 @@
      "level": "recommended"
     }
    ],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -80722,7 +80581,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -81078,7 +80936,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Missiles (partial)",
    "style": "Melee",
    "notes": [
     "They attack with Magic and magical Ranged, so no prayer blocks everything."
@@ -81345,7 +81202,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -83226,7 +83082,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -83752,7 +83607,6 @@
    ],
    "finishingItem": null,
    "protection": [],
-   "prayer": "Protect from Magic (from range)",
    "style": "Ranged or Melee",
    "notes": [],
    "coreTargetNames": [
@@ -86585,7 +86439,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": "Melee",
    "notes": [],
    "coreTargetNames": [
@@ -86673,7 +86526,6 @@
    "requiredItems": [],
    "finishingItem": null,
    "protection": [],
-   "prayer": null,
    "style": null,
    "notes": [],
    "coreTargetNames": [
@@ -87061,7 +86913,6 @@
     "threshold": 7
    },
    "protection": [],
-   "prayer": "Protect from Melee",
    "style": null,
    "notes": [
     "Mutated zygomites on Fossil Island count and need the same spray."

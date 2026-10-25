@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Print, for a list of tasks, our override rules next to the wiki sentences that
-mention items, prayers and protection, so a maintainer can check them by eye.
+mention items and protection, so a maintainer can check them by eye.
 
 Usage: python3 tools/check-overrides.py aberrant-spectres gargoyles ...
        python3 tools/check-overrides.py --all
@@ -19,7 +19,7 @@ spec = importlib.util.spec_from_file_location("bd", os.path.join(ROOT, "tools", 
 bd = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bd)
 
-KEYWORDS = re.compile(r"requir|need|must|only be (damaged|attacked|hit)|protect from|prayer|antifire|anti-dragon|dragonfire|shield|poison|venom|light source|spade|boots of stone|fungicide|rock hammer|salt|ice cooler|nose peg|earmuff|facemask|face mask|mirror shield|witchwood|leaf-bladed|broad|slayer helm|spiny|insulated|bell|lantern|explosive|goggles|gloves|unlock|salve|waterskin|rope|cannon", re.I)
+KEYWORDS = re.compile(r"requir|need|must|only be (damaged|attacked|hit)|antifire|anti-dragon|dragonfire|shield|poison|venom|light source|spade|boots of stone|fungicide|rock hammer|salt|ice cooler|nose peg|earmuff|facemask|face mask|mirror shield|witchwood|leaf-bladed|broad|slayer helm|spiny|insulated|bell|lantern|explosive|goggles|gloves|unlock|salve|waterskin|rope|cannon", re.I)
 
 
 def cached(title):
@@ -60,7 +60,7 @@ def main():
         print("  OVERRIDE required:", [(r["anyOf"], r.get("level", "required")) for r in ov.get("requiredItems", [])])
         print("  OVERRIDE protection:", [(r["anyOf"], r.get("level", "required")) for r in ov.get("protection", [])])
         print("  OVERRIDE finishing:", ov.get("finishingItem"))
-        print("  OVERRIDE prayer/style:", ov.get("prayer"), "/", ov.get("style"))
+        print("  OVERRIDE style:", ov.get("style"))
         print("  OVERRIDE notes:", ov.get("notes"))
         if t:
             print("  WIKI attack styles:", sorted({s for m in t["monsters"] for s in m["attackStyles"]}), "| poison:", any(m["poisonous"] for m in t["monsters"]), "| venom:", any(m["venomous"] for m in t["monsters"]), "| lvl", t["slayerLevel"], "| other:", t["otherRequirements"])

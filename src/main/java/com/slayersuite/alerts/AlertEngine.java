@@ -28,7 +28,6 @@ import net.runelite.api.GameState;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Player;
-import net.runelite.api.Prayer;
 import net.runelite.api.Skill;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
@@ -335,7 +334,7 @@ public class AlertEngine
 	private void checkPrayer()
 	{
 		int cur = client.getBoostedSkillLevel(Skill.PRAYER);
-		boolean relevant = anyPrayerActive() || readiness.hasGroup("prayer_restore");
+		boolean relevant = readiness.hasGroup("prayer_restore") || cur < client.getRealSkillLevel(Skill.PRAYER);
 		if (relevant && cur <= config.prayerPoints())
 		{
 			raise(AlertKind.LOW_PRAYER, "Prayer " + cur);
@@ -344,18 +343,6 @@ public class AlertEngine
 		{
 			clear(AlertKind.LOW_PRAYER);
 		}
-	}
-
-	private boolean anyPrayerActive()
-	{
-		for (Prayer p : Prayer.values())
-		{
-			if (client.getVarbitValue(p.getVarbit()) == 1)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 
 	private void checkPoison()

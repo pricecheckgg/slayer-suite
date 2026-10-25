@@ -1,6 +1,5 @@
 package com.slayersuite;
 
-import com.slayersuite.card.PrayerHintMode;
 import com.slayersuite.guard.GuardMode;
 import com.slayersuite.task.SlayerModeSetting;
 import net.runelite.client.config.Config;
@@ -25,7 +24,7 @@ public interface SlayerSuiteConfig extends Config
 	@ConfigSection(name = "Task card", description = "The card in the corner: kills left, ETA, how to fight it, where you are, what you still need.", position = 0)
 	String cardSection = "card";
 
-	@ConfigSection(name = "Prayer icons and tooltips", description = "What is drawn over the task monsters themselves.", position = 1)
+	@ConfigSection(name = "Hover card", description = "The card beside the cursor when you hover a task monster.", position = 1)
 	String monsterSection = "monsters";
 
 	@ConfigSection(name = "Readiness check", description = "At the bank: everything this task needs, checked against your gear, inventory and bank.", position = 2)
@@ -95,7 +94,7 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "cardShowPrayer", name = "Prayer and style row", description = "The protection prayer icon and the combat style to use.", section = cardSection, position = 5)
+	@ConfigItem(keyName = "cardShowPrayer", name = "Style row", description = "The combat style to use, the superior and the finishing item.", section = cardSection, position = 5)
 	default boolean cardShowPrayer()
 	{
 		return true;
@@ -121,42 +120,7 @@ public interface SlayerSuiteConfig extends Config
 
 	// ---------------------------------------------------------------- over the monsters
 
-	@ConfigItem(keyName = "prayerHintMode", name = "Prayer icons", description = "The protection prayer icon above a task monster's name. A hint only: no sound, no notification.", section = monsterSection, position = 0)
-	default PrayerHintMode prayerHintMode()
-	{
-		return PrayerHintMode.WHEN_OFF;
-	}
-
-	@ConfigItem(keyName = "prayerHintAllTargets", name = "On every task monster", description = "Icons on every task monster in range, so you see them before you attack. Off: only the one fighting you.", section = monsterSection, position = 1)
-	default boolean prayerHintAllTargets()
-	{
-		return true;
-	}
-
-	@Range(min = 12, max = 48)
-	@Units(Units.PIXELS)
-	@ConfigItem(keyName = "prayerHintSize", name = "Icon size", description = "Size of the prayer icon.", section = monsterSection, position = 2)
-	default int prayerHintSize()
-	{
-		return 24;
-	}
-
-	@Range(min = 1, max = 30)
-	@ConfigItem(keyName = "prayerHintRange", name = "Icon range", description = "Tiles. Monsters further away get no icon; the one fighting you always does.", section = monsterSection, position = 3)
-	default int prayerHintRange()
-	{
-		return 12;
-	}
-
-	@Range(min = -60, max = 60)
-	@Units(Units.PIXELS)
-	@ConfigItem(keyName = "prayerHintOffset", name = "Icon nudge", description = "Move the icon up (negative) or down (positive) from its place above the name.", section = monsterSection, position = 4)
-	default int prayerHintOffset()
-	{
-		return 0;
-	}
-
-	@ConfigItem(keyName = "hoverInfo", name = "Hover tooltip", description = "Hover a task monster for its Hitpoints, max hit, attack style, prayer, weakness, Slayer xp, poison, cannon immunity and finishing item.", section = monsterSection, position = 5)
+	@ConfigItem(keyName = "hoverInfo", name = "Hover card", description = "Hover a task monster for its Hitpoints, max hit, attack style, weakness, Slayer xp, poison, cannon immunity and finishing item.", section = monsterSection, position = 0)
 	default boolean hoverInfo()
 	{
 		return true;
@@ -182,7 +146,7 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "readinessPrayer", name = "Check prayer restores", description = "Warn when the task calls for a protection prayer and you carry no prayer restore.", section = readinessSection, position = 3)
+	@ConfigItem(keyName = "readinessPrayer", name = "Check prayer restores", description = "Warn when you carry no prayer restore and this task has cost you prayer points before.", section = readinessSection, position = 3)
 	default boolean readinessPrayer()
 	{
 		return true;
@@ -238,7 +202,7 @@ public interface SlayerSuiteConfig extends Config
 	}
 
 	@Range(min = 1, max = 99)
-	@ConfigItem(keyName = "prayerPoints", name = "Low prayer at", description = "Warn when prayer points fall to this many while a prayer is on or you carry a restore.", section = alertsSection, position = 11)
+	@ConfigItem(keyName = "prayerPoints", name = "Low prayer at", description = "Warn when prayer points fall to this many while you have spent some or carry a restore.", section = alertsSection, position = 11)
 	default int prayerPoints()
 	{
 		return 10;

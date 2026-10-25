@@ -56,7 +56,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
- * The side panel. Four blocks top to bottom: the task (progress, prayer, what you
+ * The side panel. Four blocks top to bottom: the task (progress, style, what you
  * still need), where to go (filter chips and one card per spot with a Go button),
  * getting there (numbered ways, each marked by what your account can use), and
  * your history per task.
@@ -74,7 +74,6 @@ public class SlayerSuitePanel extends PluginPanel
 	private static final Color DIM = new Color(165, 165, 165);
 	private static final Color TAG_BG = new Color(55, 55, 55);
 	private static final Color TILE_BG = new Color(36, 36, 36);
-	private static final Color PRAY_MELEE = new Color(230, 115, 110);
 	private static final Color MISSED = new Color(225, 135, 135);
 	/** Text width that fits the panel; measured from the real viewport at each rebuild. */
 	private static volatile int WRAP = PluginPanel.PANEL_WIDTH - 60;
@@ -953,12 +952,9 @@ public class SlayerSuitePanel extends PluginPanel
 		p.add(tiles(cells));
 		p.add(gap(6));
 
-		// how to fight it: aligned label / value rows, prayer coloured like its icon
+		// how to fight it: aligned label / value rows
 		if (rec != null)
 		{
-			String pray = rec.getPrayer();
-			Color prayColor = pray == null ? DIM : pray.contains("Magic") ? INFO : pray.contains("Missiles") ? OK : pray.contains("Melee") ? PRAY_MELEE : Color.WHITE;
-			p.add(kv("Pray", pray == null ? "any protection prayer" : pray, prayColor));
 			if (rec.getStyle() != null)
 			{
 				p.add(kv("Style", rec.getStyle(), Color.WHITE));

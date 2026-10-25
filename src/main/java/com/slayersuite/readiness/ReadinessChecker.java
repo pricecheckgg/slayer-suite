@@ -53,6 +53,7 @@ import net.runelite.client.game.ItemManager;
 public class ReadinessChecker
 {
 	private final Client client;
+	private final Provider<com.slayersuite.history.TaskHistory> history;
 	private final ItemManager itemManager;
 	private final SlayerDataset dataset;
 	private final TaskTracker tracker;
@@ -87,8 +88,9 @@ public class ReadinessChecker
 
 	@Inject
 	public ReadinessChecker(Client client, ItemManager itemManager, SlayerDataset dataset, TaskTracker tracker, SlayerSuiteConfig config,
-		Provider<Advisor> advisor, Provider<AccountState> account, TravelData travel, ConfigManager configManager, Gson gson)
+		Provider<Advisor> advisor, Provider<AccountState> account, TravelData travel, ConfigManager configManager, Gson gson, Provider<com.slayersuite.history.TaskHistory> history)
 	{
+		this.history = history;
 		this.client = client;
 		this.itemManager = itemManager;
 		this.dataset = dataset;
@@ -530,9 +532,10 @@ public class ReadinessChecker
 				String key = rec.anyVenomous() ? "antivenom" : "antipoison";
 				out.add(new Missing(items.label(key), rec.anyVenomous() ? "the monsters inflict venom" : "the monsters poison", false, items.satisfied(key, bankNames)));
 			}
-			if (config.readinessPrayer() && rec.getPrayer() != null && !items.satisfied("prayer_restore", held))
+			com.slayersuite.history.TaskStats stats = history.get().getCurrent();
+			if (config.readinessPrayer() && stats != null && stats.getPrayerPerKill() > 0.2 && !items.satisfied("prayer_restore", held))
 			{
-				out.add(new Missing(items.label("prayer_restore"), rec.getPrayer() + " is the usual prayer here", false, items.satisfied("prayer_restore", bankNames)));
+				out.add(new Missing(items.label("prayer_restore"), "this task has cost you prayer points before", false, items.satisfied("prayer_restore", bankNames)));
 			}
 		}
 		if (config.readinessFood() && foodCount == 0)

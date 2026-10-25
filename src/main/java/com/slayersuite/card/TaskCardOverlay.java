@@ -28,7 +28,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
-import net.runelite.api.Prayer;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -38,8 +37,8 @@ import net.runelite.client.ui.overlay.components.BackgroundComponent;
 
 /**
  * The one task card, drawn as four short blocks: the header (icon, name, kills left, bar),
- * the numbers (ETA, rate, points, streak as tiles), how to fight it (prayer icon, style,
- * superior, finishing item), where you are or where to go, and a gear checklist.
+ * the numbers (ETA, rate, points, streak as tiles), how to fight it (style, superior,
+ * finishing item), where you are or where to go, and a gear checklist.
  */
 public class TaskCardOverlay extends Overlay
 {
@@ -68,7 +67,6 @@ public class TaskCardOverlay extends Overlay
 	private final javax.inject.Provider<com.slayersuite.advisor.PathOverlay> pathOverlay;
 	private final net.runelite.client.eventbus.EventBus eventBus;
 	private final ItemManager itemManager;
-	private final PrayerSprites sprites;
 	private BufferedImage itemIcon;
 	private int itemIconFor = -1;
 
@@ -77,7 +75,7 @@ public class TaskCardOverlay extends Overlay
 	private final Font bold = FontManager.getRunescapeBoldFont();
 
 	@Inject
-	public TaskCardOverlay(TaskTracker tracker, ReadinessChecker readiness, AlertEngine alerts, SlayerDataset dataset, SlayerSuiteConfig config, TaskHistory history, TripTracker trip, Advisor advisor, com.slayersuite.task.SlayerMode mode, javax.inject.Provider<com.slayersuite.advisor.PathOverlay> pathOverlay, net.runelite.client.eventbus.EventBus eventBus, ItemManager itemManager, PrayerSprites sprites)
+	public TaskCardOverlay(TaskTracker tracker, ReadinessChecker readiness, AlertEngine alerts, SlayerDataset dataset, SlayerSuiteConfig config, TaskHistory history, TripTracker trip, Advisor advisor, com.slayersuite.task.SlayerMode mode, javax.inject.Provider<com.slayersuite.advisor.PathOverlay> pathOverlay, net.runelite.client.eventbus.EventBus eventBus, ItemManager itemManager)
 	{
 		this.eventBus = eventBus;
 		this.pathOverlay = pathOverlay;
@@ -91,7 +89,6 @@ public class TaskCardOverlay extends Overlay
 		this.history = history;
 		this.trip = trip;
 		this.itemManager = itemManager;
-		this.sprites = sprites;
 		setPosition(OverlayPosition.TOP_LEFT);
 		setPriority(PRIORITY_MED);
 		setResizable(true);
@@ -214,15 +211,9 @@ public class TaskCardOverlay extends Overlay
 		List<Cell> fight = new ArrayList<>();
 		if (rec != null)
 		{
-			if (config.cardShowPrayer())
+			if (config.cardShowPrayer() && rec.getStyle() != null)
 			{
-				Prayer p = PrayerHints.fromText(rec.getPrayer());
-				String pv = rec.getPrayer() == null ? "any" : shortPrayer(rec.getPrayer());
-				fight.add(new Cell("PRAY", pv, p == null ? (rec.getPrayer() == null ? DIM : Color.WHITE) : PrayerSprites.color(p), sprites.get(p, 14)));
-				if (rec.getStyle() != null)
-				{
-					fight.add(new Cell("STYLE", rec.getStyle(), Color.WHITE, null));
-				}
+				fight.add(new Cell("STYLE", rec.getStyle(), Color.WHITE, null));
 			}
 			ItemRule fin = rec.getFinishingItem();
 			if (fin != null && fin.getAnyOf() != null)
@@ -639,17 +630,6 @@ public class TaskCardOverlay extends Overlay
 			}
 		}
 		return itemIcon;
-	}
-
-	/** "Protect from Magic" -> "Magic"; anything else as written. */
-	private static String shortPrayer(String prayer)
-	{
-		String p = prayer.trim();
-		if (p.regionMatches(true, 0, "Protect from ", 0, 13))
-		{
-			return p.substring(13);
-		}
-		return p;
 	}
 
 	private static String firstLocationNames(TaskRecord rec)

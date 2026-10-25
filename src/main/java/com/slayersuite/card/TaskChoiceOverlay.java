@@ -36,7 +36,7 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 
 /**
  * Beside the Slayer Task Choice screen: what each offered task means for this
- * account (your own rates, xp per kill, items you lack, best spot, prayer) and
+ * account (your own rates, xp per kill, items you lack, best spot) and
  * which one to pick. Reads the screen's text; never clicks anything.
  */
 public class TaskChoiceOverlay extends OverlayPanel
@@ -347,10 +347,6 @@ public class TaskChoiceOverlay extends OverlayPanel
 			else if (c.rec.getLocations().isEmpty())
 			{
 				line("  Spot: no wiki location data", DIM);
-			}
-			if (c.rec.getPrayer() != null)
-			{
-				line("  Pray: " + c.rec.getPrayer(), DIM);
 			}
 			line("  " + c.why, pick ? OK : DIM);
 		}

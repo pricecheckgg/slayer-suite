@@ -3,7 +3,7 @@
 
 Reads every "Slayer task/<name>" page plus the monster pages they link to,
 merges the hand-maintained overrides (required items, finishing items,
-protection, prayer, style) and writes:
+protection, style) and writes:
 
   src/main/resources/com/slayersuite/data/monsters.json
   DATA-ATTRIBUTION.md  (page list with revision ids, licence notice)
@@ -709,7 +709,6 @@ def main():
             "requiredItems": [],
             "finishingItem": None,
             "protection": [],
-            "prayer": None,
             "style": None,
             "notes": [],
             "coreTargetNames": [],
@@ -811,7 +810,7 @@ def main():
             if ov.get("skip"):
                 report.append(f"skipped by override: {key}")
                 continue
-            for fld in ("requiredItems", "finishingItem", "protection", "prayer", "style"):
+            for fld in ("requiredItems", "finishingItem", "protection", "style"):
                 if fld in ov:
                     rec[fld] = ov[fld]
             for fld in ("aliases", "superiors", "notes"):
@@ -877,7 +876,7 @@ def main():
                 "category": found.get("category"), "superior": False, "locations": [l["name"] for l in page_locs], "notes": []}],
             "superiors": list(ov.get("superiors", [])), "locations": page_locs + list(ov.get("extraLocations", [])),
             "requiredItems": ov.get("requiredItems", []), "finishingItem": ov.get("finishingItem"), "protection": ov.get("protection", []),
-            "prayer": ov.get("prayer"), "style": ov.get("style"), "notes": list(ov.get("notes", [])),
+            "style": ov.get("style"), "notes": list(ov.get("notes", [])),
             "coreTargetNames": [cname] + c["targets"], "reviewed": bool(ov.get("reviewed", False)), "fallback": True,
             "iconItemId": icons.get(norm(cname)),
         }

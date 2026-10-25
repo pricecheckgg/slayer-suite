@@ -12,7 +12,6 @@ import com.slayersuite.advisor.TravelData;
 import com.slayersuite.alerts.AlertBannerOverlay;
 import com.slayersuite.alerts.AlertEngine;
 import com.slayersuite.card.NpcHoverOverlay;
-import com.slayersuite.card.PrayerHintOverlay;
 import com.slayersuite.card.TaskCardOverlay;
 import com.slayersuite.card.TaskChoiceOverlay;
 import com.slayersuite.card.TaskCompleteOverlay;
@@ -54,13 +53,13 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @Slf4j
 @PluginDescriptor(
 	name = "Slayer Suite",
-	description = "Slayer in one plugin: a task card with kills left, ETA, prayer and gear; prayer icons over task monsters; a side panel that ranks spots for your account and guides you there; a readiness check at the bank; one alert engine with banner and sounds; a task complete card; an off-task attack guard; and your own history per task.",
-	tags = {"slayer", "task", "alerts", "readiness", "superior", "afk", "bank", "combat", "prayer", "eta", "gps", "panel", "history", "sounds"}
+	description = "Slayer in one plugin: a task card with kills left, ETA, style and gear; a side panel that ranks spots for your account and guides you there; a readiness check at the bank; one alert engine with banner and sounds; task complete and level up cards; an off-task attack guard; and your own loot and history per task.",
+	tags = {"slayer", "aio", "task", "alerts", "readiness", "superior", "afk", "bank", "combat", "eta", "gps", "panel", "loot", "history", "sounds"}
 )
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.5.3";
+	public static final String VERSION = "0.6.0";
 
 	@Inject
 	private EventBus eventBus;
@@ -104,8 +103,6 @@ public class SlayerSuitePlugin extends Plugin
 	private ReadinessOverlay readinessOverlay;
 	@Inject
 	private AlertBannerOverlay bannerOverlay;
-	@Inject
-	private PrayerHintOverlay prayerHintOverlay;
 	@Inject
 	private GpsOverlay gpsOverlay;
 	@Inject
@@ -189,7 +186,6 @@ public class SlayerSuitePlugin extends Plugin
 	{
 		if (configManager.getConfiguration(SlayerSuiteConfig.GROUP, "migration") == null)
 		{
-			configManager.setConfiguration(SlayerSuiteConfig.GROUP, "prayerHintAllTargets", true);
 			configManager.setConfiguration(SlayerSuiteConfig.GROUP, "migration", "1");
 		}
 	}
@@ -228,7 +224,6 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.add(cardOverlay);
 		overlayManager.add(readinessOverlay);
 		overlayManager.add(bannerOverlay);
-		overlayManager.add(prayerHintOverlay);
 		overlayManager.add(gpsOverlay);
 		overlayManager.add(pathOverlay);
 		eventBus.register(pathOverlay);
@@ -258,7 +253,6 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(cardOverlay);
 		overlayManager.remove(readinessOverlay);
 		overlayManager.remove(bannerOverlay);
-		overlayManager.remove(prayerHintOverlay);
 		overlayManager.remove(gpsOverlay);
 		overlayManager.remove(pathOverlay);
 		eventBus.unregister(pathOverlay);
