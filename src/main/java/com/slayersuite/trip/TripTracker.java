@@ -354,6 +354,8 @@ public class TripTracker
 		{
 			return;
 		}
+		TaskStats current = history.getCurrent();
+		readiness.setPrayerPerKill(current == null ? 0 : current.getPrayerPerKill());
 		if (foodCount < 0 || doseCount < 0)
 		{
 			ItemContainer inv = client.getItemContainer(InventoryID.INV);
