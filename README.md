@@ -8,7 +8,7 @@ Slayer Suite reads the client, draws, and tells you things. It never attacks, pr
 
 ## What you get
 
-| | |
+| Part | What it does |
 |---|---|
 | **Task card** | Kills left with a bar, ETA with the finish time, kills per hour, points and streak as tiles. The prayer to use with its icon, the style, the superior, the finishing item. Where you are with cannon, multi and safespot chips, or the pinned spot with the next step to reach it. A gear checklist with have, bring or missing beside each item. |
 | **Prayer icons** | The protection prayer each task monster calls for, drawn above its name while that prayer is off, on every task monster in range so you see it before you attack. Monsters that switch styles show both icons with the active one dimmed. |
