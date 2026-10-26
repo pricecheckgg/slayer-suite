@@ -83,6 +83,11 @@ public final class ScenePath
 				}
 			}
 		}
+		List<int[]> straight = trace(flags, doors, sx, sy, best / h, best % h, maxTiles);
+		if (straight != null)
+		{
+			return straight;
+		}
 		List<int[]> path = new ArrayList<>();
 		for (int at = best; at != -1; at = prev[at])
 		{
@@ -96,6 +101,67 @@ public final class ScenePath
 		if (path.size() > maxTiles)
 		{
 			return new ArrayList<>(path.subList(0, maxTiles));
+		}
+		return path;
+	}
+
+	/**
+	 * A shortest path from the start to the goal that holds its direction as long as that stays
+	 * shortest and goes straight before diagonal, so it reads as long runs on the floor rather
+	 * than a staircase. Null when the walk cannot be completed (a one-way wall), and the search's
+	 * own path is used instead.
+	 */
+	private static List<int[]> trace(int[][] flags, boolean[][] doors, int sx, int sy, int gx, int gy, int maxTiles)
+	{
+		int[][] d = distances(flags, doors, gx, gy);
+		if (d[sx][sy] < 0)
+		{
+			return null;
+		}
+		List<int[]> path = new ArrayList<>();
+		int x = sx;
+		int y = sy;
+		int pdx = 0;
+		int pdy = 0;
+		path.add(new int[]{x, y});
+		while (!(x == gx && y == gy) && path.size() < maxTiles)
+		{
+			int want = d[x][y] - 1;
+			int bx = 0;
+			int by = 0;
+			int bestRank = Integer.MAX_VALUE;
+			for (int dx = -1; dx <= 1; dx++)
+			{
+				for (int dy = -1; dy <= 1; dy++)
+				{
+					if (dx == 0 && dy == 0)
+					{
+						continue;
+					}
+					int nx = x + dx;
+					int ny = y + dy;
+					if (!inside(flags, nx, ny) || d[nx][ny] != want || !canStep(flags, doors, x, y, dx, dy))
+					{
+						continue;
+					}
+					int rank = dx == pdx && dy == pdy ? 0 : dx == 0 || dy == 0 ? 1 : 2;
+					if (rank < bestRank)
+					{
+						bestRank = rank;
+						bx = dx;
+						by = dy;
+					}
+				}
+			}
+			if (bestRank == Integer.MAX_VALUE)
+			{
+				return null;
+			}
+			x += bx;
+			y += by;
+			pdx = bx;
+			pdy = by;
+			path.add(new int[]{x, y});
 		}
 		return path;
 	}

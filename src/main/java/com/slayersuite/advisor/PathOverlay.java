@@ -445,6 +445,7 @@ public class PathOverlay extends Overlay
 				candidates = Collections.emptyList();
 			}
 			int bestD = Integer.MAX_VALUE;
+			int[] approach = null;
 			for (Obstacle o : candidates)
 			{
 				double far = Math.hypot(o.tile.getX() - dest.getX(), Advisor.surfaceY(o.tile.getY()) - Advisor.surfaceY(dest.getY()));
@@ -452,20 +453,18 @@ public class PathOverlay extends Overlay
 				{
 					continue;
 				}
-				int ox = o.tile.getX() - baseX;
-				int oy = o.tile.getY() - baseY;
-				int d = reachNear(dist, ox, oy, size);
-				if (d >= 0 && d < bestD)
+				int[] a = bestApproach(dist, o, baseX, baseY, size);
+				if (a != null && a[2] < bestD)
 				{
-					bestD = d;
+					bestD = a[2];
 					way = o;
+					approach = a;
 				}
 			}
 			if (way != null)
 			{
-				int[] t = nearestReachable(dist, way.tile.getX() - baseX, way.tile.getY() - baseY, size);
-				tx = t[0];
-				ty = t[1];
+				tx = approach[0];
+				ty = approach[1];
 				inScene = true;
 			}
 		}
@@ -502,47 +501,45 @@ public class PathOverlay extends Overlay
 		entrance = way;
 	}
 
-	/** BFS distance to the tile or any tile next to it (the object itself is solid). */
-	private static int reachNear(int[][] dist, int x, int y, int size)
+	/**
+	 * The walkable tile around the object's whole footprint that is nearest to you by the path
+	 * distances, as {x, y, distance} in scene coordinates; null when none can be reached. A large
+	 * object like a statue is solid across several tiles, so its own tile is never the target.
+	 */
+	private static int[] bestApproach(int[][] dist, Obstacle o, int baseX, int baseY, int size)
 	{
-		int best = -1;
-		for (int dx = -1; dx <= 1; dx++)
+		int minX;
+		int minY;
+		int maxX;
+		int maxY;
+		if (o.object instanceof GameObject)
 		{
-			for (int dy = -1; dy <= 1; dy++)
-			{
-				int nx = x + dx;
-				int ny = y + dy;
-				if (nx < 0 || ny < 0 || nx >= size || ny >= size || dist[nx][ny] < 0)
-				{
-					continue;
-				}
-				if (best < 0 || dist[nx][ny] < best)
-				{
-					best = dist[nx][ny];
-				}
-			}
+			GameObject go = (GameObject) o.object;
+			Point mn = go.getSceneMinLocation();
+			Point mx = go.getSceneMaxLocation();
+			minX = mn.getX();
+			minY = mn.getY();
+			maxX = mx.getX();
+			maxY = mx.getY();
 		}
-		return best;
-	}
-
-	private static int[] nearestReachable(int[][] dist, int x, int y, int size)
-	{
-		int[] best = {x, y};
-		int bestD = Integer.MAX_VALUE;
-		for (int dx = -1; dx <= 1; dx++)
+		else
 		{
-			for (int dy = -1; dy <= 1; dy++)
+			minX = maxX = o.tile.getX() - baseX;
+			minY = maxY = o.tile.getY() - baseY;
+		}
+		int[] best = null;
+		for (int x = minX - 1; x <= maxX + 1; x++)
+		{
+			for (int y = minY - 1; y <= maxY + 1; y++)
 			{
-				int nx = x + dx;
-				int ny = y + dy;
-				if (nx < 0 || ny < 0 || nx >= size || ny >= size || dist[nx][ny] < 0)
+				boolean inside = x >= minX && x <= maxX && y >= minY && y <= maxY;
+				if (inside || x < 0 || y < 0 || x >= size || y >= size || dist[x][y] < 0)
 				{
 					continue;
 				}
-				if (dist[nx][ny] < bestD)
+				if (best == null || dist[x][y] < best[2])
 				{
-					bestD = dist[nx][ny];
-					best = new int[]{nx, ny};
+					best = new int[]{x, y, dist[x][y]};
 				}
 			}
 		}
@@ -598,7 +595,7 @@ public class PathOverlay extends Overlay
 		// Pulses run toward the spot every PULSE_EVERY tiles. They are timed from the far end of the
 		// route, so a tile keeps its place in the rhythm as you walk and the route shortens behind you.
 		double phase = (System.currentTimeMillis() / (double) PULSE_MS) % PULSE_EVERY;
-		for (int i = 1; i < n - 1; i++)
+		for (int i = 0; i < n - 1; i++)
 		{
 			WorldPoint a = p.get(i);
 			WorldPoint b = p.get(i + 1);
@@ -616,7 +613,8 @@ public class PathOverlay extends Overlay
 			}
 			double behind = ((n - 1 - i) + phase) % PULSE_EVERY;
 			float lit = behind < 3 ? (float) (1 - behind / 3) : 0f;
-			g.setColor(new Color(80, 220, 255, 60 + Math.round(lit * 120)));
+			// the chevron under your own feet is kept faint; it only says which way the chain leaves
+			g.setColor(new Color(80, 220, 255, i == 0 ? 45 : 60 + Math.round(lit * 120)));
 			g.fill(chevron);
 			g.setColor(ARROW_EDGE);
 			g.draw(chevron);

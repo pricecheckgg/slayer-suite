@@ -838,6 +838,24 @@ public class Advisor
 		{
 			refresh();
 		}
+		else if (k.equals("handToShortestPath"))
+		{
+			if (config.handToShortestPath())
+			{
+				handToShortestPath();
+			}
+			else
+			{
+				try
+				{
+					eventBus.post(new PluginMessage("shortestpath", "clear"));
+				}
+				catch (RuntimeException ex)
+				{
+					log.debug("shortest path clear failed", ex);
+				}
+			}
+		}
 	}
 
 	@Subscribe

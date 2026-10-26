@@ -462,10 +462,10 @@ public interface SlayerSuiteConfig extends Config
 		return 200;
 	}
 
-	@ConfigItem(keyName = "handToShortestPath", name = "Route via Shortest Path", description = "When the Shortest Path plugin is on, hand it the pinned spot for a full route with shortcuts and transports, drawn alongside the floor arrows.", section = advisorSection, position = 7)
+	@ConfigItem(keyName = "handToShortestPath", name = "Route via Shortest Path", description = "Also hand the pinned spot to the Shortest Path plugin, when you have it, for its own door-to-door route across the world drawn on top of the floor arrows.", section = advisorSection, position = 7)
 	default boolean handToShortestPath()
 	{
-		return true;
+		return false;
 	}
 
 	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 8)
