@@ -51,7 +51,7 @@ public class GpsOverlay extends Overlay
 		{
 			return null;
 		}
-		WorldPoint dest = advisor.destinationPoint();
+		WorldPoint dest = advisor.guidePoint();
 		Player me = client.getLocalPlayer();
 		if (dest == null || me == null)
 		{

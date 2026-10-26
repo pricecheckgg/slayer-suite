@@ -218,6 +218,24 @@ public class TravelData
 	}
 
 	/** The entry whose name is a prefix of the location name (longest match wins), or null. */
+	/** The spot's own travel landing, when its entry gives one with coordinates; null otherwise. */
+	public int[] anchor(String locationName)
+	{
+		Entry e = find(locationName);
+		if (e == null)
+		{
+			return null;
+		}
+		for (Teleport t : e.getTeleports())
+		{
+			if (t.getX() != null && t.getY() != null)
+			{
+				return new int[]{t.getX(), t.getY()};
+			}
+		}
+		return null;
+	}
+
 	public Entry find(String locationName)
 	{
 		String n = normalize(locationName);

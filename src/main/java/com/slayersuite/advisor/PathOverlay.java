@@ -163,7 +163,7 @@ public class PathOverlay extends Overlay
 			clear();
 			return;
 		}
-		WorldPoint dest = advisor.destinationPoint();
+		WorldPoint dest = advisor.guidePoint();
 		Player me = client.getLocalPlayer();
 		WorldView wv = client.getTopLevelWorldView();
 		if (dest == null || advisor.isArrived() || me == null || wv == null || !mode.active())

@@ -13,5 +13,6 @@ for f in transports agility_shortcuts spirit_trees fairy_rings gnome_gliders boa
 	curl -fsSL "$BASE/transports/$f.tsv" -o "$DEST/transports/$f.tsv"
 	head -1 "$DEST/transports/$f.tsv" | grep -q "Origin" || { echo "$f.tsv: unexpected header"; exit 1; }
 done
+# extra-transports.tsv is ours and is never overwritten
 echo "$COMMIT" > "$DEST/SOURCE_COMMIT"
 echo "routing data at $COMMIT"

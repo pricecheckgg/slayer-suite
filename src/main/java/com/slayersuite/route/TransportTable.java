@@ -58,6 +58,7 @@ public final class TransportTable
 	{
 		List<Transport> all = new ArrayList<>(80000);
 		all.addAll(parse(resource("transports.tsv"), Transport.Kind.OBJECT));
+		all.addAll(parse(resource("extra-transports.tsv"), Transport.Kind.OBJECT));
 		all.addAll(parse(resource("agility_shortcuts.tsv"), Transport.Kind.SHORTCUT));
 		all.addAll(parse(resource("boats.tsv"), Transport.Kind.BOAT));
 		all.addAll(parse(resource("ships.tsv"), Transport.Kind.SHIP));

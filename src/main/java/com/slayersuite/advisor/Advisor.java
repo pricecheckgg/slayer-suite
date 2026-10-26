@@ -474,7 +474,7 @@ public class Advisor
 		}
 		int dist = distanceFromPlayer();
 		String dir = directionFromPlayer();
-		WorldPoint dp = destinationPoint();
+		WorldPoint dp = guidePoint();
 		if (me0 != null && dp != null && dist >= 0 && dist <= 60 && underground(dp.getY()) != underground(me0.getWorldLocation().getY()))
 		{
 			return underground(dp.getY()) ? "Go down into " + dest.getName() + "; the entrance is within " + Math.max(dist, 5) + " tiles " + dir
@@ -505,6 +505,10 @@ public class Advisor
 			&& Math.hypot(best.getLanding()[0] - here.getX(), best.getLanding()[1] - here.getY()) < 40;
 		// The built-in plan knows the real walk, doors, stairs and caves included, and whether a teleport beats it.
 		Planner.Plan plan = routes.plan();
+		if (plan != null && !plan.reached() && detached() && dist >= 0 && dist <= 60)
+		{
+			return "The way in from here is not in the map yet: use the entrance once and it is learned";
+		}
 		if (plan != null && plan.reached())
 		{
 			int walk = routes.remainingTiles();
@@ -646,10 +650,43 @@ public class Advisor
 		return f != null && loc != null && sameLocation(f, loc) ? cachedTravel : Collections.emptyList();
 	}
 
+	/** Beyond this, a spot's coordinates lie in a detached map area and its travel landing guides instead. */
+	private static final int DETACHED_TILES = 400;
+
+	/**
+	 * Where the compass and the floor line point: the spot itself, or its travel landing when the
+	 * spot's coordinates sit in a detached map area (some dungeons are stored far from the ground
+	 * they are entered from). The router always gets the spot itself.
+	 */
+	public WorldPoint guidePoint()
+	{
+		WorldPoint dest = destinationPoint();
+		LocationRecord loc = destination;
+		if (dest == null || loc == null)
+		{
+			return dest;
+		}
+		int[] anchor = travel.anchor(loc.getName());
+		if (anchor == null)
+		{
+			return dest;
+		}
+		double away = Math.hypot(anchor[0] - dest.getX(), surfaceY(anchor[1]) - surfaceY(dest.getY()));
+		return away > DETACHED_TILES ? new WorldPoint(anchor[0], anchor[1], 0) : dest;
+	}
+
+	/** True when the spot is guided by its travel landing rather than its own coordinates. */
+	public boolean detached()
+	{
+		WorldPoint dest = destinationPoint();
+		WorldPoint guide = guidePoint();
+		return dest != null && guide != null && !guide.equals(dest);
+	}
+
 	/** Distance in tiles from the player to the destination, ignoring plane; -1 when unknown. Client thread only. */
 	public int distanceFromPlayer()
 	{
-		WorldPoint dest = destinationPoint();
+		WorldPoint dest = guidePoint();
 		Player me = client.getLocalPlayer();
 		if (dest == null || me == null)
 		{
@@ -673,7 +710,7 @@ public class Advisor
 	/** Eight-point compass direction from the player to the destination. */
 	public String directionFromPlayer()
 	{
-		WorldPoint dest = destinationPoint();
+		WorldPoint dest = guidePoint();
 		Player me = client.getLocalPlayer();
 		if (dest == null || me == null)
 		{
