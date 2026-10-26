@@ -33,6 +33,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.events.CommandExecuted;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import com.slayersuite.task.SuperiorSpawned;
 import com.slayersuite.task.TaskFinished;
 import com.slayersuite.trip.SuppliesLow;
@@ -64,7 +65,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.8.10";
+	public static final String VERSION = "0.8.11";
 
 	@Inject
 	private EventBus eventBus;
@@ -278,6 +279,16 @@ public class SlayerSuitePlugin extends Plugin
 			clientToolbar.addNavigation(navButton);
 		}
 		log.info("Slayer Suite {} started with {} tasks in the dataset", VERSION, dataset.getTasks().size());
+	}
+
+	@Subscribe
+	public void onConfigChanged(ConfigChanged e)
+	{
+		if (SlayerSuiteConfig.GROUP.equals(e.getGroup()) && "customChevronColour".equals(e.getKey()))
+		{
+			// picking a colour is the choice; the preset follows it without a second click
+			configManager.setConfiguration(SlayerSuiteConfig.GROUP, "chevronColour", com.slayersuite.advisor.ChevronColour.CUSTOM);
+		}
 	}
 
 	@Override

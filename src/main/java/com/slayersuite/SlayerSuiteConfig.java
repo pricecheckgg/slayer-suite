@@ -474,13 +474,13 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "chevronColour", name = "Chevron colour", description = "Colour of the route chevrons, the markers on the way, the minimap dots and the world map line.", section = advisorSection, position = 10)
+	@ConfigItem(keyName = "chevronColour", name = "Chevron colour", description = "Colour of the route chevrons, the markers on the way, the minimap dots and the world map line. Picking a custom colour below switches this to Custom by itself.", section = advisorSection, position = 10)
 	default com.slayersuite.advisor.ChevronColour chevronColour()
 	{
 		return com.slayersuite.advisor.ChevronColour.CYAN;
 	}
 
-	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Used when Chevron colour is set to Custom.", section = advisorSection, position = 11)
+	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Any colour you like; it applies as soon as you close the picker.", section = advisorSection, position = 11)
 	default java.awt.Color customChevronColour()
 	{
 		return new java.awt.Color(80, 220, 255);
