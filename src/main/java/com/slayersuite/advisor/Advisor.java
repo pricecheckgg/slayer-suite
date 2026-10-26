@@ -394,7 +394,8 @@ public class Advisor
 	private void updateRoute()
 	{
 		WorldPoint wp = arrived ? null : destinationPoint();
-		routes.setTarget(wp, wp == null ? Collections.emptyList() : landings(destination));
+		WorldPoint cannon = wp == null ? null : cannonPoint();
+		routes.setTarget(cannon != null ? cannon : wp, wp == null ? Collections.emptyList() : landings(destination));
 	}
 
 	/** Usable teleports for the spot as landings with a tick cost: a cast or click, more when a bank or spellbook swap comes first. */
@@ -524,6 +525,10 @@ public class Advisor
 			else
 			{
 				rest = walk <= 1 ? "you are there" : "walk " + TripMath.formatK(walk) + " tiles";
+				if (cannonPoint() != null)
+				{
+					rest += walk <= 1 ? ": set the cannon here" : " and set the cannon at the marked tile";
+				}
 			}
 			String time = plan.ticks > 0 ? " (about " + TaskTracker.formatDuration(plan.ticks * 600L) + ")" : "";
 			if (plan.teleport != null && !routes.onRoute())
@@ -673,6 +678,23 @@ public class Advisor
 		}
 		double away = Math.hypot(anchor[0] - dest.getX(), surfaceY(anchor[1]) - surfaceY(dest.getY()));
 		return away > DETACHED_TILES ? new WorldPoint(anchor[0], anchor[1], 0) : dest;
+	}
+
+	/**
+	 * Where to set the cannon at the pinned spot: the tile covering the most spawns within its
+	 * reach, when you own one, prefer cannon spots, the spot allows a cannon and the monsters are
+	 * not immune. Null otherwise.
+	 */
+	public WorldPoint cannonPoint()
+	{
+		LocationRecord loc = destination;
+		com.slayersuite.data.TaskRecord rec = tracker.getRecord();
+		if (loc == null || !config.preferCannon() || !account.ownsCannon() || !Boolean.TRUE.equals(loc.getCannon()) || (rec != null && rec.cannonImmune()))
+		{
+			return null;
+		}
+		int[] tile = loc.cannonTile();
+		return tile == null ? null : new WorldPoint(tile[0], tile[1], loc.getPlane() == null ? 0 : loc.getPlane());
 	}
 
 	/** True when the spot is guided by its travel landing rather than its own coordinates. */

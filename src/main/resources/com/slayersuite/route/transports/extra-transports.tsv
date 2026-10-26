@@ -1,2 +1,4 @@
 # Origin	Destination	menuOption menuTarget objectID	Skills	Items	Quests	Varbits	VarPlayers	Duration	Display info
 # Ways in that the upstream tables lack, in their layout. Rows learned in play land in plugin-data/slayer-suite/learned-transports.tsv and can be copied here.
+2321 3101 0	1473 4238 0	Enter Sewer entrance 49868						9	Poison Waste Dungeon
+1473 4237 0	2321 3100 0	Exit Sewer exit 49753						5	Poison Waste

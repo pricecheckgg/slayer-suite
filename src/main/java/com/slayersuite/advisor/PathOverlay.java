@@ -718,6 +718,30 @@ public class PathOverlay extends Overlay
 		{
 			mark(g, wv, e, markEdge, markFill);
 		}
+		WorldPoint cannon = advisor.cannonPoint();
+		if (cannon != null)
+		{
+			LocalPoint lp = LocalPoint.fromWorld(wv, cannon);
+			Polygon poly = lp == null ? null : Perspective.getCanvasTilePoly(client, lp);
+			if (poly != null)
+			{
+				g.setColor(END_FILL);
+				g.fillPolygon(poly);
+				g.setStroke(new BasicStroke(2f));
+				g.setColor(END);
+				g.drawPolygon(poly);
+				Point text = Perspective.getCanvasTextLocation(client, g, lp, "Cannon here", 60);
+				if (text != null)
+				{
+					g.setFont(FontManager.getRunescapeBoldFont());
+					int w = g.getFontMetrics().stringWidth("Cannon here");
+					g.setColor(Color.BLACK);
+					g.drawString("Cannon here", text.getX() - w / 2 + 1, text.getY() + 1);
+					g.setColor(END);
+					g.drawString("Cannon here", text.getX() - w / 2, text.getY());
+				}
+			}
+		}
 		return null;
 	}
 
