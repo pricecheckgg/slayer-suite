@@ -13923,7 +13923,7 @@
      ]
     },
     {
-     "name": "Black Knights' Fortress ()",
+     "name": "Black Knights' Fortress",
      "page": "Black Knights' Fortress (location)",
      "floor": null,
      "plane": 0,
@@ -24443,7 +24443,7 @@
      ]
     },
     {
-     "name": "Dark Warriors' Fortress ()",
+     "name": "Dark Warriors' Fortress",
      "page": "Dark Warriors' Fortress",
      "floor": null,
      "plane": 1,
@@ -41944,7 +41944,7 @@
    ],
    "locations": [
     {
-     "name": "Slayer Tower ()",
+     "name": "Slayer Tower",
      "page": "Slayer Tower",
      "floor": null,
      "plane": 1,
@@ -47734,7 +47734,7 @@
      ]
     },
     {
-     "name": "Tonali Cavern - Southern Chamber ()",
+     "name": "Tonali Cavern - Southern Chamber",
      "page": "Tonali Cavern",
      "floor": null,
      "plane": 1,
@@ -52459,7 +52459,7 @@
      ]
     },
     {
-     "name": "Tonali Cavern - Southern Chamber ()",
+     "name": "Tonali Cavern - Southern Chamber",
      "page": "Tonali Cavern",
      "floor": null,
      "plane": 0,
@@ -60005,7 +60005,7 @@
      "notes": []
     },
     {
-     "name": "Buccaneers' Haven ()",
+     "name": "Buccaneers' Haven",
      "page": "Buccaneers' Haven",
      "floor": null,
      "plane": 0,
@@ -61328,7 +61328,7 @@
    "superiors": [],
    "locations": [
     {
-     "name": "Rogues' Castle ()",
+     "name": "Rogues' Castle",
      "page": "Rogues' Castle",
      "floor": null,
      "plane": 0,
@@ -67709,7 +67709,7 @@
      ]
     },
     {
-     "name": "Tonali Cavern - Southern Chamber ()",
+     "name": "Tonali Cavern - Southern Chamber",
      "page": "Tonali Cavern",
      "floor": null,
      "plane": 0,

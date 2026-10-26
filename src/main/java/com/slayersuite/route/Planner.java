@@ -14,8 +14,8 @@ import java.util.Set;
  */
 public final class Planner
 {
-	/** Walks this short are never worth a teleport. */
-	static final int NEAR_TILES = 40;
+	/** Walks this short are never worth a teleport: a charge is a charge, and the chevrons are the point. */
+	static final int NEAR_TILES = 100;
 	/** Tiles a search to or from a network stop may look at; stops are close to roads, so this is plenty. */
 	static final int NETWORK_EXPANSIONS = 120_000;
 

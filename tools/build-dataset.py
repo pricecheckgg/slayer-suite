@@ -925,6 +925,10 @@ def main():
                 m["superior"] = norm(m["name"]) in sups
         report.append(f"superiors from the wiki table: {added} added, {dropped} base names dropped")
 
+    # A wiki floor template that renders to nothing leaves "Name ()"; drop the empty brackets
+    for t in tasks:
+        for l in t["locations"]:
+            l["name"] = re.sub(r"\s*\(\s*\)\s*$", "", l["name"])
     tasks.sort(key=lambda t: t["name"].lower())
     # Notes that would amount to prayer guidance are dropped: third-party client rules forbid indicating which prayer to use.
     guidance = re.compile(r"protection prayer|prays? against|prayer blocks|what the player prays|pray(ing)? (melee|magic|ranged|missiles)", re.I)

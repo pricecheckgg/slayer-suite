@@ -467,7 +467,8 @@ public class Advisor
 			return "You are there";
 		}
 		Player me0 = client.getLocalPlayer();
-		if (me0 != null && dest.getPlane() != null && me0.getWorldLocation().getPlane() != dest.getPlane() && inRegionOf(dest))
+		if (me0 != null && dest.getPlane() != null && me0.getWorldLocation().getPlane() != dest.getPlane() && inRegionOf(dest)
+			&& foldedDistance(dest, me0.getWorldLocation()) >= 0 && foldedDistance(dest, me0.getWorldLocation()) <= 25)
 		{
 			// right place, wrong floor: the floor path and the tile distance cannot say this
 			int up = dest.getPlane() - me0.getWorldLocation().getPlane();

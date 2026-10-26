@@ -443,6 +443,7 @@ public class TaskHistory
 				if (s != null)
 				{
 					s.setKey(key);
+					mergeEmptyBracketSpots(s);
 					return s;
 				}
 			}
@@ -1119,6 +1120,32 @@ public class TaskHistory
 			l.log.subList(0, l.log.size() - LOG_CAP).clear();
 		}
 		dirty = true;
+	}
+
+	/** Spots once named "Place ()" by a wiki floor template are folded into "Place". */
+	private static void mergeEmptyBracketSpots(TaskStats s)
+	{
+		if (s.getSpots() == null || s.getSpots().isEmpty())
+		{
+			return;
+		}
+		List<String> old = new ArrayList<>();
+		for (String name : s.getSpots().keySet())
+		{
+			if (name != null && name.endsWith(" ()"))
+			{
+				old.add(name);
+			}
+		}
+		for (String name : old)
+		{
+			TaskStats.SpotStats from = s.getSpots().remove(name);
+			TaskStats.SpotStats into = s.spot(name.substring(0, name.length() - 3));
+			into.kills += from.kills;
+			into.activeMs += from.activeMs;
+			into.xp += from.xp;
+			into.loot += from.loot;
+		}
 	}
 
 	private void saveAssignment()
