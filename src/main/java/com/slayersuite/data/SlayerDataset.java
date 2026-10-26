@@ -192,12 +192,22 @@ public class SlayerDataset
 	/** The dataset location whose regions include one of the loaded map regions, or null. */
 	public LocationRecord locationFor(TaskRecord rec, int[] regions)
 	{
+		return locationFor(rec, regions, -1);
+	}
+
+	/** The task location whose map squares you are in, on the same floor when the location names one; plane -1 ignores floors. */
+	public LocationRecord locationFor(TaskRecord rec, int[] regions, int plane)
+	{
 		if (rec == null || regions == null)
 		{
 			return null;
 		}
 		for (LocationRecord loc : rec.getLocations())
 		{
+			if (plane >= 0 && loc.getPlane() != null && loc.getPlane() != plane)
+			{
+				continue;
+			}
 			for (int r : regions)
 			{
 				if (loc.coversRegion(r))

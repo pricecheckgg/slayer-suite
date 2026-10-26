@@ -935,7 +935,7 @@ public class TaskTracker
 		}
 		WorldView wv = client.getTopLevelWorldView();
 		int[] regions = wv == null ? null : wv.getMapRegions();
-		return dataset.locationFor(record, regions == null ? new int[0] : regions);
+		return dataset.locationFor(record, regions == null ? new int[0] : regions, wv == null ? -1 : wv.getPlane());
 	}
 
 	@Subscribe

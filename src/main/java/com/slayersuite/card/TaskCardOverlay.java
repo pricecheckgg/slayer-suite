@@ -298,6 +298,32 @@ public class TaskCardOverlay extends Overlay
 	private int place(Graphics2D g, boolean draw, int x0, int y, int cw, TaskRecord rec, FontMetrics fn, FontMetrics fs)
 	{
 		LocationRecord loc = tracker.getCurrentLocation();
+		LocationRecord dest = advisor.getDestination();
+		boolean guiding = dest != null && !advisor.isArrived();
+		if (guiding)
+		{
+			// a spot is pinned and you are not at its spawns yet: the route comes first, wherever you stand
+			int dist = advisor.cachedDistance();
+			y += dotRow(g, draw, x0, y, cw, CYAN, dest.getName(), Color.WHITE, dist >= 0 ? TripMath.formatK(dist) + " " + advisor.cachedDirection() : "", DIM, fn, fs);
+			String step = advisor.getNextStep();
+			if (step != null && !step.isEmpty())
+			{
+				y += callout(g, draw, x0 + 12, y, cw - 12, "NEXT", step, fn, fs);
+			}
+			if (pathOverlay.get().blocked())
+			{
+				text(g, draw, small, fit(fs, "Tiles stop at a door, shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
+				y += fs.getHeight();
+				text(g, draw, small, fit(fs, "Optional: the Shortest Path plugin routes through these", cw - 12), x0 + 12, y + fs.getAscent(), DIM);
+				y += fs.getHeight();
+			}
+			if (loc != null && !Advisor.sameLocation(loc, dest))
+			{
+				text(g, draw, small, fit(fs, "You are at " + loc.getName(), cw - 12), x0 + 12, y + fs.getAscent(), DIM);
+				y += fs.getHeight();
+			}
+			return y + 2;
+		}
 		if (loc != null)
 		{
 			List<String> flags = new ArrayList<>();
@@ -317,8 +343,7 @@ public class TaskCardOverlay extends Overlay
 			{
 				flags.add("safespot");
 			}
-			boolean near = advisor.getDestination() == null || advisor.isArrived() || !Advisor.sameLocation(loc, advisor.getDestination());
-			y += dotRow(g, draw, x0, y, cw, OK, loc.getName(), Color.WHITE, near ? "you are here" : "follow the tiles", near ? DIM : CYAN, fn, fs);
+			y += dotRow(g, draw, x0, y, cw, OK, loc.getName(), Color.WHITE, "you are here", DIM, fn, fs);
 			if (!flags.isEmpty())
 			{
 				y += chips(g, draw, x0 + 12, y, cw - 12, flags, fs);
@@ -328,25 +353,6 @@ public class TaskCardOverlay extends Overlay
 		if (tracker.getTaskLocation() != null && !tracker.getTaskLocation().isEmpty())
 		{
 			return y + dotRow(g, draw, x0, y, cw, CYAN, "Go to " + tracker.getTaskLocation(), Color.WHITE, "", DIM, fn, fs) + 2;
-		}
-		LocationRecord dest = advisor.getDestination();
-		if (dest != null && !advisor.isArrived())
-		{
-			int dist = advisor.cachedDistance();
-			y += dotRow(g, draw, x0, y, cw, CYAN, dest.getName(), Color.WHITE, dist >= 0 ? TripMath.formatK(dist) + " " + advisor.cachedDirection() : "", DIM, fn, fs);
-			String step = advisor.getNextStep();
-			if (step != null && !step.isEmpty())
-			{
-				y += callout(g, draw, x0 + 12, y, cw - 12, "NEXT", step, fn, fs);
-			}
-			if (pathOverlay.get().blocked())
-			{
-				text(g, draw, small, fit(fs, "Tiles stop at a door, shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
-				y += fs.getHeight();
-				text(g, draw, small, fit(fs, "Optional: the Shortest Path plugin routes through these", cw - 12), x0 + 12, y + fs.getAscent(), DIM);
-				y += fs.getHeight();
-			}
-			return y + 2;
 		}
 		if (rec != null && !rec.getLocations().isEmpty())
 		{

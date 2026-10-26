@@ -331,6 +331,13 @@ public class Advisor
 		{
 			return "You are there";
 		}
+		Player me0 = client.getLocalPlayer();
+		if (me0 != null && dest.getPlane() != null && me0.getWorldLocation().getPlane() != dest.getPlane() && inRegionOf(dest))
+		{
+			// right place, wrong floor: the floor path and the tile distance cannot say this
+			int up = dest.getPlane() - me0.getWorldLocation().getPlane();
+			return (up > 0 ? "Go up " : "Go down ") + Math.abs(up) + (Math.abs(up) == 1 ? " floor" : " floors") + " to " + floorName(dest.getPlane()) + "; the spawns are there";
+		}
 		int dist = distanceFromPlayer();
 		String dir = directionFromPlayer();
 		int toSpawn = tilesToNearestSpawn(dest);
@@ -367,6 +374,36 @@ public class Advisor
 			return "Use " + how + where + ", then " + (best.getHops() <= 1 ? "you are there" : best.getHops() == 2 ? "a short run" : "a long run");
 		}
 		return "Head " + dir + ", " + TripMath.formatK(dist) + " tiles; no teleport you own";
+	}
+
+	/** True when one of the loaded map squares belongs to the location. */
+	private boolean inRegionOf(LocationRecord loc)
+	{
+		net.runelite.api.WorldView wv = client.getTopLevelWorldView();
+		int[] regions = wv == null ? null : wv.getMapRegions();
+		if (regions == null)
+		{
+			return false;
+		}
+		for (int r : regions)
+		{
+			if (loc.coversRegion(r))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static String floorName(int plane)
+	{
+		switch (plane)
+		{
+			case 0: return "the ground floor";
+			case 1: return "the first floor";
+			case 2: return "the second floor";
+			default: return "floor " + plane;
+		}
 	}
 
 	private void updatePin()
