@@ -9,7 +9,9 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -116,8 +118,14 @@ public class TravelData
 		}
 	}
 
-	/** Landing point of a teleport, or null when unknown. House teleports land at the facility, which is not a world spot. */
+	/** Landing point of a teleport, or null when unknown. For a house facility, where its teleport puts you. */
 	public static int[] landing(Teleport t)
+	{
+		return landing(t, null);
+	}
+
+	/** As above; the entry lets a house fairy ring borrow the spot's own fairy ring code. */
+	public static int[] landing(Teleport t, Entry entry)
 	{
 		if (t == null)
 		{
@@ -127,8 +135,47 @@ public class TravelData
 		{
 			return new int[]{t.getX(), t.getY()};
 		}
+		if (t.getPoh() != null && t.getItem() == null)
+		{
+			String poh = t.getPoh().toLowerCase(Locale.ROOT);
+			if (poh.equals("fairy ring"))
+			{
+				if (entry != null)
+				{
+					for (Teleport other : entry.getTeleports())
+					{
+						if (other.getFairy() != null)
+						{
+							return LANDINGS.get(other.getFairy().toLowerCase(Locale.ROOT));
+						}
+					}
+				}
+				return null;
+			}
+			String spell = POH_LANDING_KEYS.get(poh);
+			return spell == null ? LANDINGS.get(poh) : LANDINGS.get(spell);
+		}
 		String key = t.getFairy() != null ? t.getFairy() : t.getItem() != null ? t.getItem() : t.getSpell();
 		return key == null ? null : LANDINGS.get(key.toLowerCase(Locale.ROOT));
+	}
+
+	/** House portals and mounts, to the landing key of the teleport they stand in for. */
+	private static final Map<String, String> POH_LANDING_KEYS = new HashMap<>();
+
+	static
+	{
+		POH_LANDING_KEYS.put("kourend portal", "kourend castle teleport");
+		POH_LANDING_KEYS.put("kharyrll portal", "kharyrll teleport");
+		POH_LANDING_KEYS.put("ardougne portal", "ardougne teleport");
+		POH_LANDING_KEYS.put("falador portal", "falador teleport");
+		POH_LANDING_KEYS.put("lumbridge portal", "lumbridge teleport");
+		POH_LANDING_KEYS.put("lunar isle portal", "moonclan teleport");
+		POH_LANDING_KEYS.put("waterbirth island portal", "waterbirth teleport");
+		POH_LANDING_KEYS.put("troll stronghold portal", "trollheim teleport");
+		POH_LANDING_KEYS.put("xeric's talisman", "xeric's talisman");
+		POH_LANDING_KEYS.put("digsite pendant", "digsite pendant");
+		POH_LANDING_KEYS.put("mythical cape", "mythical cape");
+		POH_LANDING_KEYS.put("amulet of glory", "amulet of glory");
 	}
 
 	@Inject

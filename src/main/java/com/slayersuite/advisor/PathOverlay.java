@@ -182,9 +182,17 @@ public class PathOverlay extends Overlay
 		int sx = lp.getSceneX();
 		int sy = lp.getSceneY();
 		Router.Route route = routes.current();
-		if (route != null && route.reached)
+		if (route != null && route.reached && routes.onRoute())
 		{
 			fromRoute(wv, route);
+			lastSx = -1;
+			return;
+		}
+		com.slayersuite.route.Planner.Plan plan = routes.plan();
+		if (plan != null && plan.teleport != null && plan.reached())
+		{
+			// the plan starts with a teleport: nothing to walk yet
+			clear();
 			lastSx = -1;
 			return;
 		}

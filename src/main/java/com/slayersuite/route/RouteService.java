@@ -20,15 +20,18 @@ import net.runelite.api.Player;
 import net.runelite.api.Quest;
 import net.runelite.api.QuestState;
 import net.runelite.api.Skill;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.client.eventbus.Subscribe;
 
 /**
- * Keeps a route from you to the pinned spot. The map and the transport tables load once on a
- * background thread, searches run there too, and each tick the route is trimmed to where you
- * stand or rebuilt when you have left it. Which transports you may use is decided on the client
- * thread from your levels, quests and var values, and refreshed every minute.
+ * Keeps a plan from you to the pinned spot: walk, or teleport first and walk from the landing.
+ * The map and the transport tables load once on a background thread, searches run there too,
+ * and each tick the route is trimmed to where you stand or the plan is remade when you have
+ * left it. Which transports you may use is decided on the client thread from your levels,
+ * quests and var values, and refreshed every minute.
  */
 @Slf4j
 @Singleton
@@ -53,9 +56,12 @@ public class RouteService
 	private volatile TransportTable table;
 	private volatile boolean loadFailed;
 	private volatile Set<Transport> usable = Collections.emptySet();
+	private volatile Planner.Plan plan;
 	private volatile Router.Route route;
 	private volatile int from;
+	private volatile boolean onRoute;
 	private volatile WorldPoint target;
+	private volatile List<Planner.Landing> landings = Collections.emptyList();
 	private Future<?> pending;
 	private long lastRequestMs;
 	private int tick;
@@ -96,6 +102,7 @@ public class RouteService
 	public void stop()
 	{
 		executor.shutdownNow();
+		plan = null;
 		route = null;
 		target = null;
 	}
@@ -105,21 +112,48 @@ public class RouteService
 		return map != null && table != null;
 	}
 
-	/** The spot to route to, or null for none. Client thread. */
-	public void setTarget(WorldPoint wp)
+	/** The spot to route to, or null for none, with the teleports that could start the trip. Client thread. */
+	public void setTarget(WorldPoint wp, List<Planner.Landing> teleports)
 	{
 		WorldPoint old = target;
-		if (wp == null ? old == null : wp.equals(old))
+		List<Planner.Landing> l = teleports == null ? Collections.emptyList() : teleports;
+		boolean sameSpot = wp == null ? old == null : wp.equals(old);
+		boolean sameTeleports = l.size() == landings.size();
+		for (int i = 0; sameTeleports && i < l.size(); i++)
+		{
+			sameTeleports = l.get(i).tile == landings.get(i).tile && l.get(i).ticks == landings.get(i).ticks;
+		}
+		if (sameSpot && sameTeleports)
 		{
 			return;
 		}
 		target = wp;
+		landings = l;
+		plan = null;
 		route = null;
 		from = 0;
+		onRoute = false;
 		if (wp != null)
 		{
 			request(true);
 		}
+	}
+
+	public void setTarget(WorldPoint wp)
+	{
+		setTarget(wp, Collections.emptyList());
+	}
+
+	/** The current plan, or null while none is known. */
+	public Planner.Plan plan()
+	{
+		return plan;
+	}
+
+	/** True while you stand on (or beside) the route; false before a teleport the plan asks for. */
+	public boolean onRoute()
+	{
+		return onRoute;
 	}
 
 	public WorldPoint getTarget()
@@ -174,6 +208,24 @@ public class RouteService
 	}
 
 	@Subscribe
+	public void onGameStateChanged(GameStateChanged e)
+	{
+		if (e.getGameState() == GameState.LOGIN_SCREEN || e.getGameState() == GameState.HOPPING)
+		{
+			// the pin stays; the way there is searched again once you are back in the world
+			plan = null;
+			route = null;
+			onRoute = false;
+		}
+	}
+
+	private boolean inInstance()
+	{
+		WorldView wv = client.getTopLevelWorldView();
+		return wv != null && wv.isInstance();
+	}
+
+	@Subscribe
 	public void onGameTick(GameTick t)
 	{
 		tick++;
@@ -194,8 +246,17 @@ public class RouteService
 		{
 			return;
 		}
+		if (inInstance())
+		{
+			// the map has no instances; the search over the loaded area stands in until you leave
+			plan = null;
+			route = null;
+			onRoute = false;
+			return;
+		}
+		Planner.Plan p = plan;
 		Router.Route r = route;
-		if (r == null)
+		if (p == null || r == null)
 		{
 			request(false);
 			return;
@@ -205,9 +266,10 @@ public class RouteService
 		if (idx >= 0)
 		{
 			from = idx;
+			onRoute = true;
 			return;
 		}
-		// not on the route: still beside it is fine, further away means a new search from here
+		// beside the route is still on it; further away means a new plan from here
 		int f = from;
 		int nearest = Integer.MAX_VALUE;
 		int plane = Packed.plane(here);
@@ -219,10 +281,18 @@ public class RouteService
 				nearest = Math.min(nearest, Packed.chebyshev(tile, here));
 			}
 		}
-		if (nearest > OFF_ROUTE_TILES)
+		if (nearest <= OFF_ROUTE_TILES)
 		{
-			request(false);
+			onRoute = true;
+			return;
 		}
+		onRoute = false;
+		if (p.teleport != null && Packed.chebyshev(here, p.start) <= 25 && Packed.plane(here) == Packed.plane(p.start))
+		{
+			// still where the plan was made, waiting to teleport
+			return;
+		}
+		request(false);
 	}
 
 	/** Searches from where you stand to the target on the background thread. Client thread. */
@@ -249,21 +319,28 @@ public class RouteService
 			usable = computeUsable();
 			snapshotTick = tick;
 		}
+		if (inInstance())
+		{
+			return;
+		}
 		final int start = Packed.of(me.getWorldLocation());
 		final int goal = Router.walkableNear(map, Packed.of(to));
 		final Set<Transport> allowed = usable;
 		final WorldMap m = map;
 		final TransportTable tt = table;
 		final boolean keepOut = config.avoidWilderness();
+		final List<Planner.Landing> l = landings;
 		pending = executor.submit(() ->
 		{
 			try
 			{
-				Router.Route found = Router.find(m, tt, allowed, start, goal, MAX_EXPANSIONS, System.nanoTime() + SEARCH_BUDGET_NANOS, keepOut);
+				Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, l, keepOut, MAX_EXPANSIONS, SEARCH_BUDGET_NANOS);
 				if (to.equals(target))
 				{
 					from = 0;
-					route = found;
+					onRoute = made.teleport == null;
+					route = made.route;
+					plan = made;
 				}
 			}
 			catch (RuntimeException e)

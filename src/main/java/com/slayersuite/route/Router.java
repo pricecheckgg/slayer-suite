@@ -78,6 +78,12 @@ public final class Router
 	/** As above; with avoidWilderness the route never sets foot in the Wilderness, on the surface or below it. */
 	public static Route find(WorldMap map, TransportTable transports, Set<Transport> usable, int start, int target, int maxExpansions, long deadlineNanos, boolean avoidWilderness)
 	{
+		return find(map, transports, usable, start, target, maxExpansions, deadlineNanos, avoidWilderness, Integer.MAX_VALUE);
+	}
+
+	/** As above; a route costing more than maxCost is not worth finding, so the search stops growing past it. */
+	public static Route find(WorldMap map, TransportTable transports, Set<Transport> usable, int start, int target, int maxExpansions, long deadlineNanos, boolean avoidWilderness, int maxCost)
+	{
 		IntIntMap g = new IntIntMap(1 << 16);
 		IntIntMap parent = new IntIntMap(1 << 16);
 		Map<Integer, Transport> via = new HashMap<>();
@@ -106,6 +112,10 @@ public final class Router
 			if (++expanded > maxExpansions || (expanded & 1023) == 0 && System.nanoTime() > deadlineNanos)
 			{
 				break;
+			}
+			if (gn >= maxCost)
+			{
+				continue;
 			}
 			int h = heuristic(node, target);
 			if (h < bestH)

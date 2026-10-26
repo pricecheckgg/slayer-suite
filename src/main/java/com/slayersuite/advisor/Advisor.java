@@ -1,6 +1,8 @@
 package com.slayersuite.advisor;
 
 import com.slayersuite.SlayerSuiteConfig;
+import com.slayersuite.route.Packed;
+import com.slayersuite.route.Planner;
 import com.slayersuite.route.RouteService;
 import com.slayersuite.route.Router;
 import com.slayersuite.data.LocationRecord;
@@ -387,10 +389,40 @@ public class Advisor
 		notifyListener();
 	}
 
-	/** Gives the built-in router the pinned spot, or nothing once you are there. */
+	/** Gives the built-in router the pinned spot and the teleports that could start the trip, or nothing once you are there. */
 	private void updateRoute()
 	{
-		routes.setTarget(arrived ? null : destinationPoint());
+		WorldPoint wp = arrived ? null : destinationPoint();
+		routes.setTarget(wp, wp == null ? Collections.emptyList() : landings(destination));
+	}
+
+	/** Usable teleports for the spot as landings with a tick cost: a cast or click, more when a bank or spellbook swap comes first. */
+	private List<Planner.Landing> landings(LocationRecord loc)
+	{
+		List<Planner.Landing> out = new ArrayList<>();
+		for (TravelOption o : travelOptions(loc))
+		{
+			if (!o.isUsable() || o.getLanding() == null)
+			{
+				continue;
+			}
+			String st = o.getStatus() == null ? "" : o.getStatus();
+			int ticks = 10;
+			if (st.startsWith("in bank") || st.startsWith("seen in your bank"))
+			{
+				ticks = 90;
+			}
+			else if (st.startsWith("needs the"))
+			{
+				ticks = 120;
+			}
+			else if (st.startsWith("in your house"))
+			{
+				ticks = st.contains("no quick way") ? 60 : 18;
+			}
+			out.add(new Planner.Landing(o.getLabel(), st, Packed.of(o.getLanding()[0], o.getLanding()[1], 0), ticks));
+		}
+		return out;
 	}
 
 	/** Words for the next move: use a teleport you own, or walk. Client thread. */
@@ -442,29 +474,37 @@ public class Advisor
 		// Already close to where the best teleport lands, or close to the spot itself: walk.
 		boolean nearLanding = best != null && best.getLanding() != null && here != null
 			&& Math.hypot(best.getLanding()[0] - here.getX(), best.getLanding()[1] - here.getY()) < 40;
-		// The built-in route knows the real walk, doors, stairs and caves included.
-		if (routes.reached())
+		// The built-in plan knows the real walk, doors, stairs and caves included, and whether a teleport beats it.
+		Planner.Plan plan = routes.plan();
+		if (plan != null && plan.reached())
 		{
 			int walk = routes.remainingTiles();
 			List<Router.Step> steps = routes.remainingSteps();
-			boolean teleportBetter = best != null && !nearLanding && walk > config.floorPathMaxDistance();
-			if (!teleportBetter)
+			String rest;
+			if (!steps.isEmpty())
 			{
-				if (!steps.isEmpty())
-				{
-					Router.Step s = steps.get(0);
-					int to = Math.max(0, s.index - routes.from());
-					int after = walk - to;
-					return (to <= 1 ? "" : "Walk " + to + " tiles, then ") + s.transport.label()
-						+ (after > 1 ? ", then " + TripMath.formatK(after) + " more" : "");
-				}
-				return "Walk " + TripMath.formatK(walk) + " tiles; follow the chevrons";
+				Router.Step s = steps.get(0);
+				int to = Math.max(0, s.index - routes.from());
+				int after = walk - to;
+				rest = (to <= 1 ? "" : "walk " + to + " tiles, then ") + s.transport.label() + (after > 1 ? ", then " + TripMath.formatK(after) + " more" : "");
 			}
-			dist = walk;
+			else
+			{
+				rest = walk <= 1 ? "you are there" : "walk " + TripMath.formatK(walk) + " tiles";
+			}
+			String time = plan.ticks > 0 ? " (about " + TaskTracker.formatDuration(plan.ticks * 600L) + ")" : "";
+			if (plan.teleport != null && !routes.onRoute())
+			{
+				String how = plan.teleport.label.replace("House: ", "house ");
+				String where = plan.teleport.status.startsWith("in bank") || plan.teleport.status.startsWith("seen") ? " (it is in your bank)"
+					: plan.teleport.status.startsWith("needs") ? " (" + plan.teleport.status + ")" : "";
+				return "Use " + how + where + ", then " + rest + time;
+			}
+			return Character.toUpperCase(rest.charAt(0)) + rest.substring(1) + (steps.isEmpty() && walk > 1 ? "; follow the chevrons" : "") + time;
 		}
 		if (dist <= config.floorPathMaxDistance() || nearLanding)
 		{
-			return "Walk " + TripMath.formatK(dist) + " tiles " + dir + (dist <= config.floorPathMaxDistance() ? "; follow the chevrons" : "");
+			return "Walk " + TripMath.formatK(dist) + " tiles " + dir + (dist <= config.floorPathMaxDistance() ? "; follow the arrow" : "");
 		}
 		if (best != null)
 		{
@@ -745,7 +785,7 @@ public class Advisor
 			{
 				continue;
 			}
-			out.add(new TravelOption(t.label(), hops, usable, status, TravelData.landing(t)));
+			out.add(new TravelOption(t.label(), hops, usable, status, TravelData.landing(t, e)));
 		}
 		out.sort((a, b) ->
 		{

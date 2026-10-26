@@ -462,6 +462,18 @@ public interface SlayerSuiteConfig extends Config
 		return 200;
 	}
 
+	@ConfigItem(keyName = "routeMinimap", name = "Route on the minimap", description = "Dots along the next stretch of the route on the minimap.", section = advisorSection, position = 8)
+	default boolean routeMinimap()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "routeWorldMap", name = "Route on the world map", description = "The whole plan on the world map: the route as a line, and where your teleport lands.", section = advisorSection, position = 9)
+	default boolean routeWorldMap()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 8)
 	default boolean preferCannon()
 	{
