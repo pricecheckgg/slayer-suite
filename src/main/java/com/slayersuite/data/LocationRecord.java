@@ -24,6 +24,8 @@ public class LocationRecord
 	private Boolean multicombat;
 	private Boolean cannon;
 	private Boolean safespot;
+	/** A boss arena that happens to count for the task (set by hand in overrides): never ranked or pinned. */
+	private Boolean boss;
 	private List<String> notes = new ArrayList<>();
 
 	public boolean hasCoordinates()

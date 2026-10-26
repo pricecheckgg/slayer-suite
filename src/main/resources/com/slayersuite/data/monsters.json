@@ -1,6 +1,6 @@
 {
  "schemaVersion": 1,
- "generated": "2026-10-25",
+ "generated": "2026-10-26",
  "source": "Old School RuneScape Wiki (https://oldschool.runescape.wiki), CC BY-NC-SA 3.0. See DATA-ATTRIBUTION.md.",
  "tasks": [
   {
@@ -30942,7 +30942,8 @@
      "notes": [
       "Only available after receiving a brittle key drop from regular gargoyles. The roof serves as a boss arena for the Grotesque Guardians.",
       "For more information on fighting the Grotesque Guardians, see Grotesque Guardians/Strategies."
-     ]
+     ],
+     "boss": true
     }
    ],
    "requiredItems": [],

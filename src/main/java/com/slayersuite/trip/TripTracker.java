@@ -127,6 +127,13 @@ public class TripTracker
 
 	@Getter
 	private double foodEaten;
+	/** Cannonballs loaded this assignment and what they cost; counts drops of 1-35 balls between inventory snapshots. */
+	@Getter
+	private int ballsUsed;
+	@Getter
+	private long ballsCost;
+	private int ballCount = -1;
+	private long ballPriceEach;
 	@Getter
 	private double dosesUsed;
 	@Getter
@@ -157,6 +164,8 @@ public class TripTracker
 		foodCount = doseCount = -1;
 		prevPrayer = -1;
 		foodEaten = dosesUsed = prayerSpent = 0;
+		ballsUsed = 0;
+		ballsCost = 0;
 		sessionKills = 0;
 		projection = null;
 		alertedThisTrip = false;
@@ -236,6 +245,7 @@ public class TripTracker
 		int fireD = 0;
 		int prayerLevel = client.getGameState() == GameState.LOGGED_IN ? client.getRealSkillLevel(Skill.PRAYER) : 1;
 		com.slayersuite.data.ItemGroups groups = dataset.getItems();
+		int balls = 0;
 		if (inv != null)
 		{
 			for (Item it : inv.getItems())
@@ -243,6 +253,20 @@ public class TripTracker
 				if (it == null || it.getId() <= 0)
 				{
 					continue;
+				}
+				String bn = nameCache.get(it.getId());
+				if (bn == null)
+				{
+					bn = com.slayersuite.data.ItemNames.normalize(itemManager.getItemComposition(it.getId()).getName());
+					nameCache.put(it.getId(), bn);
+				}
+				if (groups.satisfied("cannonballs", java.util.Collections.singleton(bn)))
+				{
+					balls += Math.max(1, it.getQuantity());
+					if (ballPriceEach <= 0)
+					{
+						ballPriceEach = Math.max(0, itemManager.getItemPrice(it.getId()));
+					}
 				}
 				int[] v = info(it.getId());
 				int qty = Math.max(1, it.getQuantity());
@@ -290,6 +314,17 @@ public class TripTracker
 				dosesUsed += dDoses;
 			}
 		}
+		if (!settling && tracker.hasTask() && ballCount >= 0)
+		{
+			int dBalls = ballCount - balls;
+			// loading the cannon takes up to 30 at a time; anything bigger is a deposit, drop or death
+			if (dBalls > 0 && dBalls <= 35)
+			{
+				ballsUsed += dBalls;
+				ballsCost += dBalls * ballPriceEach;
+			}
+		}
+		ballCount = balls;
 		if (food > foodCount || doses > doseCount)
 		{
 			alertedThisTrip = false; // restocked
@@ -323,6 +358,8 @@ public class TripTracker
 	public void onTaskChanged(TaskChanged e)
 	{
 		foodEaten = dosesUsed = prayerSpent = 0;
+		ballsUsed = 0;
+		ballsCost = 0;
 		sessionKills = 0;
 		projection = null;
 		alertedThisTrip = false;
@@ -384,7 +421,7 @@ public class TripTracker
 	}
 
 	/** True when the task's own protection rules name dragonfire protection; a stray antifire dose at spectres is not a supply. */
-	boolean taskNeedsAntifire()
+	public boolean taskNeedsAntifire()
 	{
 		com.slayersuite.data.TaskRecord rec = tracker.getRecord();
 		if (rec == null)

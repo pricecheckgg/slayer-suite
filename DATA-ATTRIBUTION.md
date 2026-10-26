@@ -1,6 +1,6 @@
 # Data attribution
 
-The monster dataset in `src/main/resources/com/slayersuite/data/monsters.json` is built by `tools/build-dataset.py` from the following pages of the [Old School RuneScape Wiki](https://oldschool.runescape.wiki), retrieved on 2026-10-25.
+The monster dataset in `src/main/resources/com/slayersuite/data/monsters.json` is built by `tools/build-dataset.py` from the following pages of the [Old School RuneScape Wiki](https://oldschool.runescape.wiki), retrieved on 2026-10-26.
 
 The wiki's text is available under the [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported licence](https://creativecommons.org/licenses/by-nc-sa/3.0/). The dataset is a reformatted and condensed derivative of those pages and is distributed under the same licence. RuneScape and Old School RuneScape are trademarks of Jagex Ltd; the wiki is not affiliated with Jagex.
 

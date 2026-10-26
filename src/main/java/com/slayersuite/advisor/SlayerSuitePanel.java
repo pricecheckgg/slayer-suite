@@ -1478,6 +1478,23 @@ public class SlayerSuitePanel extends PluginPanel
 				pts += "   skipped " + t.getSkips() + "x" + (t.getBlocks() > 0 ? ", blocked" : "") + ", " + t.getPointsSpent() + " pts";
 			}
 			row.add(wrap(pts, t.getPointSamples() > 0 ? WARN : DIM));
+			if (t.getBestKph() > 0 || t.getCannonKph() > 0 || t.getSuperiors() > 0)
+			{
+				List<String> bits = new ArrayList<>();
+				if (t.getBestKph() > 0)
+				{
+					bits.add("best run " + Math.round(t.getBestKph()) + "/h");
+				}
+				if (t.getCannonKph() > 0 && t.getPlainKph() > 0)
+				{
+					bits.add("cannon " + Math.round(t.getCannonKph()) + "/h vs " + Math.round(t.getPlainKph()) + "/h");
+				}
+				if (t.getSuperiors() > 0)
+				{
+					bits.add(t.getSuperiors() + (t.getSuperiors() == 1 ? " superior" : " superiors"));
+				}
+				row.add(wrap(String.join("   ", bits), DIM));
+			}
 			p.add(row);
 		}
 		return p;

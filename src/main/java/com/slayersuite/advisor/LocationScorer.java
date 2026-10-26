@@ -35,6 +35,10 @@ public class LocationScorer
 		boolean immune = rec.cannonImmune();
 		for (LocationRecord loc : rec.getLocations())
 		{
+			if (Boolean.TRUE.equals(loc.getBoss()))
+			{
+				continue;
+			}
 			out.add(score(loc, account, opt, immune));
 		}
 		out.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
@@ -110,7 +114,9 @@ public class LocationScorer
 		}
 		if (Boolean.TRUE.equals(loc.getMulticombat()))
 		{
-			score += opt.preferMulti ? 20 : 5;
+			// multi only pays with monsters to share it: a one-spawn multi area is no better than single
+			boolean worthIt = loc.getSpawnCount() == 0 || loc.getSpawnCount() >= 3;
+			score += worthIt ? (opt.preferMulti ? 20 : 5) : 2;
 			reasons.add("multi");
 		}
 		if (Boolean.TRUE.equals(loc.getSafespot()))

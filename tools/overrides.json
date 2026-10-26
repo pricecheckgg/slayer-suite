@@ -404,7 +404,13 @@
     "notes": [
       "The Grotesque Guardians count."
     ],
-    "reviewed": "2026-10-25"
+    "reviewed": "2026-10-25",
+    "locations": [
+      {
+        "name": "Slayer Tower (roof)",
+        "boss": true
+      }
+    ]
   },
   "ghosts": {
     "style": "Melee",

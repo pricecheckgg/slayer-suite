@@ -27,6 +27,15 @@ public class TaskStats
 	private int skips;
 	private int blocks;
 	private long pointsSpent;
+	/** Your fastest assignment of this task (20+ kills): rate and how much of it was idle or away. */
+	private double bestKph;
+	private long bestIdleMs;
+	private long bestAwayMs;
+	private long bestMs;
+	/** Kills per hour with and without a cannon, smoothed over assignments; 0 until seen. */
+	private double cannonKph;
+	private double plainKph;
+	private int superiors;
 
 	public double avgPoints()
 	{
@@ -93,6 +102,13 @@ public class TaskStats
 		c.skips = skips;
 		c.blocks = blocks;
 		c.pointsSpent = pointsSpent;
+		c.bestKph = bestKph;
+		c.bestIdleMs = bestIdleMs;
+		c.bestAwayMs = bestAwayMs;
+		c.bestMs = bestMs;
+		c.cannonKph = cannonKph;
+		c.plainKph = plainKph;
+		c.superiors = superiors;
 		return c;
 	}
 }

@@ -268,7 +268,7 @@ public class TaskCompleteOverlay extends Overlay
 		}
 		sparkles = config.cardSparkles();
 		seedSparkles();
-		show("TASK COMPLETE", AlertEngine.pretty(e.getName()), "", GOLD, config.completeBannerSeconds() * 1000L);
+		show("TASK COMPLETE", AlertEngine.pretty(e.getName()), e.isTest() ? "" : history.assignmentDiagnostics(), GOLD, config.completeBannerSeconds() * 1000L);
 	}
 
 	/** Item sprites with their stack size, each paired with its value text. */

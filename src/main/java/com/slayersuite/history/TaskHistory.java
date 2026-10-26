@@ -270,6 +270,48 @@ public class TaskHistory
 			finished > 0 ? activeMs / finished : 0, PointsMath.paybackTasks(PointsMath.SKIP_COST, avg), median, blocks, tips);
 	}
 
+	/** "Idle 9m, away 6m; best run idle 2m" for the current assignment, or "" when there is nothing to say. */
+	public String assignmentDiagnostics()
+	{
+		if (assignmentKills < 10 || assignmentMs < 120_000L)
+		{
+			return "";
+		}
+		StringBuilder d = new StringBuilder();
+		if (assignmentIdleMs >= 60_000L)
+		{
+			d.append("Idle ").append(TaskTracker.formatDuration(assignmentIdleMs));
+		}
+		if (assignmentAwayMs >= 60_000L)
+		{
+			d.append(d.length() > 0 ? ", away " : "Away ").append(TaskTracker.formatDuration(assignmentAwayMs));
+		}
+		TaskStats st = current;
+		if (st != null && st.getBestKph() > 0 && st.getBestMs() > 0)
+		{
+			double kph = assignmentKills * 3_600_000.0 / assignmentMs;
+			if (kph < st.getBestKph() * 0.9)
+			{
+				d.append(d.length() > 0 ? "; " : "").append("your best run was ").append(Math.round(st.getBestKph())).append("/h")
+					.append(st.getBestIdleMs() + st.getBestAwayMs() < 60_000L ? " with under a minute idle" : " with " + TaskTracker.formatDuration(st.getBestIdleMs() + st.getBestAwayMs()) + " idle or away");
+			}
+		}
+		int balls = trip.get().getBallsUsed();
+		if (balls > 0)
+		{
+			d.append(d.length() > 0 ? "; " : "").append("cannon ").append(balls).append(" balls");
+			if (trip.get().getBallsCost() > 0)
+			{
+				d.append(" (").append(TripMath.formatK(trip.get().getBallsCost())).append(")");
+			}
+			if (st != null && st.getCannonKph() > 0 && st.getPlainKph() > 0)
+			{
+				d.append(", ").append(Math.round(st.getCannonKph())).append("/h vs ").append(Math.round(st.getPlainKph())).append("/h without");
+			}
+		}
+		return d.toString();
+	}
+
 	/** Puts the last task's one-line report on the system clipboard. */
 	public boolean copyLastReport()
 	{
@@ -313,6 +355,12 @@ public class TaskHistory
 	private long assignmentGp;
 	@Getter
 	private long assignmentMs;
+	/** Of the assignment's active time: gaps of 20 s or more between kills, split by whether you were in a task area. */
+	@Getter
+	private long assignmentIdleMs;
+	@Getter
+	private long assignmentAwayMs;
+	private static final long IDLE_GAP_MS = 20_000L;
 	/** Drops from task monsters that have landed in the inventory this assignment: item id -> {quantity, value}. */
 	private final Map<Integer, long[]> assignmentItems = new LinkedHashMap<>();
 	/** Drops from this assignment's task kills that were never picked up: item id -> {quantity, value}. */
@@ -501,6 +549,8 @@ public class TaskHistory
 		long xp;
 		long gp;
 		long ms;
+		long idleMs;
+		long awayMs;
 		/** {item id, quantity, value} per picked-up drop. */
 		List<long[]> items;
 		/** The same for drops left behind. */
@@ -986,6 +1036,8 @@ public class TaskHistory
 		a.xp = assignmentXp;
 		a.gp = assignmentGp;
 		a.ms = assignmentMs;
+		a.idleMs = assignmentIdleMs;
+		a.awayMs = assignmentAwayMs;
 		a.items = new ArrayList<>();
 		a.missed = new ArrayList<>();
 		synchronized (assignmentItems)
@@ -1022,7 +1074,7 @@ public class TaskHistory
 	/** Continue the assignment's totals after a relog when the saved ones belong to this task. */
 	private void restoreAssignment(String key)
 	{
-		assignmentKills = assignmentXp = assignmentGp = assignmentMs = 0;
+		assignmentKills = assignmentXp = assignmentGp = assignmentMs = assignmentIdleMs = assignmentAwayMs = 0;
 		clearLoot();
 		try
 		{
@@ -1033,6 +1085,8 @@ public class TaskHistory
 				assignmentXp = a.xp;
 				assignmentGp = a.gp;
 				assignmentMs = a.ms;
+				assignmentIdleMs = a.idleMs;
+				assignmentAwayMs = a.awayMs;
 				if (a.items != null)
 				{
 					synchronized (assignmentItems)
@@ -1070,7 +1124,7 @@ public class TaskHistory
 	@Subscribe
 	public void onAssignmentStarted(AssignmentStarted e)
 	{
-		assignmentKills = assignmentXp = assignmentGp = assignmentMs = 0;
+		assignmentKills = assignmentXp = assignmentGp = assignmentMs = assignmentIdleMs = assignmentAwayMs = 0;
 		clearLoot();
 		if (current != null)
 		{
@@ -1141,6 +1195,27 @@ public class TaskHistory
 				current.setPointSamples(current.getPointSamples() + 1);
 			}
 			dirty = true;
+			long runMs = Math.max(assignmentMs, sessionActiveMs);
+			long runKills = Math.max(assignmentKills, sessionKills);
+			if (runKills >= 20 && runMs >= 120_000L)
+			{
+				double kph = runKills * 3_600_000.0 / runMs;
+				if (kph > current.getBestKph())
+				{
+					current.setBestKph(kph);
+					current.setBestMs(runMs);
+					current.setBestIdleMs(assignmentIdleMs);
+					current.setBestAwayMs(assignmentAwayMs);
+				}
+				if (trip.get().getBallsUsed() > 0)
+				{
+					current.setCannonKph(TripMath.ema(current.getCannonKph(), kph, 0.5));
+				}
+				else
+				{
+					current.setPlainKph(TripMath.ema(current.getPlainKph(), kph, 0.5));
+				}
+			}
 			StringBuilder r = new StringBuilder(current.getName() == null ? AlertEngine.pretty(e.getName()) : current.getName());
 			r.append(": ").append(Math.max(assignmentKills, sessionKills)).append(" kills");
 			long ms = Math.max(assignmentMs, sessionActiveMs);
@@ -1175,7 +1250,22 @@ public class TaskHistory
 			{
 				r.append(", streak ").append(e.getStreak());
 			}
+			String diag = assignmentDiagnostics();
+			if (!diag.isEmpty())
+			{
+				r.append(". ").append(diag);
+			}
 			lastReport = r.toString();
+		}
+	}
+
+	@Subscribe
+	public void onSuperiorSpawned(com.slayersuite.task.SuperiorSpawned e)
+	{
+		if (current != null)
+		{
+			current.setSuperiors(current.getSuperiors() + 1);
+			dirty = true;
 		}
 	}
 
@@ -1244,10 +1334,22 @@ public class TaskHistory
 		}
 		if (lastKillAt > 0 && now - lastKillAt < BREAK_GAP_MS)
 		{
-			assignmentMs += now - lastKillAt;
+			long gap = now - lastKillAt;
+			assignmentMs += gap;
+			if (gap >= IDLE_GAP_MS)
+			{
+				if (tracker.getCurrentLocation() != null)
+				{
+					assignmentIdleMs += gap;
+				}
+				else
+				{
+					assignmentAwayMs += gap;
+				}
+			}
 			synchronized (this)
 			{
-				ledger().activeMs += now - lastKillAt;
+				ledger().activeMs += gap;
 			}
 		}
 		lastKillAt = now;
@@ -1482,7 +1584,7 @@ public class TaskHistory
 			return "No history for this task yet.";
 		}
 		return "Your history: " + Math.round(s.killsPerHour()) + " kills/h, " + TripMath.formatK(Math.round(s.xpPerHour())) + " xp/h, "
-			+ TripMath.formatK(Math.round(s.gpPerHour())) + " gp/h over " + s.getTasksFinished() + (s.getTasksFinished() == 1 ? " task." : " tasks.");
+			+ TripMath.formatK(Math.round(s.gpPerHour())) + " gp/h " + (s.getTasksFinished() == 0 ? "from " + s.getKills() + " kills so far." : "over " + s.getTasksFinished() + (s.getTasksFinished() == 1 ? " task." : " tasks."));
 	}
 
 	/** Compares this task's measured xp/h with the median of every task you have history for. */

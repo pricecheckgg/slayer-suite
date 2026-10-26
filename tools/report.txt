@@ -1,4 +1,4 @@
-generated 2026-10-25
+generated 2026-10-26
 149 tasks, 433 monsters, 501 wiki pages
 
 monster pins merged: Slayer task/Abyssal demons (filled 0, added 1)
