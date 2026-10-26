@@ -222,6 +222,10 @@ public class LocationScorer
 	/** Region ids with y >= 3520 inside the Wilderness x band. */
 	static boolean isWilderness(LocationRecord loc)
 	{
+		if (loc.getName() != null && loc.getName().toLowerCase(java.util.Locale.ROOT).contains("wilderness"))
+		{
+			return true;
+		}
 		if (loc.getRegions() == null)
 		{
 			return false;
@@ -230,7 +234,8 @@ public class LocationScorer
 		{
 			int rx = r >> 8;
 			int ry = r & 0xFF;
-			if (ry >= 55 && ry <= 61 && rx >= 46 && rx <= 53)
+			// surface Wilderness: x 2944..3391 (columns 46..52), y 3520..3967 (rows 55..61); column 53 is Morytania
+			if (ry >= 55 && ry <= 61 && rx >= 46 && rx <= 52)
 			{
 				return true;
 			}
