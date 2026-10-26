@@ -221,4 +221,43 @@ public class LocationScorerTest
 		org.junit.Assert.assertTrue(com.slayersuite.advisor.Advisor.samePlace("Kalphite Lair", "Kalphite Lair (east entrance)"));
 		org.junit.Assert.assertFalse(com.slayersuite.advisor.Advisor.samePlace("Slayer Tower", "Stronghold Slayer Cave"));
 	}
+
+	@Test
+	public void yourBestSpotGetsTheEdgeOnceTwoHaveRates()
+	{
+		TaskRecord rec = new TaskRecord();
+		rec.setLocations(Arrays.asList(
+			loc("Slayer Tower (top floor)", false, false, true, 8, 13623),
+			loc("Slayer Tower (basement)", false, false, true, 12, 13723)));
+		Stub acc = new Stub();
+		acc.quests.add("PRIEST_IN_PERIL");
+		LocationScorer.Options opt = new LocationScorer.Options();
+		List<ScoredLocation> plain = new LocationScorer(travel()).rank(rec, acc, opt);
+		assertEquals("Slayer Tower (basement)", plain.get(0).getLocation().getName());
+		java.util.Map<String, double[]> own = new java.util.HashMap<>();
+		own.put("Slayer Tower (top floor)", new double[]{300, 400_000, 60_000});
+		own.put("Slayer Tower (basement)", new double[]{200, 300_000, 40_000});
+		opt.ownRates = own;
+		List<ScoredLocation> r = new LocationScorer(travel()).rank(rec, acc, opt);
+		assertEquals("Slayer Tower (top floor)", r.get(0).getLocation().getName());
+		assertTrue(r.get(0).getReasons().contains("your best spot"));
+		assertTrue(r.get(0).getOwnRate().startsWith("300 kills/h"));
+		assertTrue(r.get(1).getOwnRate() != null && !r.get(1).getReasons().contains("your best spot"));
+	}
+
+	@Test
+	public void bossArenasAreNeverRankedAndTinyMultiSpotsGetNoBonus()
+	{
+		TaskRecord rec = new TaskRecord();
+		LocationRecord roof = loc("Slayer Tower (roof)", false, true, false, 1, 6727);
+		roof.setBoss(true);
+		LocationRecord one = loc("Lonely multi corner", false, true, false, 1, 1);
+		LocationRecord basement = loc("Slayer Tower (basement)", false, false, true, 12, 13723);
+		rec.setLocations(Arrays.asList(roof, one, basement));
+		Stub acc = new Stub();
+		acc.quests.add("PRIEST_IN_PERIL");
+		List<ScoredLocation> r = new LocationScorer(travel()).rank(rec, acc, new LocationScorer.Options());
+		assertEquals(2, r.size());
+		assertEquals("Slayer Tower (basement)", r.get(0).getLocation().getName());
+	}
 }

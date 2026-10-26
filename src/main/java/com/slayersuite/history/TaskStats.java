@@ -36,6 +36,46 @@ public class TaskStats
 	private double cannonKph;
 	private double plainKph;
 	private int superiors;
+	/** What you did at each spot of this task: kills, active time, Slayer xp and picked-up loot. */
+	private java.util.Map<String, SpotStats> spots = new java.util.LinkedHashMap<>();
+
+	public static class SpotStats
+	{
+		public long kills;
+		public long activeMs;
+		public long xp;
+		public long loot;
+
+		public double killsPerHour()
+		{
+			return activeMs > 0 ? kills * 3_600_000.0 / activeMs : 0;
+		}
+
+		public double gpPerHour()
+		{
+			return activeMs > 0 ? loot * 3_600_000.0 / activeMs : 0;
+		}
+
+		public double xpPerHour()
+		{
+			return activeMs > 0 ? xp * 3_600_000.0 / activeMs : 0;
+		}
+
+		/** Enough play at this spot for a rate to mean something. */
+		public boolean hasRate()
+		{
+			return kills >= 15 && activeMs >= 120_000L;
+		}
+	}
+
+	public SpotStats spot(String name)
+	{
+		if (spots == null)
+		{
+			spots = new java.util.LinkedHashMap<>();
+		}
+		return spots.computeIfAbsent(name, k -> new SpotStats());
+	}
 
 	public double avgPoints()
 	{
@@ -109,6 +149,19 @@ public class TaskStats
 		c.cannonKph = cannonKph;
 		c.plainKph = plainKph;
 		c.superiors = superiors;
+		c.spots = new java.util.LinkedHashMap<>();
+		if (spots != null)
+		{
+			for (java.util.Map.Entry<String, SpotStats> e : spots.entrySet())
+			{
+				SpotStats x = new SpotStats();
+				x.kills = e.getValue().kills;
+				x.activeMs = e.getValue().activeMs;
+				x.xp = e.getValue().xp;
+				x.loot = e.getValue().loot;
+				c.spots.put(e.getKey(), x);
+			}
+		}
 		return c;
 	}
 }

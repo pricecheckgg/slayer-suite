@@ -156,8 +156,13 @@ public class TaskHistory
 	/** Median xp/h over the tasks you have real rates for; 0 with fewer than three. */
 	double medianXpPerHour()
 	{
+		return medianXpPerHour(all());
+	}
+
+	static double medianXpPerHour(List<TaskStats> stats)
+	{
 		List<Double> rates = new ArrayList<>();
-		for (TaskStats t : all())
+		for (TaskStats t : stats)
 		{
 			if (t.getKills() >= ADVICE_MIN_KILLS && t.hasRate())
 			{
@@ -186,14 +191,15 @@ public class TaskHistory
 		double avg = PointsMath.averagePointsPerTask(masterId);
 		int nextBonus = PointsMath.nextBonusTask(streak);
 		int big = PointsMath.nextBigMilestone(streak);
+		List<TaskStats> stats = all();
 		long activeMs = 0;
 		int finished = 0;
-		for (TaskStats t : all())
+		for (TaskStats t : stats)
 		{
 			activeMs += t.getActiveMs();
 			finished += t.getTasksFinished();
 		}
-		double median = medianXpPerHour();
+		double median = medianXpPerHour(stats);
 		List<BlockRow> blocks = new ArrayList<>();
 		if (masterId > 0 && median > 0)
 		{
@@ -216,7 +222,7 @@ public class TaskHistory
 				}
 			}
 			Map<String, Double> xph = new HashMap<>();
-			for (TaskStats t : all())
+			for (TaskStats t : stats)
 			{
 				if (t.getKills() >= ADVICE_MIN_KILLS && t.hasRate())
 				{
@@ -614,6 +620,8 @@ public class TaskHistory
 		int blocks;
 		/** Skill name -> {kills, activeMs, lootValue, wall time} when it last levelled. */
 		Map<String, long[]> marks = new HashMap<>();
+		/** Task keys referenced by log entries' fifth value. */
+		List<String> taskKeys = new ArrayList<>();
 		/** Every level reached since the plugin started watching, oldest first. */
 		List<LevelRecord> levels = new ArrayList<>();
 		/** Item id -> name, filled on the client thread as drops arrive, for the panel's tooltips. */
@@ -679,7 +687,7 @@ public class TaskHistory
 		long v = 0;
 		for (long[] en : log)
 		{
-			if (en.length == 4 && en[3] > sinceTime)
+			if (en.length >= 4 && en[3] > sinceTime)
 			{
 				v += en[2];
 			}
@@ -687,12 +695,67 @@ public class TaskHistory
 		return v;
 	}
 
+	/** Index of the current task's key in the ledger's list, adding it on first sight; -1 without a task. */
+	private int taskIndex(Ledger l)
+	{
+		if (current == null || current.getKey() == null)
+		{
+			return -1;
+		}
+		int i = l.taskKeys.indexOf(current.getKey());
+		if (i < 0)
+		{
+			l.taskKeys.add(current.getKey());
+			i = l.taskKeys.size() - 1;
+		}
+		return i;
+	}
+
+	/** The most valuable drops picked up on a task over the whole log, best first. */
+	public synchronized List<LootItem> lootForTask(String key, int n)
+	{
+		Ledger l = ledger();
+		int idx = l.taskKeys.indexOf(key);
+		if (idx < 0)
+		{
+			return new ArrayList<>();
+		}
+		List<long[]> mine = new ArrayList<>();
+		for (long[] en : l.log)
+		{
+			if (en.length >= 5 && en[4] == idx)
+			{
+				mine.add(en);
+			}
+		}
+		return aggregate(mine, 0, n);
+	}
+
+	/** Spot name -> {kills/h, gp/h, xp/h} for the spots of a task you have played enough at. */
+	public Map<String, double[]> ownRates(String key)
+	{
+		Map<String, double[]> out = new LinkedHashMap<>();
+		TaskStats st = key == null ? null : (current != null && key.equals(current.getKey()) ? snapshot() : statsFor(key));
+		if (st == null || st.getSpots() == null)
+		{
+			return out;
+		}
+		for (Map.Entry<String, TaskStats.SpotStats> e : st.getSpots().entrySet())
+		{
+			if (e.getValue().hasRate())
+			{
+				out.put(e.getKey(), new double[]{e.getValue().killsPerHour(), e.getValue().gpPerHour(), e.getValue().xpPerHour()});
+			}
+		}
+		return out;
+	}
+
 	private static List<LootItem> aggregate(List<long[]> log, long sinceTime, int n)
 	{
 		Map<Integer, long[]> agg = new LinkedHashMap<>();
 		for (long[] en : log)
 		{
-			if (en.length == 4 && en[3] > sinceTime)
+			if (en.length >= 4 && en[3] > sinceTime)
 			{
 				long[] t = agg.computeIfAbsent((int) en[0], k -> new long[2]);
 				t[0] += en[1];
@@ -777,6 +840,10 @@ public class TaskHistory
 					if (l.missedLog == null)
 					{
 						l.missedLog = new ArrayList<>();
+					}
+					if (l.taskKeys == null)
+					{
+						l.taskKeys = new ArrayList<>();
 					}
 					ledger = l;
 				}
@@ -996,7 +1063,7 @@ public class TaskHistory
 				tally[1] += value;
 			}
 			l.missedValue += value;
-			l.missedLog.add(new long[]{pd.id, pd.quantity, value, t});
+			l.missedLog.add(new long[]{pd.id, pd.quantity, value, t, taskIndex(l)});
 			if (l.missedLog.size() > LOG_CAP)
 			{
 				l.missedLog.subList(0, l.missedLog.size() - LOG_CAP).clear();
@@ -1016,7 +1083,12 @@ public class TaskHistory
 		}
 		Ledger l = ledger();
 		l.lootValue += value;
-		l.log.add(new long[]{id, quantity, value, t});
+		l.log.add(new long[]{id, quantity, value, t, taskIndex(l)});
+		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
+		if (current != null && here != null)
+		{
+			current.spot(here.getName()).loot += value;
+		}
 		if (l.log.size() > LOG_CAP)
 		{
 			l.log.subList(0, l.log.size() - LOG_CAP).clear();
@@ -1332,10 +1404,20 @@ public class TaskHistory
 		{
 			sessionActiveMs += now - lastKillAt;
 		}
+		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
+		TaskStats.SpotStats spot = here == null ? null : current.spot(here.getName());
+		if (spot != null)
+		{
+			spot.kills += e.getDelta();
+		}
 		if (lastKillAt > 0 && now - lastKillAt < BREAK_GAP_MS)
 		{
 			long gap = now - lastKillAt;
 			assignmentMs += gap;
+			if (spot != null)
+			{
+				spot.activeMs += gap;
+			}
 			if (gap >= IDLE_GAP_MS)
 			{
 				if (tracker.getCurrentLocation() != null)
@@ -1396,6 +1478,11 @@ public class TaskHistory
 		{
 			sessionXp += xp - lastSlayerXp;
 			assignmentXp += xp - lastSlayerXp;
+			com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
+			if (here != null)
+			{
+				current.spot(here.getName()).xp += xp - lastSlayerXp;
+			}
 			dirty = true;
 		}
 		lastSlayerXp = xp;

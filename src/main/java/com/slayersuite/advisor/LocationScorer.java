@@ -16,6 +16,8 @@ public class LocationScorer
 		public boolean avoidWilderness = true;
 		public boolean preferCannon = true;
 		public boolean preferMulti = true;
+		/** Spot name -> {kills/h, gp/h, xp/h} from your own history on this task. */
+		public java.util.Map<String, double[]> ownRates = java.util.Collections.emptyMap();
 	}
 
 	private final TravelData travel;
@@ -125,6 +127,26 @@ public class LocationScorer
 			reasons.add("safespot");
 		}
 		score += Math.min(loc.getSpawnCount(), 15);
+		String own = null;
+		double[] mine = opt.ownRates.get(loc.getName());
+		if (mine != null)
+		{
+			own = Math.round(mine[0]) + " kills/h, " + com.slayersuite.trip.TripMath.formatK(Math.round(mine[1])) + " gp/h for you here";
+			// the spot where you have done best, by xp/h then gp/h, gets the edge once you have played two or more
+			boolean best = opt.ownRates.size() >= 2;
+			for (double[] other : opt.ownRates.values())
+			{
+				if (other != mine && (other[2] > mine[2] || (other[2] == mine[2] && other[1] > mine[1])))
+				{
+					best = false;
+				}
+			}
+			if (best)
+			{
+				score += 15;
+				reasons.add("your best spot");
+			}
+		}
 
 		String travelLabel = null;
 		int bestHops = 99;
@@ -194,7 +216,7 @@ public class LocationScorer
 		{
 			score -= 100;
 		}
-		return new ScoredLocation(loc, score, locked, wild, travelLabel, reasons);
+		return new ScoredLocation(loc, score, locked, wild, travelLabel, reasons, own);
 	}
 
 	/** Region ids with y >= 3520 inside the Wilderness x band. */

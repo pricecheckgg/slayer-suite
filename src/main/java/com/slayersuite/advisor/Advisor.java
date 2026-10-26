@@ -106,10 +106,24 @@ public class Advisor
 		return gt != null && gt.getMasterId() == 7;
 	}
 
+	/** Supplies your per-spot rates for a task key; set by the plugin at startup. */
+	private volatile java.util.function.Function<String, java.util.Map<String, double[]>> ownRatesSource;
+
+	public void setOwnRatesSource(java.util.function.Function<String, java.util.Map<String, double[]>> source)
+	{
+		ownRatesSource = source;
+	}
+
 	private LocationScorer.Options options()
 	{
 		LocationScorer.Options o = new LocationScorer.Options();
 		o.avoidWilderness = config.avoidWilderness() && !wildernessTask();
+		TaskRecord rec = tracker.getRecord();
+		java.util.function.Function<String, java.util.Map<String, double[]>> src = ownRatesSource;
+		if (rec != null && src != null)
+		{
+			o.ownRates = src.apply(rec.getKey());
+		}
 		o.preferCannon = config.preferCannon();
 		o.preferMulti = true;
 		return o;

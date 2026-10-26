@@ -116,6 +116,7 @@ public class SlayerSuitePanel extends PluginPanel
 	/** How many older levels are listed, and which of them are opened into full cards (by their time). */
 	private int olderLevelsShown = 10;
 	private final java.util.Set<Long> openedLevels = new java.util.HashSet<>();
+	private final java.util.Set<String> openedMonsters = new java.util.HashSet<>();
 	private static final int FULL_LEVEL_CARDS = 3;
 	private final Timer timer;
 	/** Where the user was before the last rebuild, re-applied while the wrapped text settles. */
@@ -430,7 +431,7 @@ public class SlayerSuitePanel extends PluginPanel
 		sb.append(sum.getSlayerXp()).append('|').append(sum.getSinceKills()).append('|').append(sum.getSinceMs() / 60_000L).append('|').append(sum.getSinceValue()).append('|')
 			.append(sum.getLifeKills()).append('|').append(sum.getLifeValue()).append('|').append(sum.getSlayerLevels().size()).append('|').append(sum.getRecentItems().size()).append('|').append(sum.getSinceItems().size())
 			.append('|').append(sum.getSinceMissedValue()).append('|').append(sum.getLifeMissedValue()).append('|').append(tracker.getTaskName()).append('|').append(history.getAssignmentKills()).append('|')
-			.append(history.getAssignmentGp()).append('|').append(history.getAssignmentMissedValue()).append('|').append(olderLevelsShown).append('|').append(openedLevels);
+			.append(history.getAssignmentGp()).append('|').append(history.getAssignmentMissedValue()).append('|').append(olderLevelsShown).append('|').append(openedLevels).append('|').append(openedMonsters).append('|').append(history.all().size());
 		String sig = sb.toString();
 		if (!force && sig.equals(lastLootSignature))
 		{
@@ -519,6 +520,32 @@ public class SlayerSuitePanel extends PluginPanel
 				}
 			}
 		}
+		List<TaskStats> monsters = history.all();
+		TaskStats curStats = history.snapshot();
+		if (curStats != null)
+		{
+			monsters.removeIf(t -> t.getKey() != null && t.getKey().equals(curStats.getKey()));
+			monsters.add(curStats);
+		}
+		monsters.removeIf(t -> t.getKills() <= 0);
+		monsters.sort((a, b) -> Long.compare(b.getKills(), a.getKills()));
+		if (!monsters.isEmpty())
+		{
+			lootContent.add(gap(10));
+			lootContent.add(titleWithNote("Monsters", monsters.size() + " tracked"));
+			int shown = 0;
+			for (TaskStats t : monsters)
+			{
+				if (shown == 25)
+				{
+					lootContent.add(wrap((monsters.size() - 25) + " more with fewer kills.", DIM));
+					break;
+				}
+				lootContent.add(openedMonsters.contains(t.getKey()) ? monsterCard(t, sum.getNames()) : monsterRow(t));
+				lootContent.add(gap(3));
+				shown++;
+			}
+		}
 		lootContent.add(gap(10));
 		lootContent.add(title("All slaying"));
 		lootContent.add(allTimeCard(sum));
@@ -589,6 +616,98 @@ public class SlayerSuitePanel extends PluginPanel
 			p.add(label("LEFT BEHIND", FontManager.getRunescapeSmallFont(), MISSED));
 			p.add(gap(3));
 			p.add(itemGrid(left, names, true));
+		}
+		return p;
+	}
+
+	/** One monster as a single line, with a button that opens its page. */
+	private JPanel monsterRow(TaskStats t)
+	{
+		JPanel p = card(null, false);
+		p.setLayout(new BorderLayout(6, 0));
+		JPanel text = new JPanel();
+		text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+		text.setOpaque(false);
+		text.add(label(t.getName() == null ? t.getKey() : t.getName(), FontManager.getRunescapeBoldFont(), Color.WHITE));
+		text.add(label(t.getKills() + " kills   " + (t.getActiveMs() > 60_000L ? TaskTracker.formatDuration(t.getActiveMs()) : "--") + "   " + TripMath.formatK(t.getSlayerXp()) + " xp   " + TripMath.formatK(t.getLootGp()) + " loot"
+			+ (t.getSuperiors() > 0 ? "   " + t.getSuperiors() + " sup" : ""), FontManager.getRunescapeSmallFont(), DIM));
+		p.add(text, BorderLayout.CENTER);
+		JButton open = button("View");
+		open.addActionListener(e ->
+		{
+			openedMonsters.add(t.getKey());
+			rebuildLoot(true);
+		});
+		JPanel east = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		east.setOpaque(false);
+		east.add(open);
+		p.add(east, BorderLayout.EAST);
+		return p;
+	}
+
+	/** Your own page for one monster: lifetime numbers, rates, best run, spots, best drops. */
+	private JPanel monsterCard(TaskStats t, Map<Integer, String> names)
+	{
+		JPanel p = card(null, true);
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		JPanel head = new JPanel(new BorderLayout(6, 0));
+		head.setOpaque(false);
+		head.setAlignmentX(LEFT_ALIGNMENT);
+		head.setMaximumSize(new Dimension(Integer.MAX_VALUE, 22));
+		head.add(label(t.getName() == null ? t.getKey() : t.getName(), FontManager.getRunescapeBoldFont().deriveFont(15f), Color.WHITE), BorderLayout.WEST);
+		JButton hide = button("Hide");
+		hide.addActionListener(e ->
+		{
+			openedMonsters.remove(t.getKey());
+			rebuildLoot(true);
+		});
+		JPanel east = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+		east.setOpaque(false);
+		east.add(hide);
+		head.add(east, BorderLayout.EAST);
+		p.add(head);
+		p.add(gap(4));
+		List<String[]> cells = new ArrayList<>();
+		cells.add(new String[]{"kills", Long.toString(t.getKills())});
+		cells.add(new String[]{"time", t.getActiveMs() > 60_000L ? TaskTracker.formatDuration(t.getActiveMs()) : "--"});
+		cells.add(new String[]{"xp", TripMath.formatK(t.getSlayerXp())});
+		cells.add(new String[]{"loot", TripMath.formatK(t.getLootGp())});
+		p.add(tiles(cells));
+		p.add(gap(4));
+		if (t.hasRate())
+		{
+			p.add(kv("Rates", Math.round(t.killsPerHour()) + " kills/h, " + TripMath.formatK(Math.round(t.xpPerHour())) + " xp/h, " + TripMath.formatK(Math.round(t.gpPerHour())) + " gp/h", Color.WHITE));
+		}
+		p.add(kv("Tasks", t.getTasksFinished() + " done" + (t.getPointSamples() > 0 ? ", +" + Math.round(t.avgPoints()) + " pts each" : "") + (t.getSkips() > 0 ? ", skipped " + t.getSkips() + "x" : ""), DIM));
+		if (t.getBestKph() > 0)
+		{
+			p.add(kv("Best run", Math.round(t.getBestKph()) + " kills/h" + (t.getBestIdleMs() + t.getBestAwayMs() >= 60_000L ? ", " + TaskTracker.formatDuration(t.getBestIdleMs() + t.getBestAwayMs()) + " idle or away" : ""), DIM));
+		}
+		if (t.getCannonKph() > 0 && t.getPlainKph() > 0)
+		{
+			p.add(kv("Cannon", Math.round(t.getCannonKph()) + "/h with, " + Math.round(t.getPlainKph()) + "/h without", DIM));
+		}
+		if (t.getSuperiors() > 0)
+		{
+			p.add(kv("Superiors", Integer.toString(t.getSuperiors()), DIM));
+		}
+		if (t.getSpots() != null && !t.getSpots().isEmpty())
+		{
+			List<String> bits = new ArrayList<>();
+			for (Map.Entry<String, TaskStats.SpotStats> e : t.getSpots().entrySet())
+			{
+				TaskStats.SpotStats sp = e.getValue();
+				bits.add(e.getKey() + ": " + sp.kills + " kills" + (sp.hasRate() ? ", " + Math.round(sp.killsPerHour()) + "/h, " + TripMath.formatK(Math.round(sp.gpPerHour())) + " gp/h" : ""));
+			}
+			p.add(kv("Spots", String.join("; ", bits), DIM));
+		}
+		List<TaskHistory.LootItem> drops = history.lootForTask(t.getKey(), 10);
+		if (!drops.isEmpty())
+		{
+			p.add(gap(6));
+			p.add(label("BEST DROPS", FontManager.getRunescapeSmallFont(), DIM));
+			p.add(gap(3));
+			p.add(itemGrid(drops, names, false));
 		}
 		return p;
 	}
@@ -1214,6 +1333,10 @@ public class SlayerSuitePanel extends PluginPanel
 			}
 		}
 		lines.add(wrap(travel, s.isLocked() ? BAD : s.getTravel() != null ? OK : DIM));
+		if (s.getOwnRate() != null)
+		{
+			lines.add(wrap(s.getOwnRate(), INFO));
+		}
 		p.add(lines, BorderLayout.CENTER);
 
 		if (l.hasCoordinates() && !here)

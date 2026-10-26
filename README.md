@@ -18,6 +18,13 @@ Slayer Suite reads the client, draws, and tells you things. It never attacks, pr
 | **Task complete** | A centred card when the assignment ends: kills, time, xp, loot, points and streak count up, with the drops you picked up as item tiles under them and the ones you left behind dimmer below. The last few kills count down on screen. A level up gets the same card with the skill icon and everything slain and picked up since that skill's previous level. |
 | **Attack guard** | Attack on monsters that do not count for your task is pushed off left-click or hidden. |
 | **Loot tab** | Your Slayer level with the xp bar to the next one, virtual levels past 99 and a maxed state at 200m. This task's drops. This level's drops. One card per level reached with its time, kills, loot and what was left on the floor, every older level a click away. Recent drops overall. |
+| **Points** | A card with your points, streak, the next bonus task and what a skip costs in tasks of points at your master. The next big milestone with hours to it at your pace. What you have spent on skips, blocks and the shop. And the blocks worth buying for you: the master's own roll weights against your xp per hour on each task, so it names the tasks whose removal raises your expected rate most. A warning fires if you interact with Turael, Aya or Spria with a streak to lose. |
+| **Packing list** | At the bank, under the readiness list: how much food, how many prayer and other potions and antifire doses to take for the kills left, from your own consumption per kill on this task, with 15% spare and whether it fits one trip. |
+| **Why a task was slow** | The completion card and the task report break the run down: minutes idle in the area, minutes away from it, and how your best run of the same task compared. |
+| **Spots that learn** | Kills, time, xp and loot are kept per spot you fought at. Spot cards show your own kills per hour and gp per hour there, and the spot where you have done best gets the edge in the ranking. |
+| **Cannon** | Cannonballs loaded per task and what they cost, with your kills per hour with and without a cannon once both are known. |
+| **Monsters** | On the Loot tab, one page per monster you have fought: lifetime kills, time, xp and loot, your rates, best run, cannon comparison, superiors seen, every spot with your numbers there, and your best drops from it. |
+| **Task report** | One line per finished task, ready to paste: kills, time, xp, loot, best drop, points, streak and the slow-run breakdown. A button in the panel or `::ss report` copies it. |
 | **History** | Per task, on your RuneScape profile: kills, time actually spent killing, Slayer xp, loot value, points per task, skips and blocks. The chat tells you your own rates when a task is assigned and says when one is well below your median, with the skip cost against your balance. |
 | **Slaying mode** | Everything switches on while you have a task and are in its area, fought a task monster in the last five minutes, or carry a slayer helmet, and goes quiet otherwise. You never turn the plugin off to do something else. |
 
@@ -50,7 +57,7 @@ Nine sections, one per thing you see: Task card, Hover card, Readiness check, Al
 
 ## Try the displays
 
-Type `::ss done`, `::ss superior`, `::ss level`, `::ss alert`, `::ss supplies` or `::ss sound` in the chat box, or press the buttons at the bottom of the panel, to fire the task complete card, the superior card, the level up card, a critical alert, the supplies alert or the task-done sound. Test events are not recorded in your history. `::ss vars` prints which game values the task is being read from.
+Type `::ss done`, `::ss superior`, `::ss level`, `::ss alert`, `::ss supplies` or `::ss sound` in the chat box, or press the buttons at the bottom of the panel, to fire the task complete card, the superior card, the level up card, a critical alert, the supplies alert or the task-done sound. Test events are not recorded in your history. `::ss vars` prints which game values the task is being read from, and `::ss report` copies the last task's one-line report.
 
 ## Sounds
 
@@ -108,9 +115,8 @@ The code is BSD 2-Clause (see `LICENSE`). The dataset is derived from the Old Sc
 
 ## Roadmap
 
-1. **Block advice.** Skip advice exists; block advice needs assignment weights per master, which the dataset does not carry yet.
-2. **Travel coverage.** `travel.json` has 45 locations; spots without an entry rank on their flags alone. Portal nexus destinations are not readable yet, so a nexus counts for its Xeric and Digsite additions alone.
-3. **Looting bag.** Drops picked up into a looting bag never show in the inventory, so they read as left behind.
-4. **Dataset in CI**, so wiki changes become a rebuild and a diff.
-5. **Dataset gaps.** 75 of 1116 location rows have no map pins, a few boss and umbrella pages have no record, and 33 of the 149 task entries have been hand-reviewed so far. `tools/report.txt` lists them.
-6. **Inventory Setups hand-off**: select the matching setup when that plugin is installed.
+1. **Travel coverage.** `travel.json` has 45 locations; spots without an entry rank on their flags alone. Portal nexus destinations are not readable yet, so a nexus counts for its Xeric and Digsite additions alone.
+2. **Looting bag.** Drops picked up into a looting bag never show in the inventory, so they read as left behind.
+3. **Dataset in CI**, so wiki changes become a rebuild and a diff.
+4. **Dataset gaps.** 75 of 1116 location rows have no map pins, a few boss and umbrella pages have no record, and 33 of the 149 task entries have been hand-reviewed so far. `tools/report.txt` lists them.
+5. **Inventory Setups hand-off**: select the matching setup when that plugin is installed.

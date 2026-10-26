@@ -13,4 +13,6 @@ public class ScoredLocation
 	boolean wilderness;
 	String travel;
 	List<String> reasons;
+	/** Your own rate at this spot, or null before you have played enough there. */
+	String ownRate;
 }
