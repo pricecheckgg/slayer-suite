@@ -75,6 +75,220 @@ public class TaskHistory
 	private final SlayerSuiteConfig config;
 	private final ItemManager itemManager;
 	private final EventBus eventBus;
+	private final com.slayersuite.task.GameTaskTable table;
+	/** Points, milestones, skip payback and block candidates, recomputed on the client thread every few seconds. */
+	@Getter
+	private volatile PointsSummary pointsSummary;
+	private int lastMasterId = -1;
+	private int pointsTick;
+	private final Map<Integer, Map<String, Integer>> weightKeysCache = new HashMap<>();
+	/** One line about the last finished task, ready for the clipboard. */
+	@Getter
+	private volatile String lastReport = "";
+	/** Task name -> varbit of its "longer tasks" Slayer reward unlock. */
+	private static final Map<String, Integer> LONGER_UNLOCKS = new LinkedHashMap<>();
+
+	static
+	{
+		LONGER_UNLOCKS.put("Dark beasts", 4031);
+		LONGER_UNLOCKS.put("Ankou", 4085);
+		LONGER_UNLOCKS.put("Suqah", 4086);
+		LONGER_UNLOCKS.put("Black dragons", 4087);
+		LONGER_UNLOCKS.put("Iron dragons", 4088);
+		LONGER_UNLOCKS.put("Steel dragons", 4088);
+		LONGER_UNLOCKS.put("Abyssal demons", 4090);
+		LONGER_UNLOCKS.put("Black demons", 4091);
+		LONGER_UNLOCKS.put("Greater demons", 4092);
+		LONGER_UNLOCKS.put("Bloodveld", 4746);
+		LONGER_UNLOCKS.put("Aberrant spectres", 4747);
+		LONGER_UNLOCKS.put("Aviansies", 4748);
+		LONGER_UNLOCKS.put("Mithril dragons", 4749);
+		LONGER_UNLOCKS.put("Cave horrors", 4750);
+		LONGER_UNLOCKS.put("Dust devils", 4751);
+		LONGER_UNLOCKS.put("Skeletal wyverns", 4752);
+		LONGER_UNLOCKS.put("Gargoyles", 4753);
+		LONGER_UNLOCKS.put("Nechryael", 4754);
+		LONGER_UNLOCKS.put("Cave kraken", 4755);
+		LONGER_UNLOCKS.put("Spiritual creatures", 4757);
+		LONGER_UNLOCKS.put("Fossil island wyverns", 5733);
+		LONGER_UNLOCKS.put("Adamant dragons", 6094);
+		LONGER_UNLOCKS.put("Rune dragons", 6095);
+		LONGER_UNLOCKS.put("Basilisks", 9455);
+		LONGER_UNLOCKS.put("Vampyres", 10389);
+		LONGER_UNLOCKS.put("Araxytes", 11022);
+		LONGER_UNLOCKS.put("Revenants", 14822);
+		LONGER_UNLOCKS.put("Gryphons", 15398);
+		LONGER_UNLOCKS.put("Frost dragons", 15399);
+		LONGER_UNLOCKS.put("Custodians", 17219);
+		LONGER_UNLOCKS.put("Wyrms", 19602);
+		LONGER_UNLOCKS.put("Aquanites", 19603);
+	}
+
+	@lombok.Value
+	public static class BlockRow
+	{
+		String name;
+		double share;
+		double xpPerHour;
+		double gainPct;
+	}
+
+	@lombok.Value
+	public static class PointsSummary
+	{
+		int masterId;
+		String master;
+		int points;
+		int streak;
+		double avgPerTask;
+		int nextBonusTask;
+		int nextBonusPoints;
+		int bigTask;
+		int bigPoints;
+		/** Your average active time per finished task; 0 when unknown. */
+		long msPerTask;
+		double skipPaybackTasks;
+		double medianXpPerHour;
+		List<BlockRow> blocks;
+		List<String> tips;
+	}
+
+	/** Median xp/h over the tasks you have real rates for; 0 with fewer than three. */
+	double medianXpPerHour()
+	{
+		List<Double> rates = new ArrayList<>();
+		for (TaskStats t : all())
+		{
+			if (t.getKills() >= ADVICE_MIN_KILLS && t.hasRate())
+			{
+				rates.add(t.xpPerHour());
+			}
+		}
+		if (rates.size() < 3)
+		{
+			return 0;
+		}
+		rates.sort(Double::compare);
+		return rates.get(rates.size() / 2);
+	}
+
+	/** Client thread. */
+	private void computePointsSummary()
+	{
+		com.slayersuite.task.GameTaskTable.GameTask gt = tracker.getGameTask();
+		if (gt != null)
+		{
+			lastMasterId = gt.getMasterId();
+		}
+		int masterId = lastMasterId;
+		int streak = tracker.getTaskStreak();
+		int base = PointsMath.basePoints(masterId);
+		double avg = PointsMath.averagePointsPerTask(masterId);
+		int nextBonus = PointsMath.nextBonusTask(streak);
+		int big = PointsMath.nextBigMilestone(streak);
+		long activeMs = 0;
+		int finished = 0;
+		for (TaskStats t : all())
+		{
+			activeMs += t.getActiveMs();
+			finished += t.getTasksFinished();
+		}
+		double median = medianXpPerHour();
+		List<BlockRow> blocks = new ArrayList<>();
+		if (masterId > 0 && median > 0)
+		{
+			Map<String, Integer> byKey = weightKeysCache.get(masterId);
+			if (byKey == null)
+			{
+				byKey = new LinkedHashMap<>();
+				for (Map.Entry<Integer, Integer> e : table.masterWeights(masterId).entrySet())
+				{
+					String name = table.taskName(e.getKey());
+					TaskRecord rec = name == null ? null : dataset.find(name);
+					if (rec != null)
+					{
+						byKey.merge(rec.getKey(), e.getValue(), Integer::sum);
+					}
+				}
+				if (!byKey.isEmpty())
+				{
+					weightKeysCache.put(masterId, byKey);
+				}
+			}
+			Map<String, Double> xph = new HashMap<>();
+			for (TaskStats t : all())
+			{
+				if (t.getKills() >= ADVICE_MIN_KILLS && t.hasRate())
+				{
+					xph.put(t.getKey(), t.xpPerHour());
+				}
+			}
+			for (PointsMath.BlockCandidate c : PointsMath.blockCandidates(byKey, xph, median, 3))
+			{
+				if (c.getGainPct() < 2)
+				{
+					continue;
+				}
+				TaskStats st = statsFor(c.getKey());
+				TaskRecord rec = dataset.find(c.getKey());
+				String name = st != null && st.getName() != null ? st.getName() : rec != null ? rec.title() : c.getKey();
+				blocks.add(new BlockRow(name, c.getShare(), c.getXpPerHour(), c.getGainPct()));
+			}
+		}
+		List<String> tips = new ArrayList<>();
+		TaskRecord rec = tracker.getRecord();
+		if (rec != null && client.getGameState() == GameState.LOGGED_IN)
+		{
+			for (Map.Entry<String, Integer> e : LONGER_UNLOCKS.entrySet())
+			{
+				TaskRecord r = dataset.find(e.getKey());
+				if (r != null && r.getKey().equals(rec.getKey()))
+				{
+					if (client.getVarbitValue(e.getValue()) == 0)
+					{
+						tips.add("Longer tasks of this are a Slayer reward unlock you have not bought.");
+					}
+					break;
+				}
+			}
+			TaskStats st = current;
+			if (st != null && st.hasRate() && median > 0)
+			{
+				double pct = st.xpPerHour() / median;
+				if (pct >= 1.2)
+				{
+					tips.add("One of your better tasks: a bracelet of slaughter would stretch it.");
+				}
+				else if (pct <= 0.8)
+				{
+					tips.add("One of your weaker tasks: a bracelet of expeditious would get it over with.");
+				}
+			}
+		}
+		pointsSummary = new PointsSummary(masterId, com.slayersuite.task.GameTaskTable.masterName(masterId), tracker.getSlayerPoints(), streak, avg,
+			nextBonus, base * PointsMath.milestoneMultiplier(nextBonus), big, base * PointsMath.milestoneMultiplier(big),
+			finished > 0 ? activeMs / finished : 0, PointsMath.paybackTasks(PointsMath.SKIP_COST, avg), median, blocks, tips);
+	}
+
+	/** Puts the last task's one-line report on the system clipboard. */
+	public boolean copyLastReport()
+	{
+		String r = lastReport;
+		if (r == null || r.isEmpty())
+		{
+			return false;
+		}
+		try
+		{
+			java.awt.Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new java.awt.datatransfer.StringSelection(r), null);
+			return true;
+		}
+		catch (RuntimeException e)
+		{
+			log.debug("clipboard unavailable", e);
+			return false;
+		}
+	}
 	private final AttackGuard guard;
 	private final Provider<TripTracker> trip;
 
@@ -125,8 +339,9 @@ public class TaskHistory
 
 	@Inject
 	public TaskHistory(ConfigManager configManager, Gson gson, Client client, TaskTracker tracker, SlayerDataset dataset,
-		SlayerSuiteConfig config, ItemManager itemManager, AttackGuard guard, Provider<TripTracker> trip, EventBus eventBus)
+		SlayerSuiteConfig config, ItemManager itemManager, AttackGuard guard, Provider<TripTracker> trip, EventBus eventBus, com.slayersuite.task.GameTaskTable table)
 	{
+		this.table = table;
 		this.configManager = configManager;
 		this.gson = gson;
 		this.client = client;
@@ -926,6 +1141,41 @@ public class TaskHistory
 				current.setPointSamples(current.getPointSamples() + 1);
 			}
 			dirty = true;
+			StringBuilder r = new StringBuilder(current.getName() == null ? AlertEngine.pretty(e.getName()) : current.getName());
+			r.append(": ").append(Math.max(assignmentKills, sessionKills)).append(" kills");
+			long ms = Math.max(assignmentMs, sessionActiveMs);
+			if (ms > 60_000L)
+			{
+				r.append(" in ").append(TaskTracker.formatDuration(ms));
+			}
+			long xp = Math.max(assignmentXp, sessionXp);
+			long gp = Math.max(assignmentGp, sessionGp);
+			if (xp > 0)
+			{
+				r.append(", ").append(TripMath.formatK(xp)).append(" xp");
+			}
+			if (gp > 0)
+			{
+				r.append(", ").append(TripMath.formatK(gp)).append(" gp");
+			}
+			List<LootItem> best = topLoot(1);
+			if (!best.isEmpty())
+			{
+				String name = ledger().names.get(String.valueOf(best.get(0).getId()));
+				if (name != null)
+				{
+					r.append(" (best drop ").append(name).append(", ").append(TripMath.formatK(best.get(0).getValue())).append(")");
+				}
+			}
+			if (e.getPoints() > 0)
+			{
+				r.append(", +").append(e.getPoints()).append(" pts");
+			}
+			if (e.getStreak() > 0)
+			{
+				r.append(", streak ").append(e.getStreak());
+			}
+			lastReport = r.toString();
 		}
 	}
 
@@ -1211,6 +1461,10 @@ public class TaskHistory
 	public void onGameTick(GameTick tick)
 	{
 		tickPending();
+		if (++pointsTick % 25 == 1)
+		{
+			computePointsSummary();
+		}
 		if (current != null && dirty && System.currentTimeMillis() - lastSaveAt > SAVE_EVERY_MS)
 		{
 			save(snapshot());
@@ -1262,7 +1516,9 @@ public class TaskHistory
 			double chance = tracker.rollChance();
 			String roll = chance > 0 ? " It is " + Math.round(chance * 100) + "% of this master's rolls" + (chance >= 0.06 ? ": worth blocking." : ": skipping is enough.") : "";
 			int have = tracker.getSlayerPoints();
-			String cost = have > 0 ? " A skip costs 30 points (you have " + String.format("%,d", have) + ")" + (chance >= 0.06 ? ", a block 100." : ".") : "";
+			PointsSummary ps = pointsSummary;
+			String payback = ps != null && ps.getSkipPaybackTasks() > 0 ? ", about " + String.format("%.1f", ps.getSkipPaybackTasks()) + " tasks of points at " + ps.getMaster() : "";
+			String cost = have > 0 ? " A skip costs 30 points" + payback + " (you have " + String.format("%,d", have) + ")" + (chance >= 0.06 ? ", a block 100." : ".") : "";
 			return "Low for you: " + Math.round(pct) + "% of your median xp/h. Consider skipping." + roll + cost;
 		}
 		if (pct > 150)

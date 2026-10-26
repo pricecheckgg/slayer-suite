@@ -165,8 +165,11 @@ public class SlayerSuitePlugin extends Plugin
 				say(tracker.varReport());
 				log.info("Slayer Suite ::ss vars -> {}", tracker.varReport());
 				break;
+			case "report":
+				say(history.copyLastReport() ? "copied: " + history.getLastReport() : "no task finished yet this session");
+				break;
 			default:
-				say("::ss done | superior | alert | supplies | sound | vars");
+				say("::ss done | superior | level | alert | supplies | sound | report | vars");
 		}
 	}
 

@@ -393,6 +393,13 @@ public class SlayerSuitePanel extends PluginPanel
 		hc.add(wrap(house.summary(), house.scanned() ? Color.WHITE : DIM));
 		hc.add(wrap(readiness.anythingRemembered() ? "Jewellery and tablets: remembered from your bank." : "Jewellery and tablets: open your bank once so I can see them.", readiness.anythingRemembered() ? DIM : WARN));
 		content.add(hc);
+		TaskHistory.PointsSummary ps = history.getPointsSummary();
+		if (ps != null && ps.getPoints() > 0)
+		{
+			content.add(gap(10));
+			content.add(title("Points"));
+			content.add(pointsCard(ps));
+		}
 		content.add(gap(10));
 		content.add(title("Your history"));
 		content.add(historyCard());
@@ -972,6 +979,14 @@ public class SlayerSuitePanel extends PluginPanel
 		{
 			p.add(kv("Rolled", Math.round(tracker.rollChance() * 100) + "% by " + com.slayersuite.task.GameTaskTable.masterName(tracker.getGameTask().getMasterId()), DIM));
 		}
+		TaskHistory.PointsSummary ps = history.getPointsSummary();
+		if (ps != null)
+		{
+			for (String tip : ps.getTips())
+			{
+				p.add(dotRow(INFO, tip, null, true));
+			}
+		}
 
 		// gear checklist: a dot per item, status on the right
 		List<Missing> missing = readiness.getMissing();
@@ -1329,6 +1344,81 @@ public class SlayerSuitePanel extends PluginPanel
 
 	// ---------------------------------------------------------------- history
 
+	/** Points, streak, the next bonuses, what a skip costs in tasks, and the blocks that would raise your rate. */
+	private JPanel pointsCard(TaskHistory.PointsSummary ps)
+	{
+		JPanel p = card(null, false);
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		List<String[]> cells = new ArrayList<>();
+		cells.add(new String[]{"points", String.format("%,d", ps.getPoints())});
+		cells.add(new String[]{"streak", Integer.toString(ps.getStreak())});
+		if (ps.getNextBonusPoints() > 0)
+		{
+			cells.add(new String[]{"task " + ps.getNextBonusTask(), "+" + ps.getNextBonusPoints()});
+		}
+		if (ps.getSkipPaybackTasks() > 0)
+		{
+			cells.add(new String[]{"skip costs", String.format("%.1f", ps.getSkipPaybackTasks()) + " tasks"});
+		}
+		p.add(tiles(cells));
+		int gained = tracker.getPointsAtSessionStart() > 0 ? tracker.getSlayerPoints() - tracker.getPointsAtSessionStart() : 0;
+		if (gained != 0)
+		{
+			p.add(gap(4));
+			p.add(label((gained > 0 ? "+" : "") + gained + " this session", FontManager.getRunescapeSmallFont(), gained > 0 ? OK : MISSED));
+		}
+		if (ps.getBigPoints() > 0)
+		{
+			int left = ps.getBigTask() - ps.getStreak();
+			String when = ps.getMsPerTask() > 0 ? ", about " + TaskTracker.formatDuration(left * ps.getMsPerTask()) + " of slaying at your pace" : "";
+			p.add(gap(4));
+			p.add(kv("Milestone", "task " + ps.getBigTask() + " pays +" + ps.getBigPoints() + " at " + ps.getMaster() + ": " + left + (left == 1 ? " task" : " tasks") + when, Color.WHITE));
+		}
+		TaskHistory.LootSummary sum = history.lootSummary();
+		long spent = sum.getSkipPoints() + sum.getBlockPoints() + sum.getOtherPoints();
+		if (spent > 0)
+		{
+			List<String> parts = new ArrayList<>();
+			if (sum.getSkips() > 0)
+			{
+				parts.add(sum.getSkipPoints() + " on " + sum.getSkips() + (sum.getSkips() == 1 ? " skip" : " skips"));
+			}
+			if (sum.getBlocks() > 0)
+			{
+				parts.add(sum.getBlockPoints() + " on " + sum.getBlocks() + (sum.getBlocks() == 1 ? " block" : " blocks"));
+			}
+			if (sum.getOtherPoints() > 0)
+			{
+				parts.add(sum.getOtherPoints() + " at the shop");
+			}
+			p.add(kv("Spent", String.join(", ", parts), DIM));
+		}
+		if (!ps.getBlocks().isEmpty())
+		{
+			p.add(gap(6));
+			p.add(label("WORTH BLOCKING FOR YOU", FontManager.getRunescapeSmallFont(), DIM));
+			p.add(gap(2));
+			for (TaskHistory.BlockRow b : ps.getBlocks())
+			{
+				JPanel row = new JPanel(new BorderLayout(6, 0));
+				row.setOpaque(false);
+				row.setAlignmentX(LEFT_ALIGNMENT);
+				row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
+				row.add(label(b.getName(), FontManager.getRunescapeBoldFont(), Color.WHITE), BorderLayout.WEST);
+				row.add(label("+" + Math.round(b.getGainPct()) + "% xp/h", FontManager.getRunescapeBoldFont(), OK), BorderLayout.EAST);
+				p.add(row);
+				p.add(wrap(Math.round(b.getShare() * 100) + "% of " + ps.getMaster() + "'s rolls, " + TripMath.formatK(Math.round(b.getXpPerHour())) + " xp/h for you vs " + TripMath.formatK(Math.round(ps.getMedianXpPerHour())) + " median", DIM));
+			}
+			p.add(wrap("A block costs 100 points and assumes the task is not blocked already.", DIM));
+		}
+		if (tracker.isStorageUnlocked())
+		{
+			p.add(gap(4));
+			p.add(label("task storage unlocked: a stored task keeps its numbers here", FontManager.getRunescapeSmallFont(), DIM));
+		}
+		return p;
+	}
+
 	private JPanel historyCard()
 	{
 		JPanel p = card(null, false);
@@ -1341,37 +1431,20 @@ public class SlayerSuitePanel extends PluginPanel
 			all.add(0, cur);
 		}
 		all.sort((a, b) -> Long.compare(b.getLastSeen(), a.getLastSeen()));
-		if (tracker.getSlayerPoints() > 0)
+		if (!history.getLastReport().isEmpty())
 		{
-			int gained = tracker.getPointsAtSessionStart() > 0 ? tracker.getSlayerPoints() - tracker.getPointsAtSessionStart() : 0;
-			String pts = String.format("%,d", tracker.getSlayerPoints()) + " Slayer points, streak " + tracker.getTaskStreak()
-				+ (tracker.getMortimerTasks() >= 0 ? ", " + tracker.getMortimerTasks() + " Mortimer tasks" : "")
-				+ (gained != 0 ? ", " + (gained > 0 ? "+" : "") + gained + " this session" : "");
-			p.add(wrap(pts, Color.WHITE, FontManager.getRunescapeBoldFont()));
-			TaskHistory.LootSummary sum = history.lootSummary();
-			long spent = sum.getSkipPoints() + sum.getBlockPoints() + sum.getOtherPoints();
-			if (spent > 0)
+			JButton copy = button("Copy last task report");
+			copy.setToolTipText(history.getLastReport());
+			copy.addActionListener(e ->
 			{
-				List<String> parts = new ArrayList<>();
-				if (sum.getSkips() > 0)
+				if (history.copyLastReport())
 				{
-					parts.add(sum.getSkipPoints() + " on " + sum.getSkips() + (sum.getSkips() == 1 ? " skip" : " skips"));
+					copy.setText("Copied");
 				}
-				if (sum.getBlocks() > 0)
-				{
-					parts.add(sum.getBlockPoints() + " on " + sum.getBlocks() + (sum.getBlocks() == 1 ? " block" : " blocks"));
-				}
-				if (sum.getOtherPoints() > 0)
-				{
-					parts.add(sum.getOtherPoints() + " at the shop");
-				}
-				p.add(wrap("Spent " + String.join(", ", parts), DIM));
-			}
-			if (tracker.isStorageUnlocked())
-			{
-				p.add(wrap("Task storage unlocked: a stored task keeps its kills, xp and loot here.", DIM));
-			}
-			p.add(gap(4));
+			});
+			copy.setAlignmentX(LEFT_ALIGNMENT);
+			p.add(copy);
+			p.add(gap(6));
 		}
 		if (all.isEmpty())
 		{

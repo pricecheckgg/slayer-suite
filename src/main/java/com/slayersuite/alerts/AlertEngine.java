@@ -76,6 +76,7 @@ public class AlertEngine
 	@Getter
 	private long pausedUntil;
 	private long lastCombatAt;
+	private long lastStreakWarnAt;
 	private long lastMovedAt;
 	private WorldPoint lastTile;
 	private boolean wasInArea;
@@ -477,6 +478,17 @@ public class AlertEngine
 		Actor target = e.getTarget();
 		if (e.getSource() == me && target instanceof NPC)
 		{
+			String who = ((NPC) target).getName();
+			if (who != null && (who.equals("Turael") || who.equals("Aya") || who.equals("Spria")) && tracker.hasTask() && tracker.getTaskStreak() >= 5)
+			{
+				long now = System.currentTimeMillis();
+				if (now - lastStreakWarnAt > 60_000L)
+				{
+					lastStreakWarnAt = now;
+					raise(AlertKind.STREAK_RESET, "A new task from " + who + " resets your streak of " + tracker.getTaskStreak());
+				}
+				return;
+			}
 			lastCombatAt = System.currentTimeMillis();
 			if (config.alertOffTask() && tracker.hasTask())
 			{

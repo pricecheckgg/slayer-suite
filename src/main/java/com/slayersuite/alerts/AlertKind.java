@@ -13,6 +13,7 @@ public enum AlertKind
 	OFF_TASK(75, Severity.WARNING, false, 8_000),
 	MISSING_ITEMS(70, Severity.WARNING, true, 0),
 	LEFT_BANK(68, Severity.WARNING, false, 20_000),
+	STREAK_RESET(66, Severity.WARNING, false, 15_000),
 	BOOST_DROPPED(60, Severity.WARNING, false, 20_000),
 	SUPPLIES_LOW(58, Severity.WARNING, false, 25_000),
 	CANNON(55, Severity.WARNING, false, 20_000),
