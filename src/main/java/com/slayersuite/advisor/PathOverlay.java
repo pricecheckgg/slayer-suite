@@ -54,7 +54,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
  */
 public class PathOverlay extends Overlay
 {
-	private static final Color ARROW_EDGE = new Color(0, 0, 0, 110);
+	private static final Color ARROW_EDGE = new Color(0, 0, 0, 140);
 	/** Milliseconds for a lit pulse to move one tile along the route. */
 	private static final long PULSE_MS = 110L;
 	/** Tiles between one pulse and the next. */
@@ -67,8 +67,6 @@ public class PathOverlay extends Overlay
 	private static final Color BLOCKED_FILL = new Color(255, 90, 90, 70);
 	private static final Color DOOR = new Color(255, 215, 80, 220);
 	private static final Color DOOR_FILL = new Color(255, 215, 80, 50);
-	private static final Color ENTRANCE = new Color(80, 220, 255, 230);
-	private static final Color ENTRANCE_FILL = new Color(80, 220, 255, 50);
 
 	/** Something on the route you have to click: a door to open, a tapestry to walk through, a cave to enter. */
 	private static final class Obstacle
@@ -698,9 +696,12 @@ public class PathOverlay extends Overlay
 			return null;
 		}
 		List<WorldPoint> p = path;
+		Color base = config.chevronColour().resolve(config.customChevronColour());
+		Color markEdge = new Color(base.getRed(), base.getGreen(), base.getBlue(), 230);
+		Color markFill = new Color(base.getRed(), base.getGreen(), base.getBlue(), 50);
 		if (p.size() >= 2)
 		{
-			drawArrows(g, wv, p);
+			drawArrows(g, wv, p, base);
 		}
 		g.setStroke(new BasicStroke(2f));
 		for (Obstacle o : obstacles)
@@ -710,12 +711,12 @@ public class PathOverlay extends Overlay
 		List<Obstacle> onRoute = routeMarks;
 		for (Obstacle o : onRoute)
 		{
-			mark(g, wv, o, ENTRANCE, ENTRANCE_FILL);
+			mark(g, wv, o, markEdge, markFill);
 		}
 		Obstacle e = entrance;
 		if (e != null && onRoute.isEmpty())
 		{
-			mark(g, wv, e, ENTRANCE, ENTRANCE_FILL);
+			mark(g, wv, e, markEdge, markFill);
 		}
 		return null;
 	}
@@ -724,7 +725,7 @@ public class PathOverlay extends Overlay
 	 * A chevron lying flat on each tile, pointing at the next one, like the boost pads of a kart
 	 * track: a soft pulse runs along them toward the spot, and the last tile is outlined.
 	 */
-	private void drawArrows(Graphics2D g, WorldView wv, List<WorldPoint> p)
+	private void drawArrows(Graphics2D g, WorldView wv, List<WorldPoint> p, Color base)
 	{
 		Object aa = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -753,7 +754,7 @@ public class PathOverlay extends Overlay
 			double behind = ((n - 1 - i) + phase) % PULSE_EVERY;
 			float lit = behind < 3 ? (float) (1 - behind / 3) : 0f;
 			// the chevron under your own feet is kept faint; it only says which way the chain leaves
-			g.setColor(new Color(80, 220, 255, i == 0 ? 45 : 60 + Math.round(lit * 120)));
+			g.setColor(new Color(base.getRed(), base.getGreen(), base.getBlue(), i == 0 ? 45 : 60 + Math.round(lit * 120)));
 			g.fill(chevron);
 			g.setColor(ARROW_EDGE);
 			g.draw(chevron);

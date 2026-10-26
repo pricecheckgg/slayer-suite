@@ -21,7 +21,6 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 /** The next stretch of the route as dots on the minimap. */
 public class RouteMinimapOverlay extends Overlay
 {
-	private static final Color DOT = new Color(80, 220, 255, 200);
 	private static final int TILES = 120;
 
 	private final Client client;
@@ -54,7 +53,8 @@ public class RouteMinimapOverlay extends Overlay
 		}
 		int from = routes.from();
 		int max = Math.min(r.tiles.size(), from + TILES);
-		g.setColor(DOT);
+		Color base = config.chevronColour().resolve(config.customChevronColour());
+		g.setColor(new Color(base.getRed(), base.getGreen(), base.getBlue(), 200));
 		for (int i = from + 1; i < max; i++)
 		{
 			WorldPoint wp = Packed.toWorld(r.tiles.get(i));

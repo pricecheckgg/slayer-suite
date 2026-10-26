@@ -474,6 +474,18 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
+	@ConfigItem(keyName = "chevronColour", name = "Chevron colour", description = "Colour of the route chevrons, the markers on the way, the minimap dots and the world map line.", section = advisorSection, position = 10)
+	default com.slayersuite.advisor.ChevronColour chevronColour()
+	{
+		return com.slayersuite.advisor.ChevronColour.CYAN;
+	}
+
+	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Used when Chevron colour is set to Custom.", section = advisorSection, position = 11)
+	default java.awt.Color customChevronColour()
+	{
+		return new java.awt.Color(80, 220, 255);
+	}
+
 	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 8)
 	default boolean preferCannon()
 	{

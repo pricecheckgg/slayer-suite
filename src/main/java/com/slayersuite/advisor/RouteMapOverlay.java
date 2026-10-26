@@ -26,7 +26,6 @@ import net.runelite.client.ui.overlay.worldmap.WorldMapOverlay;
 /** The whole plan on the world map: a line along the route, and a ring where the teleport lands. */
 public class RouteMapOverlay extends Overlay
 {
-	private static final Color LINE = new Color(80, 220, 255, 220);
 	private static final Color SHADOW = new Color(0, 0, 0, 140);
 	private static final Color LANDING = new Color(255, 215, 80, 230);
 
@@ -64,6 +63,8 @@ public class RouteMapOverlay extends Overlay
 		Rectangle bounds = map.getBounds();
 		Shape clip = g.getClip();
 		g.setClip(bounds);
+		Color base = config.chevronColour().resolve(config.customChevronColour());
+		Color line = new Color(base.getRed(), base.getGreen(), base.getBlue(), 220);
 		int from = routes.onRoute() ? routes.from() : 0;
 		Point prev = null;
 		for (int i = from; i < r.tiles.size(); i += 2)
@@ -75,7 +76,7 @@ public class RouteMapOverlay extends Overlay
 				g.setColor(SHADOW);
 				g.drawLine(prev.getX(), prev.getY(), p.getX(), p.getY());
 				g.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-				g.setColor(LINE);
+				g.setColor(line);
 				g.drawLine(prev.getX(), prev.getY(), p.getX(), p.getY());
 			}
 			prev = p == null ? prev : p;

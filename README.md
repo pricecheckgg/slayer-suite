@@ -53,7 +53,7 @@ cp build/libs/slayer-suite-*.jar ~/.runelite/sideloaded-plugins/
 
 ## Settings
 
-Nine sections, one per thing you see: Task card, Hover card, Readiness check, Alerts, Task complete, Sounds, Attack guard, History and advice, Spots and travel. Slaying mode and the overlapping-plugins notice sit above them. When another enabled plugin does a job this one does (Slayer Task ETA, Scape Target, TaskJingle, Item Reminders, AFKing Toolkit alerts) a checklist at the top of the screen names each one and clears itself as you switch them off.
+Nine sections, one per thing you see: Task card, Hover card, Readiness check, Alerts, Task complete, Sounds, Attack guard, History and advice, Spots and travel. Slaying mode and the overlapping-plugins notice sit above them. When another enabled plugin does a job this one does (Slayer Task ETA, Scape Target, TaskJingle, Item Reminders, AFKing Toolkit alerts) a checklist at the top of the screen names each one and clears itself as you switch them off. Chevron colour picks the route's look: cyan, neon green, pink, red, orange, yellow, purple, blue, white or a custom colour.
 
 ## Try the displays
 
