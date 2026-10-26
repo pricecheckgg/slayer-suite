@@ -72,6 +72,8 @@ public class RouteService
 	private int snapshotTick = -1;
 	private volatile boolean fairyRings;
 	private int lastTile = Integer.MIN_VALUE;
+	/** The tick you logged in; the first snapshot after login is retaken once the game has sent your quest and var state. */
+	private int loginTick = -1;
 
 	@Inject
 	public RouteService(Client client, SlayerSuiteConfig config)
@@ -292,6 +294,11 @@ public class RouteService
 			plan = null;
 			route = null;
 			onRoute = false;
+			lastTile = Integer.MIN_VALUE;
+		}
+		else if (e.getGameState() == GameState.LOGGED_IN)
+		{
+			loginTick = tick;
 		}
 	}
 
@@ -320,6 +327,13 @@ public class RouteService
 		Player me = client.getLocalPlayer();
 		if (me == null)
 		{
+			return;
+		}
+		if (loginTick >= 0 && tick - loginTick == 8)
+		{
+			// quests and vars arrive a few ticks after login: take the snapshot again and plan afresh
+			snapshotTick = -1;
+			request(true);
 			return;
 		}
 		if (inInstance())
