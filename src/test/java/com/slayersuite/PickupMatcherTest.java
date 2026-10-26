@@ -178,4 +178,19 @@ public class PickupMatcherTest
 		untagged.add(new PickupMatcher.Pending(995, 5, 1, 1_000L));
 		assertEquals(-1, PickupMatcher.match(inv(), inv(995, 5), untagged, 2_000L, 90_000L).get(0)[3]);
 	}
+
+	@Test
+	public void aDropKeepsItsOwnWindow()
+	{
+		List<PickupMatcher.Pending> pending = new ArrayList<>();
+		PickupMatcher.Pending quick = new PickupMatcher.Pending(995, 5, 1, 1_000L);
+		quick.windowMs = 1_000L;
+		pending.add(quick);
+		pending.add(new PickupMatcher.Pending(996, 5, 1, 1_000L));
+		List<PickupMatcher.Pending> missed = new ArrayList<>();
+		PickupMatcher.expire(pending, 2_500L, 90_000L, missed);
+		assertEquals(1, pending.size());
+		assertEquals(996, pending.get(0).id);
+		assertEquals(1, missed.size());
+	}
 }

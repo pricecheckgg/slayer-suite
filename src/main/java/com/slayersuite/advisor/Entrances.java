@@ -18,8 +18,8 @@ final class Entrances
 		put("Smoke Dungeon", "Smokey well", "Climb-down");
 		put("Fremennik Slayer Dungeon", "Cave entrance", "Enter");
 		put("Iorwerth Dungeon", "Cave", "Enter");
-		put("Stronghold Slayer Cave", "Cave entrance", "Enter");
-		put("Stronghold Slayer Dungeon", "Cave entrance", "Enter");
+		put("Stronghold Slayer Cave", "Cave", "Enter");
+		put("Stronghold Slayer Dungeon", "Cave", "Enter");
 		put("Taverley Dungeon", "Ladder", "Climb-down");
 		put("Brimhaven Dungeon", "Dungeon entrance", null);
 		put("Asgarnian Ice Dungeon", "Trapdoor", "Climb-down");
@@ -29,11 +29,11 @@ final class Entrances
 		put("Draynor Sewers", "Trapdoor", "Climb-down");
 		put("Chasm of Fire", "Chasm", null);
 		put("Karuulm Slayer Dungeon", "Elevator", null);
-		put("Kalphite Lair", "Tunnel", null);
-		put("Smoke Devil Dungeon", "Crevice", null);
-		put("Kraken Cove", "Crevice", null);
+		put("Kalphite Lair", "Tunnel entrance", "Climb-down");
+		put("Smoke Devil Dungeon", "Smoky cave", "Enter");
+		put("Kraken Cove", "Cave Entrance", "Enter");
 		put("Mos Le'Harmless Cave", "Cave entrance", "Enter");
-		put("Wilderness Slayer Cave", "Cave entrance", null);
+		put("Wilderness Slayer Cave", "Stairs", "Walk-down");
 		put("Ancient Cavern", "Whirlpool", null);
 	}
 

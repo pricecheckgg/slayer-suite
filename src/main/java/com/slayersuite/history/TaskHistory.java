@@ -375,8 +375,10 @@ public class TaskHistory
 	private final List<PickupMatcher.Pending> pending = new ArrayList<>();
 	private Map<Integer, Integer> inventory = new HashMap<>();
 	private boolean bankOpen;
-	/** Loot from your kills lies on the ground for three minutes before it vanishes; a little slack on top. */
-	private static final long PICKUP_WINDOW_MS = 190_000L;
+	/** An untradeable drop from your kill lies on the ground for three minutes (300 ticks); a little slack on top. */
+	private static final long PICKUP_WINDOW_MS = 185_000L;
+	/** A tradeable drop vanishes after two minutes (200 ticks). */
+	private static final long PICKUP_WINDOW_TRADEABLE_MS = 125_000L;
 	/** A drop and the task's kill count must move within this of each other to count as a task kill. */
 	private static final long KILL_MATCH_MS = 4_000L;
 	private static final int PICKUP_TILES = 10;
@@ -1538,6 +1540,7 @@ public class TaskHistory
 				where == null ? -1 : where.getX(), where == null ? -1 : where.getY(), where == null ? -1 : where.getPlane(), killConfirmed);
 			Ledger l = ledger();
 			pd.task = taskIndex(l);
+			pd.windowMs = tradeable(id) ? PICKUP_WINDOW_TRADEABLE_MS : PICKUP_WINDOW_MS;
 			String name = l.names.get(String.valueOf(id));
 			if (name == null)
 			{
@@ -1620,6 +1623,18 @@ public class TaskHistory
 		for (long[] take : PickupMatcher.match(before, now, pending, t, PICKUP_WINDOW_MS, px, py, pplane, PICKUP_TILES))
 		{
 			takeLoot((int) take[0], take[1], take[2], t, (int) take[3]);
+		}
+	}
+
+	private boolean tradeable(int id)
+	{
+		try
+		{
+			return itemManager.getItemComposition(id).isTradeable();
+		}
+		catch (RuntimeException e)
+		{
+			return false;
 		}
 	}
 

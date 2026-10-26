@@ -101,4 +101,13 @@ public class RouterTest
 		assertTrue(r.reached);
 		assertEquals("Climb-down Ladder", r.steps.get(0).transport.label());
 	}
+
+	@Test
+	public void theWildernessSlayerCaveCountsAsWilderness()
+	{
+		assertTrue(Router.inWilderness(Packed.of(3406, 10145, 0)));
+		assertTrue(Router.inWilderness(Packed.of(3100, 3600, 0)));
+		assertTrue(!Router.inWilderness(Packed.of(3428, 3533, 0)));
+		assertTrue(!Router.inWilderness(Packed.of(3222, 3218, 0)));
+	}
 }

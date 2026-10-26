@@ -63,7 +63,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.8.1";
+	public static final String VERSION = "0.8.2";
 
 	@Inject
 	private EventBus eventBus;

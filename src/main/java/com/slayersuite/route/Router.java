@@ -219,12 +219,16 @@ public final class Router
 		return packed;
 	}
 
-	/** The Wilderness on the surface, and the dungeons under it. */
+	/** The Wilderness on the surface, and the dungeons under it, whose caves run further east than the ditch line. */
 	static boolean inWilderness(int p)
 	{
 		int x = Packed.x(p);
 		int y = Packed.y(p);
-		return x >= 2944 && x <= 3391 && ((y >= 3525 && y <= 3967) || (y >= 9925 && y <= 10367));
+		if (y >= 9920 && y <= 10367)
+		{
+			return x >= 2944 && x <= 3455;
+		}
+		return x >= 2944 && x <= 3391 && y >= 3525 && y <= 3967;
 	}
 
 	/** A binary heap of (key, value) ints, smallest key first. */

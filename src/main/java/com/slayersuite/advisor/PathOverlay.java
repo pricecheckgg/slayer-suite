@@ -486,7 +486,12 @@ public class PathOverlay extends Overlay
 					}
 					if (knownEntrance != null && c.getName().equalsIgnoreCase(knownEntrance[0]))
 					{
-						String want = knownEntrance[1] == null ? firstNonNull(c.getActions()) : firstAction(c, new String[]{knownEntrance[1]});
+						String want = knownEntrance[1] == null ? null : firstAction(c, new String[]{knownEntrance[1]});
+						if (want == null)
+						{
+							// a closed trapdoor offers Open before Climb-down: say what is there to click
+							want = firstNonNull(c.getActions());
+						}
 						known.add(new Obstacle(o, want == null ? "Use" : want, c.getName(), wp));
 						continue;
 					}

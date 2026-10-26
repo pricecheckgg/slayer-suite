@@ -28,6 +28,8 @@ public final class PickupMatcher
 		public boolean autoStored;
 		/** The task the drop came from (an index the caller owns); -1 when unknown. */
 		public int task = -1;
+		/** How long this drop lies on the ground; 0 or less means the caller's window applies. */
+		public long windowMs;
 
 		public Pending(int id, long quantity, long priceEach, long at)
 		{
@@ -70,7 +72,7 @@ public final class PickupMatcher
 		for (Iterator<Pending> it = pending.iterator(); it.hasNext(); )
 		{
 			Pending pd = it.next();
-			boolean stale = nowMs - pd.at > windowMs;
+			boolean stale = nowMs - pd.at > (pd.windowMs > 0 ? pd.windowMs : windowMs);
 			if (stale || pd.quantity <= 0)
 			{
 				if (stale && pd.quantity > 0 && pd.killConfirmed && missedOut != null)
