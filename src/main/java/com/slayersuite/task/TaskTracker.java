@@ -938,6 +938,41 @@ public class TaskTracker
 		return dataset.locationFor(record, regions == null ? new int[0] : regions, wv == null ? -1 : wv.getPlane());
 	}
 
+	/** One SuperiorSpawned per superior, whether the chat line or the spawn itself is seen first. */
+	private void superiorSeen()
+	{
+		long now = System.currentTimeMillis();
+		if (now - lastSuperiorAt < 30_000L)
+		{
+			return;
+		}
+		lastSuperiorAt = now;
+		eventBus.post(new SuperiorSpawned(taskName));
+	}
+
+	@Subscribe
+	public void onNpcSpawned(net.runelite.api.events.NpcSpawned e)
+	{
+		if (record == null || record.getSuperiors().isEmpty() || e.getNpc() == null)
+		{
+			return;
+		}
+		net.runelite.api.NPCComposition comp = e.getNpc().getTransformedComposition();
+		String name = comp == null ? e.getNpc().getName() : comp.getName();
+		if (name == null)
+		{
+			return;
+		}
+		for (String sup : record.getSuperiors())
+		{
+			if (sup != null && sup.equalsIgnoreCase(name))
+			{
+				superiorSeen();
+				return;
+			}
+		}
+	}
+
 	@Subscribe
 	public void onChatMessage(ChatMessage e)
 	{
@@ -990,8 +1025,7 @@ public class TaskTracker
 		}
 		if (plain.startsWith(SUPERIOR_MESSAGE))
 		{
-			lastSuperiorAt = System.currentTimeMillis();
-			eventBus.post(new SuperiorSpawned(taskName));
+			superiorSeen();
 		}
 		else if (TASK_COMPLETE.matcher(plain).find())
 		{

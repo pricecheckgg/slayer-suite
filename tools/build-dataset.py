@@ -885,6 +885,46 @@ def main():
         tasks.append(rec)
         report.append(f"fallback record from monster page: {cname} <- {found['page']}")
 
+    # The wiki's table of superior slayer monsters names every superior against its normal
+    # variant; records built from monster pages have no other way to learn theirs.
+    sup_title, sup_text, sup_rev = parse_page("Superior slayer monster", args.refresh)
+    if sup_text:
+        sources.append((sup_title, sup_rev))
+        superiors_by_base = {}
+        for row in sup_text.split("|-"):
+            cells = [c.strip() for c in re.split(r"\n\|", "\n" + row) if c.strip()]
+            links = []
+            for c in cells:
+                c = re.sub(r'^rowspan="\d+"\s*\|', "", c).strip()
+                m = re.match(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]", c)
+                if m:
+                    links.append(m.group(1).strip())
+            if len(links) >= 2:
+                superiors_by_base.setdefault(norm(links[0]), []).append(links[1])
+        normal_variants = set(superiors_by_base)
+        added = 0
+        for t in tasks:
+            names = {norm(t["name"]), norm(t.get("displayName", ""))} | {norm(m["name"]) for m in t["monsters"]} | {norm(a) for a in t["aliases"]}
+            for base, sups in superiors_by_base.items():
+                if base in names or singular(base) in names or any(n and (n == singular(base) or singular(n) == base) for n in names):
+                    for sp in sups:
+                        if norm(sp) not in {norm(x) for x in t["superiors"]}:
+                            t["superiors"].append(sp)
+                            added += 1
+        # A superior is never the task's own monster; the variant heuristics can list the base name.
+        dropped = 0
+        for t in tasks:
+            own = {norm(t["name"]), norm(t.get("displayName", "")), norm(singular(t["name"]))} | {norm(a) for a in t["aliases"]}
+            own |= {norm(m["name"]) for m in t["monsters"] if not m.get("superior")}
+            own |= normal_variants
+            keep = [sp for sp in t["superiors"] if norm(sp) not in own]
+            dropped += len(t["superiors"]) - len(keep)
+            t["superiors"] = keep
+            sups = {norm(sp) for sp in keep}
+            for m in t["monsters"]:
+                m["superior"] = norm(m["name"]) in sups
+        report.append(f"superiors from the wiki table: {added} added, {dropped} base names dropped")
+
     tasks.sort(key=lambda t: t["name"].lower())
     # Notes that would amount to prayer guidance are dropped: third-party client rules forbid indicating which prayer to use.
     guidance = re.compile(r"protection prayer|prays? against|prayer blocks|what the player prays|pray(ing)? (melee|magic|ranged|missiles)", re.I)

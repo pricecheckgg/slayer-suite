@@ -18379,7 +18379,9 @@
      "notes": []
     }
    ],
-   "superiors": [],
+   "superiors": [
+    "Cockathrice"
+   ],
    "locations": [
     {
      "name": "Fremennik Slayer Cave",
@@ -23128,7 +23130,7 @@
      "cannonImmune": false,
      "elementalWeakness": "fire",
      "category": "Custodian Stalker",
-     "superior": true,
+     "superior": false,
      "locations": [
       "Stalker Den"
      ],
@@ -23138,7 +23140,7 @@
     }
    ],
    "superiors": [
-    "Elder custodian stalker"
+    "Ancient Custodian"
    ],
    "locations": [
     {
@@ -24089,7 +24091,9 @@
      "notes": []
     }
    ],
-   "superiors": [],
+   "superiors": [
+    "Night beast"
+   ],
    "locations": [
     {
      "name": "Iorwerth Dungeon",
@@ -25744,7 +25748,9 @@
      "notes": []
     }
    ],
-   "superiors": [],
+   "superiors": [
+    "Guardian Drake"
+   ],
    "locations": [
     {
      "name": "Karuulm Slayer Dungeon",
@@ -41933,7 +41939,9 @@
      "notes": []
     }
    ],
-   "superiors": [],
+   "superiors": [
+    "Malevolent Mage"
+   ],
    "locations": [
     {
      "name": "Slayer Tower ()",
@@ -61041,7 +61049,9 @@
      "notes": []
     }
    ],
-   "superiors": [],
+   "superiors": [
+    "Giant rockslug"
+   ],
    "locations": [
     {
      "name": "Dorgesh-Kaan South Dungeon (fairy ring ajq)",
@@ -78771,7 +78781,7 @@
      "cannonImmune": true,
      "elementalWeakness": null,
      "category": "Vampyres, Venators",
-     "superior": true,
+     "superior": false,
      "locations": [
       "Apsul Hunting Ground",
       "Virer Hunting Ground"
@@ -78784,7 +78794,7 @@
     }
    ],
    "superiors": [
-    "Venator"
+    "Blood-starved venator"
    ],
    "locations": [
     {
@@ -79629,7 +79639,7 @@
      "cannonImmune": true,
      "elementalWeakness": null,
      "category": "Vampyres, Venators",
-     "superior": true,
+     "superior": false,
      "locations": [
       "Apsul Hunting Ground",
       "Virer Hunting Ground"
@@ -79642,7 +79652,7 @@
     }
    ],
    "superiors": [
-    "Venator"
+    "Blood-starved venator"
    ],
    "locations": [
     {

@@ -8,9 +8,10 @@ import net.runelite.api.CollisionDataFlag;
 
 /**
  * Breadth-first path over the loaded scene's collision flags. Walls, objects and
- * water are respected; doors, stairs and shortcuts are not (a closed door is a
- * wall). When the target is not reachable it paths to the reachable tile
- * nearest to it, so the line always points the right way.
+ * water are respected. Tiles marked as doors may be crossed through their wall
+ * (the door opens when you click it); stairs and shortcuts are not known. When
+ * the target is not reachable it paths to the reachable tile nearest to it, so
+ * the line always points the right way.
  */
 public final class ScenePath
 {
@@ -23,6 +24,12 @@ public final class ScenePath
 
 	/** Scene coordinates from start (inclusive) to the end tile. Empty when the start is off the grid. */
 	public static List<int[]> find(int[][] flags, int sx, int sy, int tx, int ty, int maxTiles)
+	{
+		return find(flags, null, sx, sy, tx, ty, maxTiles);
+	}
+
+	/** As above; doors[x][y] true lets a step cross the wall on that tile. */
+	public static List<int[]> find(int[][] flags, boolean[][] doors, int sx, int sy, int tx, int ty, int maxTiles)
 	{
 		if (flags == null || flags.length == 0 || !inside(flags, sx, sy))
 		{
@@ -66,7 +73,7 @@ public final class ScenePath
 					}
 					int nx = cx + dx;
 					int ny = cy + dy;
-					if (!inside(flags, nx, ny) || seen[nx * h + ny] || !canStep(flags, cx, cy, dx, dy))
+					if (!inside(flags, nx, ny) || seen[nx * h + ny] || !canStep(flags, doors, cx, cy, dx, dy))
 					{
 						continue;
 					}
@@ -96,6 +103,11 @@ public final class ScenePath
 	/** BFS distance from the start to every tile; -1 where unreachable. */
 	public static int[][] distances(int[][] flags, int sx, int sy)
 	{
+		return distances(flags, null, sx, sy);
+	}
+
+	public static int[][] distances(int[][] flags, boolean[][] doors, int sx, int sy)
+	{
 		int w = flags.length;
 		int h = flags[0].length;
 		int[][] dist = new int[w][h];
@@ -123,7 +135,7 @@ public final class ScenePath
 					}
 					int nx = c[0] + dx;
 					int ny = c[1] + dy;
-					if (inside(flags, nx, ny) && dist[nx][ny] < 0 && canStep(flags, c[0], c[1], dx, dy))
+					if (inside(flags, nx, ny) && dist[nx][ny] < 0 && canStep(flags, doors, c[0], c[1], dx, dy))
 					{
 						dist[nx][ny] = dist[c[0]][c[1]] + 1;
 						queue.add(new int[]{nx, ny});
@@ -144,8 +156,16 @@ public final class ScenePath
 		return (flags[x][y] & BLOCKED) != 0;
 	}
 
-	/** One step from (x,y) by (dx,dy), with OSRS's rule that a diagonal needs both cardinals free. */
 	static boolean canStep(int[][] flags, int x, int y, int dx, int dy)
+	{
+		return canStep(flags, null, x, y, dx, dy);
+	}
+
+	/**
+	 * One step from (x,y) by (dx,dy), with OSRS's rule that a diagonal needs both cardinals free.
+	 * A cardinal step onto or off a door tile ignores the wall between the two tiles.
+	 */
+	static boolean canStep(int[][] flags, boolean[][] doors, int x, int y, int dx, int dy)
 	{
 		int nx = x + dx;
 		int ny = y + dy;
@@ -155,8 +175,12 @@ public final class ScenePath
 		}
 		if (dx != 0 && dy != 0)
 		{
-			return canStep(flags, x, y, dx, 0) && canStep(flags, x, y, 0, dy)
-				&& canStep(flags, x + dx, y, 0, dy) && canStep(flags, x, y + dy, dx, 0);
+			return canStep(flags, doors, x, y, dx, 0) && canStep(flags, doors, x, y, 0, dy)
+				&& canStep(flags, doors, x + dx, y, 0, dy) && canStep(flags, doors, x, y + dy, dx, 0);
+		}
+		if (doors != null && (doors[x][y] || doors[nx][ny]))
+		{
+			return true;
 		}
 		int from = flags[x][y];
 		int to = flags[nx][ny];

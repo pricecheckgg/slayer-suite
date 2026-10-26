@@ -440,6 +440,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Stick](https://oldschool.runescape.wiki/w/Stick) | 15215947 |
 | [Sulphur Lizard](https://oldschool.runescape.wiki/w/Sulphur_Lizard) | 15339650 |
 | [Sulphur Nagua](https://oldschool.runescape.wiki/w/Sulphur_Nagua) | 15352431 |
+| [Superior slayer monster](https://oldschool.runescape.wiki/w/Superior_slayer_monster) | 15372069 |
 | [Suqah](https://oldschool.runescape.wiki/w/Suqah) | 15359423 |
 | [Swamp Crab](https://oldschool.runescape.wiki/w/Swamp_Crab) | 15200068 |
 | [Taloned Wyvern](https://oldschool.runescape.wiki/w/Taloned_Wyvern) | 15366069 |

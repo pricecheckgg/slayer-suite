@@ -310,9 +310,16 @@ public class TaskCardOverlay extends Overlay
 			{
 				y += callout(g, draw, x0 + 12, y, cw - 12, "NEXT", step, fn, fs);
 			}
-			if (pathOverlay.get().blocked())
+			String via = pathOverlay.get().entranceLabel();
+			if (via != null)
 			{
-				text(g, draw, small, fit(fs, "Tiles stop at a door, shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
+				int tiles = pathOverlay.get().lineTiles();
+				text(g, draw, small, fit(fs, via + (tiles > 0 ? ", " + tiles + " tiles, marked on the floor" : ", marked on the floor"), cw - 12), x0 + 12, y + fs.getAscent(), CYAN);
+				y += fs.getHeight();
+			}
+			else if (pathOverlay.get().blocked())
+			{
+				text(g, draw, small, fit(fs, "Tiles stop at a shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
 				y += fs.getHeight();
 				text(g, draw, small, fit(fs, "Optional: the Shortest Path plugin routes through these", cw - 12), x0 + 12, y + fs.getAscent(), DIM);
 				y += fs.getHeight();
