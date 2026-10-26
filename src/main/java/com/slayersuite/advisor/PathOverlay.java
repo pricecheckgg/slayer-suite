@@ -453,7 +453,7 @@ public class PathOverlay extends Overlay
 				{
 					continue;
 				}
-				int[] a = bestApproach(dist, o, baseX, baseY, size);
+				int[] a = bestApproach(dist, o, baseX, baseY, size, sx, sy);
 				if (a != null && a[2] < bestD)
 				{
 					bestD = a[2];
@@ -506,7 +506,7 @@ public class PathOverlay extends Overlay
 	 * distances, as {x, y, distance} in scene coordinates; null when none can be reached. A large
 	 * object like a statue is solid across several tiles, so its own tile is never the target.
 	 */
-	private static int[] bestApproach(int[][] dist, Obstacle o, int baseX, int baseY, int size)
+	private static int[] bestApproach(int[][] dist, Obstacle o, int baseX, int baseY, int size, int sx, int sy)
 	{
 		int minX;
 		int minY;
@@ -528,6 +528,7 @@ public class PathOverlay extends Overlay
 			minY = maxY = o.tile.getY() - baseY;
 		}
 		int[] best = null;
+		double bestScore = Double.MAX_VALUE;
 		for (int x = minX - 1; x <= maxX + 1; x++)
 		{
 			for (int y = minY - 1; y <= maxY + 1; y++)
@@ -537,8 +538,12 @@ public class PathOverlay extends Overlay
 				{
 					continue;
 				}
-				if (best == null || dist[x][y] < best[2])
+				// equally short approaches: the one on your side of the object, and a side over a corner
+				boolean corner = (x < minX || x > maxX) && (y < minY || y > maxY);
+				double score = dist[x][y] * 1000.0 + (corner ? 100 : 0) + Math.hypot(x - sx, y - sy);
+				if (score < bestScore)
 				{
+					bestScore = score;
 					best = new int[]{x, y, dist[x][y]};
 				}
 			}

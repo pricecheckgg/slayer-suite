@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.client.config.ConfigManager;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
@@ -52,6 +53,9 @@ public class Advisor
 	private final WorldMapPointManager mapPoints;
 	private final LocationScorer scorer;
 	private final EventBus eventBus;
+	private final ConfigManager configManager;
+	private static final String HANDED_ROUTE_KEY = "shortestPathHanded";
+	private boolean staleRouteChecked;
 
 	private volatile List<ScoredLocation> ranked = Collections.emptyList();
 	@Getter
@@ -75,9 +79,10 @@ public class Advisor
 	private volatile String nextStep = "";
 
 	@Inject
-	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus)
+	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, ConfigManager configManager)
 	{
 		this.eventBus = eventBus;
+		this.configManager = configManager;
 		this.client = client;
 		this.config = config;
 		this.tracker = tracker;
@@ -399,18 +404,34 @@ public class Advisor
 			WorldPoint wp = arrived ? null : destinationPoint();
 			if (wp == null)
 			{
-				eventBus.post(new PluginMessage("shortestpath", "clear"));
+				clearShortestPath();
 			}
 			else
 			{
 				Map<String, Object> data = new HashMap<>();
 				data.put("target", wp);
 				eventBus.post(new PluginMessage("shortestpath", "path", data));
+				// remembered so a route handed before the setting was switched off is cleared on the next start
+				configManager.setConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY, true);
 			}
 		}
 		catch (RuntimeException e)
 		{
 			log.debug("shortest path hand-off failed", e);
+		}
+	}
+
+	/** Tells the Shortest Path plugin to drop the route we gave it, if any. */
+	private void clearShortestPath()
+	{
+		try
+		{
+			eventBus.post(new PluginMessage("shortestpath", "clear"));
+			configManager.unsetConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY);
+		}
+		catch (RuntimeException e)
+		{
+			log.debug("shortest path clear failed", e);
 		}
 	}
 
@@ -846,14 +867,7 @@ public class Advisor
 			}
 			else
 			{
-				try
-				{
-					eventBus.post(new PluginMessage("shortestpath", "clear"));
-				}
-				catch (RuntimeException ex)
-				{
-					log.debug("shortest path clear failed", ex);
-				}
+				clearShortestPath();
 			}
 		}
 	}
@@ -861,6 +875,15 @@ public class Advisor
 	@Subscribe
 	public void onGameTick(GameTick t)
 	{
+		if (!staleRouteChecked && client.getGameState() == GameState.LOGGED_IN)
+		{
+			// a route handed to Shortest Path in an earlier session outlives the setting that sent it
+			staleRouteChecked = true;
+			if (!config.handToShortestPath() && "true".equals(configManager.getConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY)))
+			{
+				clearShortestPath();
+			}
+		}
 		LocationRecord focus = destination;
 		if (focus == null)
 		{
