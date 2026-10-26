@@ -319,9 +319,7 @@ public class TaskCardOverlay extends Overlay
 			}
 			else if (pathOverlay.get().blocked())
 			{
-				text(g, draw, small, fit(fs, "Tiles stop at a shortcut or stairs: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
-				y += fs.getHeight();
-				text(g, draw, small, fit(fs, "Optional: the Shortest Path plugin routes through these", cw - 12), x0 + 12, y + fs.getAscent(), DIM);
+				text(g, draw, small, fit(fs, "The chevrons stop short here: follow the arrow past it", cw - 12), x0 + 12, y + fs.getAscent(), RECOMMENDED);
 				y += fs.getHeight();
 			}
 			if (loc != null && !Advisor.sameLocation(loc, dest))

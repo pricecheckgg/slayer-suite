@@ -1,6 +1,9 @@
 package com.slayersuite.advisor;
 
 import com.slayersuite.SlayerSuiteConfig;
+import com.slayersuite.route.Packed;
+import com.slayersuite.route.RouteService;
+import com.slayersuite.route.Router;
 import com.slayersuite.task.SlayerMode;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -42,11 +45,12 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
 /**
- * Arrows on the floor from you toward the pinned spot, through the loaded map's walls and
- * obstacles. Doors on the way are crossed and marked with the action that opens them. When
- * the spot is on another floor or underground, the nearest staircase, ladder or cave
- * entrance that gets you there becomes the target and is marked too. The Shortest Path
- * plugin, when on, draws its own full route alongside.
+ * Chevrons on the floor from you toward the pinned spot. With the built-in route known they
+ * follow it door to door across the whole map, and every transport on the way (a door, a
+ * staircase, a cave mouth, a shortcut) is marked with the option that uses it. Until the route
+ * is known, or where the map has none (an instance), a search over the loaded area stands in:
+ * doors are crossed and marked, and when the spot is on another floor or underground the
+ * nearest way there is marked as the target.
  */
 public class PathOverlay extends Overlay
 {
@@ -99,11 +103,16 @@ public class PathOverlay extends Overlay
 	private final Advisor advisor;
 	private final SlayerSuiteConfig config;
 	private final SlayerMode mode;
+	private final RouteService routes;
 	private final Map<Integer, ObjectComposition> defs = new HashMap<>();
 
 	private volatile List<WorldPoint> path = Collections.emptyList();
 	private volatile List<Obstacle> obstacles = Collections.emptyList();
 	private volatile Obstacle entrance;
+	/** Transports on the built-in route, drawn as the way through. */
+	private volatile List<Obstacle> routeMarks = Collections.emptyList();
+	/** Tiles from you to the first transport on the route; -1 when the line is the whole way. */
+	private volatile int entranceTiles = -1;
 	/** True when the line reaches a spawn point; false when it stops short at a shortcut, stairs or the edge. */
 	@lombok.Getter
 	private volatile boolean reachesTarget;
@@ -112,8 +121,9 @@ public class PathOverlay extends Overlay
 	private WorldPoint lastDest;
 
 	@Inject
-	public PathOverlay(Client client, Advisor advisor, SlayerSuiteConfig config, SlayerMode mode)
+	public PathOverlay(Client client, Advisor advisor, SlayerSuiteConfig config, SlayerMode mode, RouteService routes)
 	{
+		this.routes = routes;
 		this.client = client;
 		this.advisor = advisor;
 		this.config = config;
@@ -136,9 +146,13 @@ public class PathOverlay extends Overlay
 		return e == null ? null : e.label();
 	}
 
-	/** Tiles from you to the entrance or the spot; -1 when there is no line. */
+	/** Tiles from you to the first transport on the way, or to the spot; -1 when there is no line. */
 	public int lineTiles()
 	{
+		if (entranceTiles >= 0)
+		{
+			return entranceTiles;
+		}
 		List<WorldPoint> p = path;
 		return p.isEmpty() ? -1 : p.size() - 1;
 	}
@@ -167,6 +181,15 @@ public class PathOverlay extends Overlay
 		}
 		int sx = lp.getSceneX();
 		int sy = lp.getSceneY();
+		Router.Route route = routes.current();
+		if (route != null && route.reached)
+		{
+			fromRoute(wv, route);
+			lastSx = -1;
+			return;
+		}
+		routeMarks = Collections.emptyList();
+		entranceTiles = -1;
 		if (sx == lastSx && sy == lastSy && dest.equals(lastDest) && !path.isEmpty())
 		{
 			return;
@@ -181,7 +204,100 @@ public class PathOverlay extends Overlay
 	{
 		path = Collections.emptyList();
 		obstacles = Collections.emptyList();
+		routeMarks = Collections.emptyList();
 		entrance = null;
+		entranceTiles = -1;
+	}
+
+	/** The next stretch of the built-in route, and the transports on it as marks. */
+	private void fromRoute(WorldView wv, Router.Route route)
+	{
+		int from = routes.from();
+		int max = Math.min(route.tiles.size(), from + Math.max(2, config.floorPathTiles()) + 1);
+		List<WorldPoint> out = new ArrayList<>(Math.max(0, max - from));
+		for (int i = from; i < max; i++)
+		{
+			out.add(Packed.toWorld(route.tiles.get(i)));
+		}
+		List<Obstacle> marks = new ArrayList<>();
+		Obstacle first = null;
+		int firstTiles = -1;
+		for (Router.Step s : route.steps)
+		{
+			if (s.index < from || s.index >= max)
+			{
+				continue;
+			}
+			WorldPoint at = Packed.toWorld(route.tiles.get(s.index));
+			Obstacle o = new Obstacle(findObject(wv, at, s.transport.objectId), s.transport.action, s.transport.name, at);
+			marks.add(o);
+			if (first == null)
+			{
+				first = o;
+				firstTiles = s.index - from;
+			}
+		}
+		path = out;
+		obstacles = Collections.emptyList();
+		routeMarks = marks;
+		entrance = first;
+		entranceTiles = firstTiles;
+		reachesTarget = route.reached;
+	}
+
+	/** The object with the id on or next to the tile, for its clickbox; null when it is not loaded. */
+	private TileObject findObject(WorldView wv, WorldPoint at, int id)
+	{
+		if (id < 0)
+		{
+			return null;
+		}
+		Scene scene = wv.getScene();
+		Tile[][][] tiles = scene == null ? null : scene.getTiles();
+		int plane = at.getPlane();
+		if (tiles == null || plane < 0 || plane >= tiles.length || tiles[plane] == null)
+		{
+			return null;
+		}
+		for (int dx = -1; dx <= 1; dx++)
+		{
+			for (int dy = -1; dy <= 1; dy++)
+			{
+				int x = at.getX() + dx - wv.getBaseX();
+				int y = at.getY() + dy - wv.getBaseY();
+				if (x < 0 || y < 0 || x >= tiles[plane].length || tiles[plane][x] == null || y >= tiles[plane][x].length)
+				{
+					continue;
+				}
+				Tile tile = tiles[plane][x][y];
+				if (tile == null)
+				{
+					continue;
+				}
+				WallObject wall = tile.getWallObject();
+				if (wall != null && wall.getId() == id)
+				{
+					return wall;
+				}
+				DecorativeObject deco = tile.getDecorativeObject();
+				if (deco != null && deco.getId() == id)
+				{
+					return deco;
+				}
+				GameObject[] objs = tile.getGameObjects();
+				if (objs != null)
+				{
+					for (GameObject o : objs)
+					{
+						if (o != null && o.getId() == id)
+						{
+							return o;
+						}
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	private ObjectComposition def(int id)
@@ -578,8 +694,13 @@ public class PathOverlay extends Overlay
 		{
 			mark(g, wv, o, DOOR, DOOR_FILL);
 		}
+		List<Obstacle> onRoute = routeMarks;
+		for (Obstacle o : onRoute)
+		{
+			mark(g, wv, o, ENTRANCE, ENTRANCE_FILL);
+		}
 		Obstacle e = entrance;
-		if (e != null)
+		if (e != null && onRoute.isEmpty())
 		{
 			mark(g, wv, e, ENTRANCE, ENTRANCE_FILL);
 		}
@@ -670,7 +791,7 @@ public class PathOverlay extends Overlay
 		Shape box = null;
 		try
 		{
-			box = o.object.getClickbox();
+			box = o.object == null ? null : o.object.getClickbox();
 		}
 		catch (RuntimeException ignored)
 		{

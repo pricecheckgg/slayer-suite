@@ -6,6 +6,7 @@ import com.slayersuite.advisor.GpsOverlay;
 import com.slayersuite.advisor.HouseScanner;
 import com.slayersuite.advisor.OverlapOverlay;
 import com.slayersuite.advisor.PathOverlay;
+import com.slayersuite.route.RouteService;
 import com.slayersuite.advisor.PluginOverlap;
 import com.slayersuite.advisor.SlayerSuitePanel;
 import com.slayersuite.advisor.TravelData;
@@ -60,7 +61,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.7.12";
+	public static final String VERSION = "0.8.0";
 
 	@Inject
 	private EventBus eventBus;
@@ -108,6 +109,8 @@ public class SlayerSuitePlugin extends Plugin
 	private GpsOverlay gpsOverlay;
 	@Inject
 	private PathOverlay pathOverlay;
+	@Inject
+	private RouteService routeService;
 	@Inject
 	private NpcHoverOverlay hoverOverlay;
 	@Inject
@@ -233,6 +236,8 @@ public class SlayerSuitePlugin extends Plugin
 		eventBus.register(advisor);
 		eventBus.register(houseScanner);
 		eventBus.register(pluginOverlap);
+		routeService.start();
+		eventBus.register(routeService);
 		keyManager.registerKeyListener(alerts.getPauseHotkey());
 
 		overlayManager.add(cardOverlay);
@@ -270,6 +275,8 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(gpsOverlay);
 		overlayManager.remove(pathOverlay);
 		eventBus.unregister(pathOverlay);
+		eventBus.unregister(routeService);
+		routeService.stop();
 		overlayManager.remove(hoverOverlay);
 		overlayManager.remove(completeOverlay);
 		eventBus.unregister(completeOverlay);

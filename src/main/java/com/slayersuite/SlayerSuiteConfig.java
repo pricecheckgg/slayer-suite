@@ -442,30 +442,24 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Arrows from you toward the pinned spot through the loaded map's walls. Doors on the way are marked with the action that opens them; when the spot is on another floor or underground, the stairs or entrance to use is marked. Shortcuts are not known.", section = advisorSection, position = 4)
+	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Chevrons from you to the pinned spot along the route, door to door across the whole map: doors, stairs, ladders, caves and the Agility shortcuts you can use are known, and each one on the way is marked with the option that uses it.", section = advisorSection, position = 4)
 	default boolean floorPath()
 	{
 		return true;
 	}
 
 	@Range(min = 10, max = 120)
-	@ConfigItem(keyName = "floorPathTiles", name = "Floor path length", description = "Most tiles the floor path draws.", section = advisorSection, position = 5)
+	@ConfigItem(keyName = "floorPathTiles", name = "Chevrons ahead", description = "How many tiles of the route are drawn ahead of you.", section = advisorSection, position = 5)
 	default int floorPathTiles()
 	{
 		return 60;
 	}
 
 	@Range(min = 50, max = 1000)
-	@ConfigItem(keyName = "floorPathMaxDistance", name = "Floor path only within", description = "Tiles. Further than this the spot is a teleport away, so only the arrow shows.", section = advisorSection, position = 6)
+	@ConfigItem(keyName = "floorPathMaxDistance", name = "Walk up to", description = "Tiles. A spot further than this by foot is a teleport away when you own one, and the next step names it; the chevrons still show the walk.", section = advisorSection, position = 6)
 	default int floorPathMaxDistance()
 	{
 		return 200;
-	}
-
-	@ConfigItem(keyName = "handToShortestPath", name = "Route via Shortest Path", description = "Also hand the pinned spot to the Shortest Path plugin, when you have it, for its own door-to-door route across the world drawn on top of the floor arrows.", section = advisorSection, position = 7)
-	default boolean handToShortestPath()
-	{
-		return false;
 	}
 
 	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 8)

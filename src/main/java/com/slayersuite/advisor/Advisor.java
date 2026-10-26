@@ -1,6 +1,8 @@
 package com.slayersuite.advisor;
 
 import com.slayersuite.SlayerSuiteConfig;
+import com.slayersuite.route.RouteService;
+import com.slayersuite.route.Router;
 import com.slayersuite.data.LocationRecord;
 import com.slayersuite.data.TaskRecord;
 import com.slayersuite.readiness.ReadinessChecker;
@@ -19,7 +21,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
-import net.runelite.client.config.ConfigManager;
 import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameTick;
@@ -27,7 +28,6 @@ import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.events.PluginMessage;
 import net.runelite.client.eventbus.EventBus;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,9 +53,7 @@ public class Advisor
 	private final WorldMapPointManager mapPoints;
 	private final LocationScorer scorer;
 	private final EventBus eventBus;
-	private final ConfigManager configManager;
-	private static final String HANDED_ROUTE_KEY = "shortestPathHanded";
-	private boolean staleRouteChecked;
+	private final RouteService routes;
 
 	private volatile List<ScoredLocation> ranked = Collections.emptyList();
 	@Getter
@@ -79,10 +77,10 @@ public class Advisor
 	private volatile String nextStep = "";
 
 	@Inject
-	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, ConfigManager configManager)
+	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes)
 	{
 		this.eventBus = eventBus;
-		this.configManager = configManager;
+		this.routes = routes;
 		this.client = client;
 		this.config = config;
 		this.tracker = tracker;
@@ -257,8 +255,8 @@ public class Advisor
 			return -1;
 		}
 		WorldPoint wp = me.getWorldLocation();
-		int plane = loc.getPlane() == null ? 0 : loc.getPlane();
-		if (wp.getPlane() != plane)
+		// a spot with no floor recorded may lie on any floor (some basements are floor 3 in the game)
+		if (loc.getPlane() != null && wp.getPlane() != loc.getPlane())
 		{
 			return -1;
 		}
@@ -376,7 +374,7 @@ public class Advisor
 		destination = loc;
 		arrived = loc != null && nearSpawn(loc);
 		updatePin();
-		handToShortestPath();
+		updateRoute();
 		notifyListener();
 	}
 
@@ -385,54 +383,14 @@ public class Advisor
 		destination = null;
 		arrived = false;
 		updatePin();
-		handToShortestPath();
+		updateRoute();
 		notifyListener();
 	}
 
-	/**
-	 * The Shortest Path plugin (Hub) owns a full world map with doors, shortcuts and transports.
-	 * When it is installed, it draws the whole route for the pin; without it nothing happens.
-	 */
-	private void handToShortestPath()
+	/** Gives the built-in router the pinned spot, or nothing once you are there. */
+	private void updateRoute()
 	{
-		if (!config.handToShortestPath())
-		{
-			return;
-		}
-		try
-		{
-			WorldPoint wp = arrived ? null : destinationPoint();
-			if (wp == null)
-			{
-				clearShortestPath();
-			}
-			else
-			{
-				Map<String, Object> data = new HashMap<>();
-				data.put("target", wp);
-				eventBus.post(new PluginMessage("shortestpath", "path", data));
-				// remembered so a route handed before the setting was switched off is cleared on the next start
-				configManager.setConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY, true);
-			}
-		}
-		catch (RuntimeException e)
-		{
-			log.debug("shortest path hand-off failed", e);
-		}
-	}
-
-	/** Tells the Shortest Path plugin to drop the route we gave it, if any. */
-	private void clearShortestPath()
-	{
-		try
-		{
-			eventBus.post(new PluginMessage("shortestpath", "clear"));
-			configManager.unsetConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY);
-		}
-		catch (RuntimeException e)
-		{
-			log.debug("shortest path clear failed", e);
-		}
+		routes.setTarget(arrived ? null : destinationPoint());
 	}
 
 	/** Words for the next move: use a teleport you own, or walk. Client thread. */
@@ -484,9 +442,29 @@ public class Advisor
 		// Already close to where the best teleport lands, or close to the spot itself: walk.
 		boolean nearLanding = best != null && best.getLanding() != null && here != null
 			&& Math.hypot(best.getLanding()[0] - here.getX(), best.getLanding()[1] - here.getY()) < 40;
+		// The built-in route knows the real walk, doors, stairs and caves included.
+		if (routes.reached())
+		{
+			int walk = routes.remainingTiles();
+			List<Router.Step> steps = routes.remainingSteps();
+			boolean teleportBetter = best != null && !nearLanding && walk > config.floorPathMaxDistance();
+			if (!teleportBetter)
+			{
+				if (!steps.isEmpty())
+				{
+					Router.Step s = steps.get(0);
+					int to = Math.max(0, s.index - routes.from());
+					int after = walk - to;
+					return (to <= 1 ? "" : "Walk " + to + " tiles, then ") + s.transport.label()
+						+ (after > 1 ? ", then " + TripMath.formatK(after) + " more" : "");
+				}
+				return "Walk " + TripMath.formatK(walk) + " tiles; follow the chevrons";
+			}
+			dist = walk;
+		}
 		if (dist <= config.floorPathMaxDistance() || nearLanding)
 		{
-			return "Walk " + TripMath.formatK(dist) + " tiles " + dir + (dist <= config.floorPathMaxDistance() ? " (follow the tiles)" : "");
+			return "Walk " + TripMath.formatK(dist) + " tiles " + dir + (dist <= config.floorPathMaxDistance() ? "; follow the chevrons" : "");
 		}
 		if (best != null)
 		{
@@ -859,31 +837,11 @@ public class Advisor
 		{
 			refresh();
 		}
-		else if (k.equals("handToShortestPath"))
-		{
-			if (config.handToShortestPath())
-			{
-				handToShortestPath();
-			}
-			else
-			{
-				clearShortestPath();
-			}
-		}
 	}
 
 	@Subscribe
 	public void onGameTick(GameTick t)
 	{
-		if (!staleRouteChecked && client.getGameState() == GameState.LOGGED_IN)
-		{
-			// a route handed to Shortest Path in an earlier session outlives the setting that sent it
-			staleRouteChecked = true;
-			if (!config.handToShortestPath() && "true".equals(configManager.getConfiguration(SlayerSuiteConfig.GROUP, HANDED_ROUTE_KEY)))
-			{
-				clearShortestPath();
-			}
-		}
 		LocationRecord focus = destination;
 		if (focus == null)
 		{
@@ -932,7 +890,7 @@ public class Advisor
 			destination = here;
 			arrived = true;
 			updatePin();
-			handToShortestPath();
+			updateRoute();
 			notifyListener();
 		}
 		LocationRecord pinned = destination;
@@ -945,7 +903,7 @@ public class Advisor
 				destination = atHand;
 				arrived = nearSpawn(atHand);
 				updatePin();
-				handToShortestPath();
+				updateRoute();
 				notifyListener();
 			}
 		}
@@ -957,7 +915,7 @@ public class Advisor
 			{
 				arrived = true;
 				updatePin();
-				handToShortestPath();
+				updateRoute();
 				notifyListener();
 			}
 			else if (!near && arrived && tilesToNearestSpawn(d) > ARRIVE_TILES * 3)
@@ -965,7 +923,7 @@ public class Advisor
 				// wandered well away from the spawns again: guide back
 				arrived = false;
 				updatePin();
-				handToShortestPath();
+				updateRoute();
 				notifyListener();
 			}
 		}

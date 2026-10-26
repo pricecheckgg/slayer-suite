@@ -1,0 +1,352 @@
+package com.slayersuite.route;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import com.slayersuite.SlayerSuiteConfig;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
+import net.runelite.api.Player;
+import net.runelite.api.Quest;
+import net.runelite.api.QuestState;
+import net.runelite.api.Skill;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.GameTick;
+import net.runelite.client.eventbus.Subscribe;
+
+/**
+ * Keeps a route from you to the pinned spot. The map and the transport tables load once on a
+ * background thread, searches run there too, and each tick the route is trimmed to where you
+ * stand or rebuilt when you have left it. Which transports you may use is decided on the client
+ * thread from your levels, quests and var values, and refreshed every minute.
+ */
+@Slf4j
+@Singleton
+public class RouteService
+{
+	private static final int MAX_EXPANSIONS = 1_500_000;
+	private static final long SEARCH_BUDGET_NANOS = 4_000_000_000L;
+	private static final long REQUEST_GAP_MS = 1_200L;
+	private static final int OFF_ROUTE_TILES = 2;
+	private static final int SNAPSHOT_EVERY_TICKS = 100;
+
+	private final Client client;
+	private final SlayerSuiteConfig config;
+	private final ExecutorService executor = Executors.newSingleThreadExecutor(r ->
+	{
+		Thread t = new Thread(r, "slayer-suite-route");
+		t.setDaemon(true);
+		return t;
+	});
+
+	private volatile WorldMap map;
+	private volatile TransportTable table;
+	private volatile boolean loadFailed;
+	private volatile Set<Transport> usable = Collections.emptySet();
+	private volatile Router.Route route;
+	private volatile int from;
+	private volatile WorldPoint target;
+	private Future<?> pending;
+	private long lastRequestMs;
+	private int tick;
+	private int snapshotTick = -1;
+
+	@Inject
+	public RouteService(Client client, SlayerSuiteConfig config)
+	{
+		this.client = client;
+		this.config = config;
+	}
+
+	/** Starts loading the map; cheap to call again. */
+	public void start()
+	{
+		if (map == null && !loadFailed)
+		{
+			executor.submit(() ->
+			{
+				try
+				{
+					long t0 = System.currentTimeMillis();
+					WorldMap m = WorldMap.load();
+					TransportTable t = TransportTable.load();
+					table = t;
+					map = m;
+					log.debug("Slayer Suite: routing data ready in {} ms ({} regions, {} transports)", System.currentTimeMillis() - t0, m.regionCount(), t.size());
+				}
+				catch (RuntimeException e)
+				{
+					loadFailed = true;
+					log.warn("Slayer Suite: routing data could not be loaded", e);
+				}
+			});
+		}
+	}
+
+	public void stop()
+	{
+		executor.shutdownNow();
+		route = null;
+		target = null;
+	}
+
+	public boolean ready()
+	{
+		return map != null && table != null;
+	}
+
+	/** The spot to route to, or null for none. Client thread. */
+	public void setTarget(WorldPoint wp)
+	{
+		WorldPoint old = target;
+		if (wp == null ? old == null : wp.equals(old))
+		{
+			return;
+		}
+		target = wp;
+		route = null;
+		from = 0;
+		if (wp != null)
+		{
+			request(true);
+		}
+	}
+
+	public WorldPoint getTarget()
+	{
+		return target;
+	}
+
+	/** The current route, or null while none is known. */
+	public Router.Route current()
+	{
+		return route;
+	}
+
+	/** Index of your tile on the route. */
+	public int from()
+	{
+		return from;
+	}
+
+	/** Tiles still to walk; 0 when there is no route. */
+	public int remainingTiles()
+	{
+		Router.Route r = route;
+		return r == null ? 0 : Math.max(0, r.tiles.size() - 1 - from);
+	}
+
+	/** The transports still ahead, with their index on the route. */
+	public List<Router.Step> remainingSteps()
+	{
+		Router.Route r = route;
+		if (r == null)
+		{
+			return Collections.emptyList();
+		}
+		int f = from;
+		List<Router.Step> out = new ArrayList<>();
+		for (Router.Step s : r.steps)
+		{
+			if (s.index >= f)
+			{
+				out.add(s);
+			}
+		}
+		return out;
+	}
+
+	/** True when the route gets all the way to the target. */
+	public boolean reached()
+	{
+		Router.Route r = route;
+		return r != null && r.reached;
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick t)
+	{
+		tick++;
+		if (target == null || client.getGameState() != GameState.LOGGED_IN)
+		{
+			return;
+		}
+		if (!ready())
+		{
+			if (tick % 5 == 0)
+			{
+				start();
+			}
+			return;
+		}
+		Player me = client.getLocalPlayer();
+		if (me == null)
+		{
+			return;
+		}
+		Router.Route r = route;
+		if (r == null)
+		{
+			request(false);
+			return;
+		}
+		int here = Packed.of(me.getWorldLocation());
+		int idx = r.indexOf(here);
+		if (idx >= 0)
+		{
+			from = idx;
+			return;
+		}
+		// not on the route: still beside it is fine, further away means a new search from here
+		int f = from;
+		int nearest = Integer.MAX_VALUE;
+		int plane = Packed.plane(here);
+		for (int i = Math.max(0, f - 5); i < r.tiles.size() && nearest > OFF_ROUTE_TILES; i++)
+		{
+			int tile = r.tiles.get(i);
+			if (Packed.plane(tile) == plane)
+			{
+				nearest = Math.min(nearest, Packed.chebyshev(tile, here));
+			}
+		}
+		if (nearest > OFF_ROUTE_TILES)
+		{
+			request(false);
+		}
+	}
+
+	/** Searches from where you stand to the target on the background thread. Client thread. */
+	private void request(boolean force)
+	{
+		WorldPoint to = target;
+		Player me = client.getLocalPlayer();
+		if (to == null || me == null || !ready())
+		{
+			return;
+		}
+		long now = System.currentTimeMillis();
+		if (!force && (now - lastRequestMs < REQUEST_GAP_MS || (pending != null && !pending.isDone())))
+		{
+			return;
+		}
+		if (pending != null && !pending.isDone())
+		{
+			pending.cancel(true);
+		}
+		lastRequestMs = now;
+		if (snapshotTick < 0 || tick - snapshotTick >= SNAPSHOT_EVERY_TICKS)
+		{
+			usable = computeUsable();
+			snapshotTick = tick;
+		}
+		final int start = Packed.of(me.getWorldLocation());
+		final int goal = Router.walkableNear(map, Packed.of(to));
+		final Set<Transport> allowed = usable;
+		final WorldMap m = map;
+		final TransportTable tt = table;
+		final boolean keepOut = config.avoidWilderness();
+		pending = executor.submit(() ->
+		{
+			try
+			{
+				Router.Route found = Router.find(m, tt, allowed, start, goal, MAX_EXPANSIONS, System.nanoTime() + SEARCH_BUDGET_NANOS, keepOut);
+				if (to.equals(target))
+				{
+					from = 0;
+					route = found;
+				}
+			}
+			catch (RuntimeException e)
+			{
+				log.debug("Slayer Suite: route search failed", e);
+			}
+		});
+	}
+
+	/** The transports whose levels, quests and var conditions you meet. Client thread. */
+	private Set<Transport> computeUsable()
+	{
+		TransportTable tt = table;
+		if (tt == null)
+		{
+			return Collections.emptySet();
+		}
+		Map<Quest, Boolean> done = new HashMap<>();
+		Set<Transport> out = new HashSet<>(tt.size());
+		for (Transport t : tt.all())
+		{
+			if (t.needsItems || !skillsMet(t) || !questsMet(t, done) || !varsMet(t))
+			{
+				continue;
+			}
+			out.add(t);
+		}
+		return out;
+	}
+
+	private boolean skillsMet(Transport t)
+	{
+		for (Map.Entry<Skill, Integer> e : t.skills.entrySet())
+		{
+			if (client.getRealSkillLevel(e.getKey()) < e.getValue())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean questsMet(Transport t, Map<Quest, Boolean> done)
+	{
+		for (Quest q : t.quests)
+		{
+			Boolean finished = done.get(q);
+			if (finished == null)
+			{
+				try
+				{
+					finished = q.getState(client) == QuestState.FINISHED;
+				}
+				catch (RuntimeException e)
+				{
+					finished = false;
+				}
+				done.put(q, finished);
+			}
+			if (!finished)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean varsMet(Transport t)
+	{
+		for (Transport.VarCheck c : t.varbits)
+		{
+			if (!c.holds(client.getVarbitValue(c.id)))
+			{
+				return false;
+			}
+		}
+		for (Transport.VarCheck c : t.varplayers)
+		{
+			if (!c.holds(client.getVarpValue(c.id)))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+}
