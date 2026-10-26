@@ -1475,6 +1475,11 @@ public class SlayerSuitePanel extends PluginPanel
 		List<String[]> cells = new ArrayList<>();
 		cells.add(new String[]{"points", String.format("%,d", ps.getPoints())});
 		cells.add(new String[]{"streak", Integer.toString(ps.getStreak())});
+		int mortimer = history.mortimerTasks();
+		if (mortimer > 0)
+		{
+			cells.add(new String[]{"Mortimer tasks", Integer.toString(mortimer)});
+		}
 		if (ps.getNextBonusPoints() > 0)
 		{
 			cells.add(new String[]{"task " + ps.getNextBonusTask(), "+" + ps.getNextBonusPoints()});

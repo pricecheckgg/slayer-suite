@@ -618,6 +618,8 @@ public class TaskHistory
 		long otherPoints;
 		int skips;
 		int blocks;
+		/** Mortimer tasks completed, as the game last reported it. */
+		int mortimerTasks;
 		/** Skill name -> {kills, activeMs, lootValue, wall time} when it last levelled. */
 		Map<String, long[]> marks = new HashMap<>();
 		/** Task keys referenced by log entries' fifth value. */
@@ -1658,6 +1660,39 @@ public class TaskHistory
 		{
 			save(snapshot());
 			saveAssignment();
+		}
+		int mort = tracker.getMortimerTasks();
+		if (mort > 0)
+		{
+			Ledger l = ledger();
+			boolean changed;
+			synchronized (l)
+			{
+				changed = l.mortimerTasks != mort;
+				if (changed)
+				{
+					l.mortimerTasks = mort;
+				}
+			}
+			if (changed)
+			{
+				saveLedger();
+			}
+		}
+	}
+
+	/** Mortimer tasks completed: this session's chat count, else the last one remembered; 0 when never seen. */
+	public int mortimerTasks()
+	{
+		int live = tracker.getMortimerTasks();
+		if (live > 0)
+		{
+			return live;
+		}
+		Ledger l = ledger();
+		synchronized (l)
+		{
+			return l.mortimerTasks;
 		}
 	}
 

@@ -46,6 +46,7 @@ public class TaskCompleteOverlay extends Overlay
 	private static final Color XP_BLUE = new Color(120, 205, 255);
 	private static final Color GREEN = new Color(110, 230, 150);
 	private static final Color ORANGE = new Color(255, 152, 31);
+	private static final Color MORTIMER = new Color(200, 150, 255);
 	private static final Color LABEL = new Color(165, 165, 165);
 	private static final long COUNT_MS = 1200;
 	private static final long POP_MS = 260;
@@ -69,6 +70,8 @@ public class TaskCompleteOverlay extends Overlay
 	private volatile Color accent = GOLD;
 	/** The counters under the task name: kills, time, xp, loot, points, streak. Numbers count up. */
 	private volatile List<Stat> stats = Collections.emptyList();
+	/** True once the Mortimer counter is on the card, or when the card is not a task card. */
+	private volatile boolean mortimerShown = true;
 	/** Picked-up drops of the assignment: sprite with its quantity, and the value under it. */
 	private volatile List<Object[]> loot = Collections.emptyList();
 	/** Drops from your task kills that were left on the floor. */
@@ -245,6 +248,13 @@ public class TaskCompleteOverlay extends Overlay
 		{
 			list.add(new Stat("MISSED", MISSED, missedValue, false, true));
 		}
+		// "You've completed N Mortimer tasks" arrives after the finish line, so the counter joins the card when it lands.
+		mortimerShown = false;
+		if (e.isTest() && tracker.currentMasterId() == 10)
+		{
+			list.add(new Stat("MORTIMER TASKS", MORTIMER, tracker.getMortimerTasks() > 0 ? tracker.getMortimerTasks() : 30, false, false));
+			mortimerShown = true;
+		}
 		stats = list;
 		loot = sprites(history.topLoot(8));
 		missed = sprites(history.topMissed(6));
@@ -350,6 +360,7 @@ public class TaskCompleteOverlay extends Overlay
 		{
 			list.add(new Stat("MISSED", MISSED, e.getMissedValue(), false, true));
 		}
+		mortimerShown = true;
 		stats = list;
 		loot = sprites(e.getLoot());
 		missed = sprites(e.getMissed());
@@ -440,6 +451,13 @@ public class TaskCompleteOverlay extends Overlay
 		{
 			shownAt = 0;
 			return null;
+		}
+		if (!mortimerShown && tracker.getMortimerTasks() > 0 && tracker.getMortimerAt() >= start - 10_000L)
+		{
+			List<Stat> list = new ArrayList<>(stats);
+			list.add(new Stat("MORTIMER TASKS", MORTIMER, tracker.getMortimerTasks(), false, false));
+			stats = list;
+			mortimerShown = true;
 		}
 		float alpha;
 		float scale = 1f;

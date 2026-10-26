@@ -141,6 +141,9 @@ public class TaskTracker
 	/** From "You've completed N Mortimer tasks"; -1 until seen. */
 	@Getter
 	private int mortimerTasks = -1;
+	/** Wall time the Mortimer count was last read from chat. */
+	@Getter
+	private long mortimerAt;
 	private int lastPointsAwarded;
 	private long lastPointsAwardedAt;
 	/** Our own completion detection, independent of the core plugin clearing the task. */
@@ -862,6 +865,13 @@ public class TaskTracker
 			+ "; varp candidates " + countCandidates.keySet() + "; varbit candidates " + varbitCandidates.keySet() + "; recent " + String.join(" | ", recentVars);
 	}
 
+	/** Slayer master of the current task from the game's tables (10 = Mortimer); -1 when unknown. */
+	public int currentMasterId()
+	{
+		GameTaskTable.GameTask gt = gameTask;
+		return gt == null ? -1 : gt.getMasterId();
+	}
+
 	private boolean recentlyFinished(String name)
 	{
 		return finishedName != null && finishedName.equalsIgnoreCase(name) && System.currentTimeMillis() - finishedAt < 60_000L;
@@ -992,6 +1002,7 @@ public class TaskTracker
 			try
 			{
 				mortimerTasks = Integer.parseInt(mort.group(1).replace(",", ""));
+				mortimerAt = System.currentTimeMillis();
 			}
 			catch (NumberFormatException ignored)
 			{
