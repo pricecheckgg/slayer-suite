@@ -286,6 +286,78 @@ public class Advisor
 		return d >= 0 && d <= ARRIVE_TILES;
 	}
 
+	/** Within this many ground tiles of a spot counts as standing at its door (its cave mouth, its stairs). */
+	static final int AT_HAND_TILES = 40;
+
+	/**
+	 * Tiles from the point to the spot's nearest pin or its centre, with dungeons folded onto the
+	 * ground above them, so a cave mouth is close to the cave below it; -1 without coordinates.
+	 */
+	static int foldedDistance(LocationRecord loc, WorldPoint wp)
+	{
+		if (loc == null || wp == null)
+		{
+			return -1;
+		}
+		int best = -1;
+		if (loc.getPins() != null)
+		{
+			for (List<Integer> pin : loc.getPins())
+			{
+				if (pin == null || pin.size() < 2)
+				{
+					continue;
+				}
+				int d = (int) Math.round(Math.hypot(pin.get(0) - wp.getX(), surfaceY(pin.get(1)) - surfaceY(wp.getY())));
+				if (best < 0 || d < best)
+				{
+					best = d;
+				}
+			}
+		}
+		if (best < 0 && loc.hasCoordinates())
+		{
+			best = (int) Math.round(Math.hypot(loc.getX() - wp.getX(), surfaceY(loc.getY()) - surfaceY(wp.getY())));
+		}
+		return best;
+	}
+
+	/**
+	 * Another spot of the task whose door you are standing at while the pinned one is far away:
+	 * you chose to go there, so the pin follows. Null when the pin should stay. Client thread.
+	 */
+	private LocationRecord spotAtHand(LocationRecord pinned)
+	{
+		Player me = client.getLocalPlayer();
+		if (me == null)
+		{
+			return null;
+		}
+		WorldPoint wp = me.getWorldLocation();
+		int pinnedD = foldedDistance(pinned, wp);
+		if (pinnedD >= 0 && pinnedD <= AT_HAND_TILES * 3)
+		{
+			return null;
+		}
+		LocationRecord best = null;
+		int bestD = Integer.MAX_VALUE;
+		for (ScoredLocation s : ranked)
+		{
+			LocationRecord loc = s.getLocation();
+			if (loc == null || s.isLocked() || Boolean.TRUE.equals(loc.getBoss()) || sameLocation(loc, pinned))
+			{
+				continue;
+			}
+			int d = foldedDistance(loc, wp);
+			if (d >= 0 && d <= AT_HAND_TILES && d < bestD)
+			{
+				bestD = d;
+				best = loc;
+			}
+		}
+		return best;
+	}
+
 	public void setDestination(LocationRecord loc)
 	{
 		destination = loc;
@@ -813,6 +885,20 @@ public class Advisor
 			updatePin();
 			handToShortestPath();
 			notifyListener();
+		}
+		LocationRecord pinned = destination;
+		if (pinned != null && !arrived)
+		{
+			LocationRecord atHand = spotAtHand(pinned);
+			if (atHand != null)
+			{
+				// standing at the way into another of the task's spots: that is where you are going
+				destination = atHand;
+				arrived = nearSpawn(atHand);
+				updatePin();
+				handToShortestPath();
+				notifyListener();
+			}
 		}
 		LocationRecord d = destination;
 		if (d != null)

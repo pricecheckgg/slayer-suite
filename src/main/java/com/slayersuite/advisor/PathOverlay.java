@@ -84,6 +84,9 @@ public class PathOverlay extends Overlay
 		}
 	}
 
+	/** An entrance further than this from the spot (dungeons folded onto the ground above them) leads somewhere else. */
+	private static final int ENTRANCE_REACH = 150;
+
 	private static final String[] DOOR_ACTIONS = {"Open", "Walk-through", "Pass", "Go-through", "Pass-through", "Squeeze-through", "Crawl-through", "Jump-over", "Climb-over"};
 	private static final String[] DOWN_ACTIONS = {"Climb-down", "Descend", "Enter", "Jump-in", "Crawl-through", "Squeeze-through", "Walk-down", "Climb"};
 	private static final String[] UP_ACTIONS = {"Climb-up", "Ascend", "Climb", "Walk-up", "Exit", "Leave", "Climb-out"};
@@ -393,6 +396,11 @@ public class PathOverlay extends Overlay
 			int bestD = Integer.MAX_VALUE;
 			for (Obstacle o : candidates)
 			{
+				double far = Math.hypot(o.tile.getX() - dest.getX(), Advisor.surfaceY(o.tile.getY()) - Advisor.surfaceY(dest.getY()));
+				if (far > ENTRANCE_REACH)
+				{
+					continue;
+				}
 				int ox = o.tile.getX() - baseX;
 				int oy = o.tile.getY() - baseY;
 				int d = reachNear(dist, ox, oy, size);
