@@ -997,7 +997,10 @@ public class TaskTracker
 		}
 		String plain = msg.replaceAll("<[^>]*>", "").trim();
 		Matcher mort = MORTIMER_TASKS.matcher(plain);
-		if (mort.find())
+		// "You've completed N Mortimer tasks; return to a Slayer master" is also printed when you check
+		// the task on a helmet or gem, so it never counts as a completion on its own
+		boolean mortimerLine = mort.find();
+		if (mortimerLine)
 		{
 			try
 			{
@@ -1038,7 +1041,7 @@ public class TaskTracker
 		{
 			superiorSeen();
 		}
-		else if (TASK_COMPLETE.matcher(plain).find())
+		else if (!mortimerLine && TASK_COMPLETE.matcher(plain).find())
 		{
 			completionMessageAt = System.currentTimeMillis();
 			Matcher pm = POINTS_AWARDED.matcher(plain);

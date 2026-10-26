@@ -45,8 +45,8 @@ import net.runelite.client.ui.overlay.OverlayPosition;
  * Arrows on the floor from you toward the pinned spot, through the loaded map's walls and
  * obstacles. Doors on the way are crossed and marked with the action that opens them. When
  * the spot is on another floor or underground, the nearest staircase, ladder or cave
- * entrance that gets you there becomes the target and is marked too. While the Shortest
- * Path plugin is on and drawing the route, only the markers are drawn.
+ * entrance that gets you there becomes the target and is marked too. The Shortest Path
+ * plugin, when on, draws its own full route alongside.
  */
 public class PathOverlay extends Overlay
 {
@@ -97,7 +97,6 @@ public class PathOverlay extends Overlay
 	private final Advisor advisor;
 	private final SlayerSuiteConfig config;
 	private final SlayerMode mode;
-	private final PluginOverlap overlap;
 	private final Map<Integer, ObjectComposition> defs = new HashMap<>();
 
 	private volatile List<WorldPoint> path = Collections.emptyList();
@@ -111,13 +110,12 @@ public class PathOverlay extends Overlay
 	private WorldPoint lastDest;
 
 	@Inject
-	public PathOverlay(Client client, Advisor advisor, SlayerSuiteConfig config, SlayerMode mode, PluginOverlap overlap)
+	public PathOverlay(Client client, Advisor advisor, SlayerSuiteConfig config, SlayerMode mode)
 	{
 		this.client = client;
 		this.advisor = advisor;
 		this.config = config;
 		this.mode = mode;
-		this.overlap = overlap;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_SCENE);
 		setPriority(PRIORITY_LOW);
@@ -229,6 +227,38 @@ public class PathOverlay extends Overlay
 		return null;
 	}
 
+	private static final String[] ENTRANCE_WORDS = {"cave", "entrance", "trapdoor", "ladder", "stair", "hole", "crevice", "tunnel", "passage", "well", "rope", "crack", "hatch", "chasm", "pit", "opening", "grate", "vine", "cavern", "shaft", "dungeon", "tomb", "crypt", "ramp", "lift", "elevator", "whirlpool", "manhole", "mine", "climb", "doorway", "steps"};
+
+	/** Named like a way down or up, not a portal, a domain or a random thing with an Enter option. */
+	private static boolean looksLikeEntrance(String name)
+	{
+		String n = name.toLowerCase(Locale.ROOT);
+		for (String w : ENTRANCE_WORDS)
+		{
+			if (n.contains(w))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static String firstNonNull(String[] actions)
+	{
+		if (actions == null)
+		{
+			return null;
+		}
+		for (String a : actions)
+		{
+			if (a != null && !a.isEmpty())
+			{
+				return a;
+			}
+		}
+		return null;
+	}
+
 	private static boolean looksLikeDoor(String name)
 	{
 		String n = name.toLowerCase(Locale.ROOT);
@@ -263,6 +293,9 @@ public class PathOverlay extends Overlay
 		Map<Integer, Obstacle> doorAt = new HashMap<>();
 		List<Obstacle> ups = new ArrayList<>();
 		List<Obstacle> downs = new ArrayList<>();
+		List<Obstacle> known = new ArrayList<>();
+		com.slayersuite.data.LocationRecord loc = advisor.getDestination();
+		String[] knownEntrance = loc == null ? null : Entrances.forLocation(loc.getName());
 		for (int x = 0; x < size; x++)
 		{
 			flags[x] = raw[x].clone();
@@ -325,6 +358,16 @@ public class PathOverlay extends Overlay
 						// the tile under a large door is solid in the flags; let the path step onto it
 						flags[x][y] &= ~(CollisionDataFlag.BLOCK_MOVEMENT_OBJECT | CollisionDataFlag.BLOCK_MOVEMENT_FULL);
 					}
+					if (knownEntrance != null && c.getName().equalsIgnoreCase(knownEntrance[0]))
+					{
+						String want = knownEntrance[1] == null ? firstNonNull(c.getActions()) : firstAction(c, new String[]{knownEntrance[1]});
+						known.add(new Obstacle(o, want == null ? "Use" : want, c.getName(), wp));
+						continue;
+					}
+					if (!looksLikeEntrance(c.getName()))
+					{
+						continue;
+					}
 					String up = firstAction(c, UP_ACTIONS);
 					if (up != null)
 					{
@@ -345,7 +388,6 @@ public class PathOverlay extends Overlay
 		int[][] dist = ScenePath.distances(flags, doors, sx, sy);
 		Obstacle way = null;
 		// Prefer the nearest reachable spawn pin over the middle of the spawn cloud.
-		com.slayersuite.data.LocationRecord loc = advisor.getDestination();
 		if (loc != null && loc.getPins() != null && !loc.getPins().isEmpty() && dest.getPlane() == plane)
 		{
 			int bestD = Integer.MAX_VALUE;
@@ -383,7 +425,12 @@ public class PathOverlay extends Overlay
 			boolean destUnder = dest.getY() >= 6400;
 			boolean hereUnder = here.getY() >= 6400;
 			List<Obstacle> candidates;
-			if (destUnder != hereUnder)
+			if (!known.isEmpty())
+			{
+				// the spot's own way in, whatever its option is called (the Catacombs' statue says Investigate)
+				candidates = known;
+			}
+			else if (destUnder != hereUnder)
 			{
 				candidates = destUnder ? downs : ups;
 			}
@@ -518,8 +565,7 @@ public class PathOverlay extends Overlay
 			return null;
 		}
 		List<WorldPoint> p = path;
-		boolean routeDrawnElsewhere = config.handToShortestPath() && overlap.isEnabled("shortestpath.");
-		if (!routeDrawnElsewhere && p.size() >= 2)
+		if (p.size() >= 2)
 		{
 			drawArrows(g, wv, p);
 		}
