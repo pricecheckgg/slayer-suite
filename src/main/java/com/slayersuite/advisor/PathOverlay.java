@@ -7,7 +7,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.Stroke;
+import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,18 +43,20 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
 /**
- * Tiles on the floor from you toward the pinned spot, through the loaded map's walls and
+ * Arrows on the floor from you toward the pinned spot, through the loaded map's walls and
  * obstacles. Doors on the way are crossed and marked with the action that opens them. When
  * the spot is on another floor or underground, the nearest staircase, ladder or cave
- * entrance that gets you there becomes the target and is marked too. With the Shortest Path
- * plugin drawing the route, only the markers are drawn.
+ * entrance that gets you there becomes the target and is marked too. While the Shortest
+ * Path plugin is on and drawing the route, only the markers are drawn.
  */
 public class PathOverlay extends Overlay
 {
-	private static final Color FILL = new Color(80, 220, 255, 60);
-	private static final Color EDGE = new Color(80, 220, 255, 160);
+	private static final Color ARROW = new Color(80, 220, 255, 230);
+	private static final Color ARROW_SHADOW = new Color(0, 0, 0, 150);
 	private static final Color END = new Color(255, 215, 80, 200);
+	private static final Color END_FILL = new Color(255, 215, 80, 70);
 	private static final Color BLOCKED = new Color(255, 90, 90, 200);
+	private static final Color BLOCKED_FILL = new Color(255, 90, 90, 70);
 	private static final Color DOOR = new Color(255, 215, 80, 220);
 	private static final Color DOOR_FILL = new Color(255, 215, 80, 50);
 	private static final Color ENTRANCE = new Color(80, 220, 255, 230);
@@ -503,29 +508,10 @@ public class PathOverlay extends Overlay
 			return null;
 		}
 		List<WorldPoint> p = path;
-		boolean routeDrawnElsewhere = config.handToShortestPath() && overlap.hasPlugin("shortestpath.");
-		g.setStroke(new BasicStroke(1f));
+		boolean routeDrawnElsewhere = config.handToShortestPath() && overlap.isEnabled("shortestpath.");
 		if (!routeDrawnElsewhere && p.size() >= 2)
 		{
-			for (int i = 1; i < p.size(); i++)
-			{
-				LocalPoint lp = LocalPoint.fromWorld(wv, p.get(i));
-				if (lp == null)
-				{
-					continue;
-				}
-				Polygon poly = Perspective.getCanvasTilePoly(client, lp);
-				if (poly == null)
-				{
-					continue;
-				}
-				boolean last = i == p.size() - 1;
-				Color endColor = reachesTarget || entrance != null ? END : BLOCKED;
-				g.setColor(last ? endColor : FILL);
-				g.fillPolygon(poly);
-				g.setColor(last ? endColor : EDGE);
-				g.drawPolygon(poly);
-			}
+			drawArrows(g, wv, p);
 		}
 		g.setStroke(new BasicStroke(2f));
 		for (Obstacle o : obstacles)
@@ -538,6 +524,71 @@ public class PathOverlay extends Overlay
 			mark(g, wv, e, ENTRANCE, ENTRANCE_FILL);
 		}
 		return null;
+	}
+
+	/** A chevron on each tile pointing at the next one, and the last tile outlined. */
+	private void drawArrows(Graphics2D g, WorldView wv, List<WorldPoint> p)
+	{
+		Object aa = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		Point[] centres = new Point[p.size()];
+		for (int i = 0; i < p.size(); i++)
+		{
+			LocalPoint lp = LocalPoint.fromWorld(wv, p.get(i));
+			centres[i] = lp == null ? null : Perspective.localToCanvas(client, lp, p.get(i).getPlane());
+		}
+		Stroke shadow = new BasicStroke(4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		Stroke line = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		for (int i = 1; i < p.size() - 1; i++)
+		{
+			Point a = centres[i];
+			Point b = centres[i + 1];
+			if (a == null || b == null)
+			{
+				continue;
+			}
+			double dx = b.getX() - a.getX();
+			double dy = b.getY() - a.getY();
+			double len = Math.hypot(dx, dy);
+			if (len < 2)
+			{
+				continue;
+			}
+			double ux = dx / len;
+			double uy = dy / len;
+			double size = Math.max(4, Math.min(14, len * 0.45));
+			double tipX = a.getX() + ux * size * 0.5;
+			double tipY = a.getY() + uy * size * 0.5;
+			double baseX = tipX - ux * size;
+			double baseY = tipY - uy * size;
+			double wingX = -uy * size * 0.7;
+			double wingY = ux * size * 0.7;
+			Path2D.Double chevron = new Path2D.Double();
+			chevron.moveTo(baseX + wingX, baseY + wingY);
+			chevron.lineTo(tipX, tipY);
+			chevron.lineTo(baseX - wingX, baseY - wingY);
+			g.setStroke(shadow);
+			g.setColor(ARROW_SHADOW);
+			g.draw(chevron);
+			g.setStroke(line);
+			g.setColor(ARROW);
+			g.draw(chevron);
+		}
+		LocalPoint last = LocalPoint.fromWorld(wv, p.get(p.size() - 1));
+		Polygon poly = last == null ? null : Perspective.getCanvasTilePoly(client, last);
+		if (poly != null)
+		{
+			boolean good = reachesTarget || entrance != null;
+			g.setColor(good ? END_FILL : BLOCKED_FILL);
+			g.fillPolygon(poly);
+			g.setStroke(line);
+			g.setColor(good ? END : BLOCKED);
+			g.drawPolygon(poly);
+		}
+		if (aa != null)
+		{
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa);
+		}
 	}
 
 	private void mark(Graphics2D g, WorldView wv, Obstacle o, Color edge, Color fill)

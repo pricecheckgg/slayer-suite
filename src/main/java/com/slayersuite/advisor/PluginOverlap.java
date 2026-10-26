@@ -80,6 +80,26 @@ public class PluginOverlap
 		return false;
 	}
 
+	/** True when a plugin whose class name starts with the prefix is loaded and switched on. */
+	public boolean isEnabled(String classPrefix)
+	{
+		try
+		{
+			for (Plugin p : pluginManager.getPlugins())
+			{
+				if (p.getClass().getName().startsWith(classPrefix))
+				{
+					return pluginManager.isPluginEnabled(p);
+				}
+			}
+		}
+		catch (RuntimeException e)
+		{
+			// unknown
+		}
+		return false;
+	}
+
 	public List<String> scan()
 	{
 		List<String> out = new ArrayList<>();

@@ -442,7 +442,7 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Tiles from you toward the pinned spot through the loaded map's walls. Doors, stairs and shortcuts are not known, so the line ends at the nearest reachable tile.", section = advisorSection, position = 4)
+	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Arrows from you toward the pinned spot through the loaded map's walls. Doors on the way are marked with the action that opens them; when the spot is on another floor or underground, the stairs or entrance to use is marked. Shortcuts are not known.", section = advisorSection, position = 4)
 	default boolean floorPath()
 	{
 		return true;
@@ -462,7 +462,7 @@ public interface SlayerSuiteConfig extends Config
 		return 200;
 	}
 
-	@ConfigItem(keyName = "handToShortestPath", name = "Route via Shortest Path", description = "When the Shortest Path plugin is installed, hand it the pinned spot for a full route with doors, shortcuts and transports.", section = advisorSection, position = 7)
+	@ConfigItem(keyName = "handToShortestPath", name = "Route via Shortest Path", description = "When the Shortest Path plugin is on, hand it the pinned spot for a full route with shortcuts and transports; its route replaces the arrows and only the door and entrance markers stay.", section = advisorSection, position = 7)
 	default boolean handToShortestPath()
 	{
 		return true;
