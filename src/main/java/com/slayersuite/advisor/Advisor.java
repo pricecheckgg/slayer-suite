@@ -340,6 +340,12 @@ public class Advisor
 		}
 		int dist = distanceFromPlayer();
 		String dir = directionFromPlayer();
+		WorldPoint dp = destinationPoint();
+		if (me0 != null && dp != null && dist >= 0 && dist <= 60 && underground(dp.getY()) != underground(me0.getWorldLocation().getY()))
+		{
+			return underground(dp.getY()) ? "Go down into " + dest.getName() + "; the entrance is within " + Math.max(dist, 5) + " tiles " + dir
+				: "Come up to the surface; " + dest.getName() + " is " + Math.max(dist, 5) + " tiles " + dir + " from here";
+		}
 		int toSpawn = tilesToNearestSpawn(dest);
 		if (toSpawn >= 0 && toSpawn < dist)
 		{
@@ -488,7 +494,18 @@ public class Advisor
 			return -1;
 		}
 		WorldPoint wp = me.getWorldLocation();
-		return (int) Math.round(Math.hypot(dest.getX() - wp.getX(), dest.getY() - wp.getY()));
+		return (int) Math.round(Math.hypot(dest.getX() - wp.getX(), surfaceY(dest.getY()) - surfaceY(wp.getY())));
+	}
+
+	/** Dungeons are stored 6400 tiles north of the ground above them; fold that away for distances and headings. */
+	static int surfaceY(int y)
+	{
+		return y >= 6400 ? y - 6400 : y;
+	}
+
+	private static boolean underground(int y)
+	{
+		return y >= 6400;
 	}
 
 	/** Eight-point compass direction from the player to the destination. */
@@ -501,7 +518,7 @@ public class Advisor
 			return "";
 		}
 		WorldPoint wp = me.getWorldLocation();
-		return compass(dest.getX() - wp.getX(), dest.getY() - wp.getY());
+		return compass(dest.getX() - wp.getX(), surfaceY(dest.getY()) - surfaceY(wp.getY()));
 	}
 
 	static String compass(int dx, int dy)
@@ -772,6 +789,16 @@ public class Advisor
 		if (ranked.isEmpty() && tracker.getRecord() != null)
 		{
 			refresh();
+		}
+		LocationRecord here = tracker.getCurrentLocation();
+		if (here != null && nearSpawn(here) && (destination == null || !sameLocation(here, destination)))
+		{
+			// you reached one of the task's spots, pinned or not: that is the destination now
+			destination = here;
+			arrived = true;
+			updatePin();
+			handToShortestPath();
+			notifyListener();
 		}
 		LocationRecord d = destination;
 		if (d != null)
