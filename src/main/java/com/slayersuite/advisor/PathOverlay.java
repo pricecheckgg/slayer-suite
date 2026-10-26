@@ -51,8 +51,10 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 public class PathOverlay extends Overlay
 {
 	private static final Color ARROW_EDGE = new Color(0, 0, 0, 110);
-	/** Milliseconds for the lit pulse to move one tile along the route. */
+	/** Milliseconds for a lit pulse to move one tile along the route. */
 	private static final long PULSE_MS = 110L;
+	/** Tiles between one pulse and the next. */
+	private static final int PULSE_EVERY = 12;
 	/** Half-size of a chevron in local units; a tile is 128 across. */
 	private static final double CHEVRON = 46;
 	private static final Color END = new Color(255, 215, 80, 200);
@@ -593,8 +595,9 @@ public class PathOverlay extends Overlay
 		Stroke line = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 		g.setStroke(line);
 		int n = p.size();
-		// where the pulse is, in tiles from you; it rests a moment past the end before starting again
-		double head = (System.currentTimeMillis() / (double) PULSE_MS) % (n + 6);
+		// Pulses run toward the spot every PULSE_EVERY tiles. They are timed from the far end of the
+		// route, so a tile keeps its place in the rhythm as you walk and the route shortens behind you.
+		double phase = (System.currentTimeMillis() / (double) PULSE_MS) % PULSE_EVERY;
 		for (int i = 1; i < n - 1; i++)
 		{
 			WorldPoint a = p.get(i);
@@ -611,8 +614,8 @@ public class PathOverlay extends Overlay
 			{
 				continue;
 			}
-			double behind = head - i;
-			float lit = behind >= 0 && behind < 3 ? (float) (1 - behind / 3) : 0f;
+			double behind = ((n - 1 - i) + phase) % PULSE_EVERY;
+			float lit = behind < 3 ? (float) (1 - behind / 3) : 0f;
 			g.setColor(new Color(80, 220, 255, 60 + Math.round(lit * 120)));
 			g.fill(chevron);
 			g.setColor(ARROW_EDGE);
