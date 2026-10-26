@@ -68,4 +68,17 @@ public class TransportTableTest
 		}
 		assertTrue(needing > 100 && needing < 400);
 	}
+
+	@Test
+	public void learnedTransportsJoinTheTable()
+	{
+		int origin = Packed.of(2300, 3100, 0);
+		assertFalse(table.knows(origin, 12345));
+		Transport learned = new Transport(origin, Packed.of(1500, 4300, 1), "Enter", "Sewer", 12345, 3, "",
+			java.util.Collections.emptyMap(), java.util.Collections.emptySet(), java.util.Collections.emptyList(), java.util.Collections.emptyList(), false, false);
+		TransportTable bigger = table.withAdded(java.util.Collections.singletonList(learned));
+		assertTrue(bigger.knows(origin, 12345));
+		assertEquals(table.size() + 1, bigger.size());
+		assertFalse(table.knows(origin, 12345));
+	}
 }

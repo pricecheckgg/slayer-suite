@@ -957,6 +957,28 @@
           "hops": 3
         }
       ]
+    },
+    {
+      "name": "Poison Waste Dungeon",
+      "requires": [
+        {
+          "quest": "THE_PATH_OF_GLOUPHRIE",
+          "started": true
+        }
+      ],
+      "teleports": [
+        {
+          "item": "Spirit tree",
+          "hops": 2,
+          "x": 2339,
+          "y": 3111,
+          "quest": "THE_PATH_OF_GLOUPHRIE"
+        },
+        {
+          "fairy": "BKP",
+          "hops": 3
+        }
+      ]
     }
   ]
 }

@@ -748,7 +748,18 @@
     ],
     "reviewed": "2026-10-25"
   },
-  "warped-creatures": {},
+  "warped-creatures": {
+    "requiredItems": [
+      {
+        "anyOf": [
+          "crystal_chime"
+        ],
+        "why": "they cannot be harmed without a crystal chime",
+        "level": "required"
+      }
+    ],
+    "reviewed": "2026-10-26"
+  },
   "waterfiends": {
     "style": "Melee",
     "notes": [],

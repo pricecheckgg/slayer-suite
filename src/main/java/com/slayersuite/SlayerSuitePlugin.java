@@ -9,6 +9,7 @@ import com.slayersuite.advisor.PathOverlay;
 import com.slayersuite.advisor.RouteMapOverlay;
 import com.slayersuite.advisor.RouteMinimapOverlay;
 import com.slayersuite.route.RouteService;
+import com.slayersuite.route.TransportLearner;
 import com.slayersuite.advisor.PluginOverlap;
 import com.slayersuite.advisor.SlayerSuitePanel;
 import com.slayersuite.advisor.TravelData;
@@ -63,7 +64,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.8.2";
+	public static final String VERSION = "0.8.3";
 
 	@Inject
 	private EventBus eventBus;
@@ -113,6 +114,8 @@ public class SlayerSuitePlugin extends Plugin
 	private PathOverlay pathOverlay;
 	@Inject
 	private RouteService routeService;
+	@Inject
+	private TransportLearner transportLearner;
 	@Inject
 	private RouteMinimapOverlay routeMinimapOverlay;
 	@Inject
@@ -226,6 +229,7 @@ public class SlayerSuitePlugin extends Plugin
 		try
 		{
 			sounds.setDirectory(getPluginDirectory().joinSegment("sounds"));
+			transportLearner.setFile(getPluginDirectory().joinSegment("learned-transports.tsv"));
 			log.debug("Slayer Suite: custom sounds are read from {}", sounds.getDirectory());
 		}
 		catch (java.io.IOException | RuntimeException e)
@@ -244,6 +248,8 @@ public class SlayerSuitePlugin extends Plugin
 		eventBus.register(pluginOverlap);
 		routeService.start();
 		eventBus.register(routeService);
+		transportLearner.load();
+		eventBus.register(transportLearner);
 		keyManager.registerKeyListener(alerts.getPauseHotkey());
 
 		overlayManager.add(cardOverlay);
@@ -286,6 +292,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(routeMapOverlay);
 		eventBus.unregister(pathOverlay);
 		eventBus.unregister(routeService);
+		eventBus.unregister(transportLearner);
 		routeService.stop();
 		overlayManager.remove(hoverOverlay);
 		overlayManager.remove(completeOverlay);

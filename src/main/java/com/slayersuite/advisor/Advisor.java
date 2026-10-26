@@ -723,6 +723,13 @@ public class Advisor
 					status = "in your house";
 				}
 			}
+			else if (t.getItem() != null && t.getItem().equalsIgnoreCase("Spirit tree"))
+			{
+				boolean trees = account.questFinished("TREE_GNOME_VILLAGE");
+				boolean thisTree = t.getQuest() == null || account.questStarted(t.getQuest());
+				usable = trees && thisTree;
+				status = !trees ? "needs Tree Gnome Village" : !thisTree ? "needs " + LocationScorer.pretty(t.getQuest()) + " started" : "spirit tree";
+			}
 			else if (t.getItem() != null)
 			{
 				String n = com.slayersuite.data.ItemNames.normalize(t.getItem());

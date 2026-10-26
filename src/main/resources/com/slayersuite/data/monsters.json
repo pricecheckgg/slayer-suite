@@ -80582,7 +80582,15 @@
      "notes": []
     }
    ],
-   "requiredItems": [],
+   "requiredItems": [
+    {
+     "anyOf": [
+      "crystal_chime"
+     ],
+     "why": "they cannot be harmed without a crystal chime",
+     "level": "required"
+    }
+   ],
    "finishingItem": null,
    "protection": [],
    "style": null,
@@ -80595,7 +80603,7 @@
     "Mutated tortoise"
    ],
    "iconItemId": 28582,
-   "reviewed": false
+   "reviewed": true
   },
   {
    "key": "waterfiends",

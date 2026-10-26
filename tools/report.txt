@@ -97,7 +97,6 @@ monster pins merged: Slayer task/Vampyres (filled 0, added 2)
 no overrides: venators
 variants from monster page: Slayer task/Wall beast <- Wall beast
 monster pins merged: Slayer task/Wall beast (filled 0, added 1)
-no overrides: warped-creatures
 monster pins merged: Slayer task/Wolves (filled 11, added 18)
 no overrides: wolves
 monster pins merged: Slayer task/Wyrms (filled 5, added 0)

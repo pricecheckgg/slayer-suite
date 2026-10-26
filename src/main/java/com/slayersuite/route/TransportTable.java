@@ -59,6 +59,28 @@ public final class TransportTable
 		return in;
 	}
 
+	/** A table with these transports added; the old one is untouched, so a running search keeps its view. */
+	public TransportTable withAdded(List<Transport> extra)
+	{
+		List<Transport> merged = new ArrayList<>(all.size() + extra.size());
+		merged.addAll(all);
+		merged.addAll(extra);
+		return new TransportTable(merged);
+	}
+
+	/** True when a transport through this object already leaves the tile. */
+	public boolean knows(int origin, int objectId)
+	{
+		for (Transport t : from(origin))
+		{
+			if (t.objectId == objectId)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public List<Transport> from(int packed)
 	{
 		List<Transport> list = byOrigin.get(packed);

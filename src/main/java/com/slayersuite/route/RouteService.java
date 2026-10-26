@@ -54,6 +54,8 @@ public class RouteService
 
 	private volatile WorldMap map;
 	private volatile TransportTable table;
+	/** Transports learned before the tables were ready, applied once they are. */
+	private final List<Transport> extra = Collections.synchronizedList(new ArrayList<>());
 	private volatile boolean loadFailed;
 	private volatile Set<Transport> usable = Collections.emptySet();
 	private volatile Planner.Plan plan;
@@ -86,6 +88,13 @@ public class RouteService
 					long t0 = System.currentTimeMillis();
 					WorldMap m = WorldMap.load();
 					TransportTable t = TransportTable.load();
+					synchronized (extra)
+					{
+						if (!extra.isEmpty())
+						{
+							t = t.withAdded(new ArrayList<>(extra));
+						}
+					}
 					table = t;
 					map = m;
 					log.debug("Slayer Suite: routing data ready in {} ms ({} regions, {} transports)", System.currentTimeMillis() - t0, m.regionCount(), t.size());
@@ -110,6 +119,33 @@ public class RouteService
 	public boolean ready()
 	{
 		return map != null && table != null;
+	}
+
+	public WorldMap map()
+	{
+		return map;
+	}
+
+	public TransportTable table()
+	{
+		return table;
+	}
+
+	/** Adds transports found by using them; they need nothing and are usable at once. Client thread. */
+	public void addTransports(List<Transport> found)
+	{
+		TransportTable t = table;
+		if (t == null)
+		{
+			extra.addAll(found);
+			return;
+		}
+		table = t.withAdded(found);
+		Set<Transport> u = new HashSet<>(usable);
+		u.addAll(found);
+		usable = u;
+		plan = null;
+		route = null;
 	}
 
 	/** The spot to route to, or null for none, with the teleports that could start the trip. Client thread. */
