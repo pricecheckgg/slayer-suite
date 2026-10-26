@@ -10,7 +10,6 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,8 +50,11 @@ import net.runelite.client.ui.overlay.OverlayPosition;
  */
 public class PathOverlay extends Overlay
 {
-	private static final Color ARROW = new Color(80, 220, 255, 230);
-	private static final Color ARROW_SHADOW = new Color(0, 0, 0, 150);
+	private static final Color ARROW_EDGE = new Color(0, 0, 0, 110);
+	/** Milliseconds for the lit pulse to move one tile along the route. */
+	private static final long PULSE_MS = 110L;
+	/** Half-size of a chevron in local units; a tile is 128 across. */
+	private static final double CHEVRON = 46;
 	private static final Color END = new Color(255, 215, 80, 200);
 	private static final Color END_FILL = new Color(255, 215, 80, 70);
 	private static final Color BLOCKED = new Color(255, 90, 90, 200);
@@ -534,62 +536,49 @@ public class PathOverlay extends Overlay
 		return null;
 	}
 
-	/** A chevron on each tile pointing at the next one, and the last tile outlined. */
+	/**
+	 * A chevron lying flat on each tile, pointing at the next one, like the boost pads of a kart
+	 * track: a soft pulse runs along them toward the spot, and the last tile is outlined.
+	 */
 	private void drawArrows(Graphics2D g, WorldView wv, List<WorldPoint> p)
 	{
 		Object aa = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		Point[] centres = new Point[p.size()];
-		for (int i = 0; i < p.size(); i++)
+		Stroke line = new BasicStroke(1.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+		g.setStroke(line);
+		int n = p.size();
+		// where the pulse is, in tiles from you; it rests a moment past the end before starting again
+		double head = (System.currentTimeMillis() / (double) PULSE_MS) % (n + 6);
+		for (int i = 1; i < n - 1; i++)
 		{
-			LocalPoint lp = LocalPoint.fromWorld(wv, p.get(i));
-			centres[i] = lp == null ? null : Perspective.localToCanvas(client, lp, p.get(i).getPlane());
-		}
-		Stroke shadow = new BasicStroke(4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-		Stroke line = new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
-		for (int i = 1; i < p.size() - 1; i++)
-		{
-			Point a = centres[i];
-			Point b = centres[i + 1];
-			if (a == null || b == null)
+			WorldPoint a = p.get(i);
+			WorldPoint b = p.get(i + 1);
+			LocalPoint c = LocalPoint.fromWorld(wv, a);
+			int dx = Integer.signum(b.getX() - a.getX());
+			int dy = Integer.signum(b.getY() - a.getY());
+			if (c == null || (dx == 0 && dy == 0))
 			{
 				continue;
 			}
-			double dx = b.getX() - a.getX();
-			double dy = b.getY() - a.getY();
-			double len = Math.hypot(dx, dy);
-			if (len < 2)
+			Polygon chevron = chevron(wv, c, a.getPlane(), dx, dy);
+			if (chevron == null)
 			{
 				continue;
 			}
-			double ux = dx / len;
-			double uy = dy / len;
-			double size = Math.max(4, Math.min(14, len * 0.45));
-			double tipX = a.getX() + ux * size * 0.5;
-			double tipY = a.getY() + uy * size * 0.5;
-			double baseX = tipX - ux * size;
-			double baseY = tipY - uy * size;
-			double wingX = -uy * size * 0.7;
-			double wingY = ux * size * 0.7;
-			Path2D.Double chevron = new Path2D.Double();
-			chevron.moveTo(baseX + wingX, baseY + wingY);
-			chevron.lineTo(tipX, tipY);
-			chevron.lineTo(baseX - wingX, baseY - wingY);
-			g.setStroke(shadow);
-			g.setColor(ARROW_SHADOW);
-			g.draw(chevron);
-			g.setStroke(line);
-			g.setColor(ARROW);
+			double behind = head - i;
+			float lit = behind >= 0 && behind < 3 ? (float) (1 - behind / 3) : 0f;
+			g.setColor(new Color(80, 220, 255, 60 + Math.round(lit * 120)));
+			g.fill(chevron);
+			g.setColor(ARROW_EDGE);
 			g.draw(chevron);
 		}
-		LocalPoint last = LocalPoint.fromWorld(wv, p.get(p.size() - 1));
+		LocalPoint last = LocalPoint.fromWorld(wv, p.get(n - 1));
 		Polygon poly = last == null ? null : Perspective.getCanvasTilePoly(client, last);
 		if (poly != null)
 		{
 			boolean good = reachesTarget || entrance != null;
 			g.setColor(good ? END_FILL : BLOCKED_FILL);
 			g.fillPolygon(poly);
-			g.setStroke(line);
 			g.setColor(good ? END : BLOCKED);
 			g.drawPolygon(poly);
 		}
@@ -597,6 +586,31 @@ public class PathOverlay extends Overlay
 		{
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, aa);
 		}
+	}
+
+	/** The six corners of a chevron on the ground around tile centre c, pointing (dx, dy) in world tiles. */
+	private Polygon chevron(WorldView wv, LocalPoint c, int plane, int dx, int dy)
+	{
+		double len = Math.hypot(dx, dy);
+		double ux = dx / len;
+		double uy = dy / len;
+		// (forward, sideways) as fractions of CHEVRON: outer wing, tip, outer wing, inner wing, notch, inner wing
+		double[][] corners = {{-0.3, 0.9}, {0.9, 0}, {-0.3, -0.9}, {-0.9, -0.9}, {0.3, 0}, {-0.9, 0.9}};
+		Polygon poly = new Polygon();
+		for (double[] k : corners)
+		{
+			double f = k[0] * CHEVRON;
+			double s = k[1] * CHEVRON;
+			int lx = (int) Math.round(c.getX() + ux * f - uy * s);
+			int ly = (int) Math.round(c.getY() + uy * f + ux * s);
+			Point sp = Perspective.localToCanvas(client, new LocalPoint(lx, ly, wv), plane);
+			if (sp == null)
+			{
+				return null;
+			}
+			poly.addPoint(sp.getX(), sp.getY());
+		}
+		return poly;
 	}
 
 	private void mark(Graphics2D g, WorldView wv, Obstacle o, Color edge, Color fill)
