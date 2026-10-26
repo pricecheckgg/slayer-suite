@@ -1,44 +1,338 @@
 {
- "comment": "Item groups the readiness check looks for. Matching is by item name after normalisation: lower case, bracketed dose/charge/imbue suffixes such as (4), (10), (i), (e), (p++), (or) removed, and a trailing charge number such as 'Fungicide spray 10' removed. Other brackets, e.g. (uncharged) or (lit), are kept so they can be listed explicitly. 'requireAll' means every name must be present (cannon parts).",
- "groups": {
-  "slayer_helm": {"label": "Slayer helmet", "names": ["Slayer helmet", "Black slayer helmet", "Green slayer helmet", "Red slayer helmet", "Purple slayer helmet", "Turquoise slayer helmet", "Hydra slayer helmet", "Twisted slayer helmet", "Tztok slayer helmet", "Vampyric slayer helmet", "Tzkal slayer helmet", "Araxyte slayer helmet", "Hooded slayer helmet", "Oathplate slayer helmet", "Radiant slayer helmet"]},
-  "black_mask": {"label": "Black mask", "names": ["Black mask"]},
-  "nose_peg": {"label": "Nose peg", "names": ["Nose peg"]},
-  "earmuffs": {"label": "Earmuffs", "names": ["Earmuffs"]},
-  "facemask": {"label": "Facemask", "names": ["Facemask"]},
-  "spiny_helmet": {"label": "Spiny helmet", "names": ["Spiny helmet"]},
-  "mirror_shield": {"label": "Mirror shield or V's shield", "names": ["Mirror shield", "V's shield"]},
-  "witchwood_icon": {"label": "Witchwood icon", "names": ["Witchwood icon"]},
-  "insulated_boots": {"label": "Insulated boots", "names": ["Insulated boots"]},
-  "slayer_gloves": {"label": "Slayer gloves", "names": ["Slayer gloves"]},
-  "reinforced_goggles": {"label": "Reinforced goggles", "names": ["Reinforced goggles"]},
-  "rock_hammer": {"label": "Rock hammer, rock thrownhammer or granite hammer", "names": ["Rock hammer", "Rock thrownhammer", "Granite hammer"]},
-  "bag_of_salt": {"label": "Bag of salt", "names": ["Bag of salt"]},
-  "ice_cooler": {"label": "Ice cooler", "names": ["Ice cooler"]},
-  "fungicide_spray": {"label": "Fungicide spray", "names": ["Fungicide spray"]},
-  "bug_lantern_lit": {"label": "Lit bug lantern", "names": ["Lit bug lantern"]},
-  "bug_lantern": {"label": "Bug lantern", "names": ["Bug lantern", "Lit bug lantern"]},
-  "slayer_bell": {"label": "Slayer bell", "names": ["Slayer bell"]},
-  "fishing_explosive": {"label": "Fishing explosive", "names": ["Fishing explosive"]},
-  "leaf_bladed": {"label": "Leaf-bladed weapon, broad ammo or a Magic Dart staff", "names": ["Leaf-bladed spear", "Leaf-bladed sword", "Leaf-bladed battleaxe", "Broad arrows", "Broad bolts", "Amethyst broad bolts", "Slayer's staff", "Staff of the dead", "Toxic staff of the dead", "Staff of light", "Staff of balance"]},
-  "antifire_potion": {"label": "Antifire potion", "names": ["Antifire potion", "Super antifire potion", "Extended antifire", "Extended super antifire"]},
-  "antifire_shield": {"label": "Anti-dragon or dragonfire shield", "names": ["Anti-dragon shield", "Dragonfire shield", "Dragonfire shield (uncharged)", "Dragonfire ward", "Dragonfire ward (uncharged)", "Ancient wyvern shield", "Ancient wyvern shield (uncharged)"]},
-  "wyvern_shield": {"label": "Elemental, mind, dragonfire or ancient wyvern shield", "names": ["Elemental shield", "Mind shield", "Dragonfire shield", "Dragonfire shield (uncharged)", "Dragonfire ward", "Dragonfire ward (uncharged)", "Ancient wyvern shield", "Ancient wyvern shield (uncharged)"]},
-  "antipoison": {"label": "Antipoison", "names": ["Antipoison", "Superantipoison", "Antidote+", "Antidote++", "Anti-venom", "Anti-venom+", "Extended anti-venom+", "Sanfew serum"]},
-  "antivenom": {"label": "Anti-venom (or a charged serpentine, magma or tanzanite helm)", "names": ["Anti-venom", "Anti-venom+", "Extended anti-venom+", "Serpentine helm", "Magma helm", "Tanzanite helm"]},
-  "prayer_restore": {"label": "Prayer potions or super restores", "names": ["Prayer potion", "Super restore", "Sanfew serum", "Blighted super restore", "Moonlight potion", "Ancient brew", "Forgotten brew"]},
-  "karuulm_boots": {"label": "Boots of stone, boots of brimstone or granite boots", "names": ["Boots of stone", "Boots of brimstone", "Granite boots"]},
-  "light_source": {"label": "Lit light source", "names": ["Lit candle", "Lit black candle", "Candle lantern (lit)", "Black candle lantern (lit)", "Oil lamp (lit)", "Oil lantern (lit)", "Bullseye lantern (lit)", "Sapphire lantern (lit)", "Emerald lantern (lit)", "Mining helmet (lit)", "Lit torch", "Bruma torch", "Kandarin headgear", "Firemaking cape", "Max cape", "Abyssal lantern", "Fire of Eternal Light"]},
-  "tinderbox": {"label": "Tinderbox", "names": ["Tinderbox"]},
-  "herb_sack": {"label": "Herb sack", "names": ["Herb sack", "Open herb sack"]},
-  "seed_box": {"label": "Seed box", "names": ["Seed box", "Open seed box"]},
-  "spade": {"label": "Spade", "names": ["Spade"]},
-  "rope": {"label": "Rope", "names": ["Rope"]},
-  "waterskin": {"label": "Waterskins", "names": ["Waterskin"]},
-  "cannon_parts": {"label": "Dwarf multicannon (all four parts)", "names": ["Cannon base", "Cannon stand", "Cannon barrels", "Cannon furnace"], "requireAll": true},
-  "cannonballs": {"label": "Cannonballs", "names": ["Cannonball", "Granite cannonball"]},
-  "vampyre_weapon": {"label": "Silver or blisterwood weapon", "names": ["Blisterwood flail", "Blisterwood sickle", "Ivandis flail", "Rod of ivandis", "Silverlight", "Darklight", "Arclight", "Emberlight", "Silver sickle", "Wolfbane"]},
-  "salve_amulet": {"label": "Salve amulet", "names": ["Salve amulet"]},
-  "ectoplasmator": {"label": "Ectoplasmator", "names": ["Ectoplasmator"]}
- }
+  "comment": "Item groups the readiness check looks for. Matching is by item name after normalisation: lower case, bracketed dose/charge/imbue suffixes such as (4), (10), (i), (e), (p++), (or) removed, and a trailing charge number such as 'Fungicide spray 10' removed. Other brackets, e.g. (uncharged) or (lit), are kept so they can be listed explicitly. 'requireAll' means every name must be present (cannon parts).",
+  "groups": {
+    "slayer_helm": {
+      "label": "Slayer helmet",
+      "names": [
+        "Slayer helmet",
+        "Black slayer helmet",
+        "Green slayer helmet",
+        "Red slayer helmet",
+        "Purple slayer helmet",
+        "Turquoise slayer helmet",
+        "Hydra slayer helmet",
+        "Twisted slayer helmet",
+        "Tztok slayer helmet",
+        "Vampyric slayer helmet",
+        "Tzkal slayer helmet",
+        "Araxyte slayer helmet",
+        "Hooded slayer helmet",
+        "Oathplate slayer helmet",
+        "Radiant slayer helmet"
+      ]
+    },
+    "black_mask": {
+      "label": "Black mask",
+      "names": [
+        "Black mask"
+      ]
+    },
+    "nose_peg": {
+      "label": "Nose peg",
+      "names": [
+        "Nose peg"
+      ]
+    },
+    "earmuffs": {
+      "label": "Earmuffs",
+      "names": [
+        "Earmuffs"
+      ]
+    },
+    "facemask": {
+      "label": "Facemask",
+      "names": [
+        "Facemask"
+      ]
+    },
+    "spiny_helmet": {
+      "label": "Spiny helmet",
+      "names": [
+        "Spiny helmet"
+      ]
+    },
+    "mirror_shield": {
+      "label": "Mirror shield or V's shield",
+      "names": [
+        "Mirror shield",
+        "V's shield"
+      ]
+    },
+    "witchwood_icon": {
+      "label": "Witchwood icon",
+      "names": [
+        "Witchwood icon"
+      ]
+    },
+    "insulated_boots": {
+      "label": "Insulated boots",
+      "names": [
+        "Insulated boots"
+      ]
+    },
+    "slayer_gloves": {
+      "label": "Slayer gloves",
+      "names": [
+        "Slayer gloves"
+      ]
+    },
+    "reinforced_goggles": {
+      "label": "Reinforced goggles",
+      "names": [
+        "Reinforced goggles"
+      ]
+    },
+    "rock_hammer": {
+      "label": "Rock hammer or thrownhammer",
+      "names": [
+        "Rock hammer",
+        "Rock thrownhammer",
+        "Granite hammer"
+      ]
+    },
+    "bag_of_salt": {
+      "label": "Bag of salt",
+      "names": [
+        "Bag of salt"
+      ]
+    },
+    "ice_cooler": {
+      "label": "Ice cooler",
+      "names": [
+        "Ice cooler"
+      ]
+    },
+    "fungicide_spray": {
+      "label": "Fungicide spray",
+      "names": [
+        "Fungicide spray"
+      ]
+    },
+    "bug_lantern_lit": {
+      "label": "Lit bug lantern",
+      "names": [
+        "Lit bug lantern"
+      ]
+    },
+    "bug_lantern": {
+      "label": "Bug lantern",
+      "names": [
+        "Bug lantern",
+        "Lit bug lantern"
+      ]
+    },
+    "slayer_bell": {
+      "label": "Slayer bell",
+      "names": [
+        "Slayer bell"
+      ]
+    },
+    "fishing_explosive": {
+      "label": "Fishing explosive",
+      "names": [
+        "Fishing explosive"
+      ]
+    },
+    "leaf_bladed": {
+      "label": "Leaf-bladed weapon, broad ammo or a Magic Dart staff",
+      "names": [
+        "Leaf-bladed spear",
+        "Leaf-bladed sword",
+        "Leaf-bladed battleaxe",
+        "Broad arrows",
+        "Broad bolts",
+        "Amethyst broad bolts",
+        "Slayer's staff",
+        "Staff of the dead",
+        "Toxic staff of the dead",
+        "Staff of light",
+        "Staff of balance"
+      ]
+    },
+    "antifire_potion": {
+      "label": "Antifire potion",
+      "names": [
+        "Antifire potion",
+        "Super antifire potion",
+        "Extended antifire",
+        "Extended super antifire"
+      ]
+    },
+    "antifire_shield": {
+      "label": "Anti-dragon or dragonfire shield",
+      "names": [
+        "Anti-dragon shield",
+        "Dragonfire shield",
+        "Dragonfire shield (uncharged)",
+        "Dragonfire ward",
+        "Dragonfire ward (uncharged)",
+        "Ancient wyvern shield",
+        "Ancient wyvern shield (uncharged)"
+      ]
+    },
+    "wyvern_shield": {
+      "label": "Elemental, mind, dragonfire or ancient wyvern shield",
+      "names": [
+        "Elemental shield",
+        "Mind shield",
+        "Dragonfire shield",
+        "Dragonfire shield (uncharged)",
+        "Dragonfire ward",
+        "Dragonfire ward (uncharged)",
+        "Ancient wyvern shield",
+        "Ancient wyvern shield (uncharged)"
+      ]
+    },
+    "antipoison": {
+      "label": "Antipoison",
+      "names": [
+        "Antipoison",
+        "Superantipoison",
+        "Antidote+",
+        "Antidote++",
+        "Anti-venom",
+        "Anti-venom+",
+        "Extended anti-venom+",
+        "Sanfew serum"
+      ]
+    },
+    "antivenom": {
+      "label": "Anti-venom (or a charged serpentine, magma or tanzanite helm)",
+      "names": [
+        "Anti-venom",
+        "Anti-venom+",
+        "Extended anti-venom+",
+        "Serpentine helm",
+        "Magma helm",
+        "Tanzanite helm"
+      ]
+    },
+    "prayer_restore": {
+      "label": "Prayer potions or super restores",
+      "names": [
+        "Prayer potion",
+        "Super restore",
+        "Sanfew serum",
+        "Blighted super restore",
+        "Moonlight potion",
+        "Ancient brew",
+        "Forgotten brew"
+      ]
+    },
+    "karuulm_boots": {
+      "label": "Boots of stone, boots of brimstone or granite boots",
+      "names": [
+        "Boots of stone",
+        "Boots of brimstone",
+        "Granite boots"
+      ]
+    },
+    "light_source": {
+      "label": "Lit light source",
+      "names": [
+        "Lit candle",
+        "Lit black candle",
+        "Candle lantern (lit)",
+        "Black candle lantern (lit)",
+        "Oil lamp (lit)",
+        "Oil lantern (lit)",
+        "Bullseye lantern (lit)",
+        "Sapphire lantern (lit)",
+        "Emerald lantern (lit)",
+        "Mining helmet (lit)",
+        "Lit torch",
+        "Bruma torch",
+        "Kandarin headgear",
+        "Firemaking cape",
+        "Max cape",
+        "Abyssal lantern",
+        "Fire of Eternal Light"
+      ]
+    },
+    "tinderbox": {
+      "label": "Tinderbox",
+      "names": [
+        "Tinderbox"
+      ]
+    },
+    "herb_sack": {
+      "label": "Herb sack",
+      "names": [
+        "Herb sack",
+        "Open herb sack"
+      ]
+    },
+    "seed_box": {
+      "label": "Seed box",
+      "names": [
+        "Seed box",
+        "Open seed box"
+      ]
+    },
+    "spade": {
+      "label": "Spade",
+      "names": [
+        "Spade"
+      ]
+    },
+    "rope": {
+      "label": "Rope",
+      "names": [
+        "Rope"
+      ]
+    },
+    "waterskin": {
+      "label": "Waterskins",
+      "names": [
+        "Waterskin"
+      ]
+    },
+    "cannon_parts": {
+      "label": "Dwarf multicannon (all four parts)",
+      "names": [
+        "Cannon base",
+        "Cannon stand",
+        "Cannon barrels",
+        "Cannon furnace"
+      ],
+      "requireAll": true
+    },
+    "cannonballs": {
+      "label": "Cannonballs",
+      "names": [
+        "Cannonball",
+        "Granite cannonball",
+        "Steel cannonball",
+        "Steel cannonballs",
+        "Cannonballs"
+      ]
+    },
+    "vampyre_weapon": {
+      "label": "Silver or blisterwood weapon",
+      "names": [
+        "Blisterwood flail",
+        "Blisterwood sickle",
+        "Ivandis flail",
+        "Rod of ivandis",
+        "Silverlight",
+        "Darklight",
+        "Arclight",
+        "Emberlight",
+        "Silver sickle",
+        "Wolfbane"
+      ]
+    },
+    "salve_amulet": {
+      "label": "Salve amulet",
+      "names": [
+        "Salve amulet"
+      ]
+    },
+    "ectoplasmator": {
+      "label": "Ectoplasmator",
+      "names": [
+        "Ectoplasmator"
+      ]
+    }
+  }
 }

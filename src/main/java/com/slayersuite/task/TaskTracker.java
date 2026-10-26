@@ -145,6 +145,8 @@ public class TaskTracker
 	private long lastPointsAwardedAt;
 	/** Our own completion detection, independent of the core plugin clearing the task. */
 	private int lastCount = -1;
+	private long loggedInAt;
+	private static final long SETTLE_MS = 5_000L;
 	private long pendingFinishAt;
 	private String pendingFinishName;
 	private String finishedName;
@@ -256,7 +258,21 @@ public class TaskTracker
 		if (e.getGameState() == GameState.LOGIN_SCREEN || e.getGameState() == GameState.HOPPING)
 		{
 			killTimes.clear();
+			// the client zeroes every varp here: that is not a task reaching zero
+			pendingFinishAt = 0;
+			pendingFinishName = null;
+			lastCount = -1;
 		}
+		else if (e.getGameState() == GameState.LOGGED_IN)
+		{
+			loggedInAt = System.currentTimeMillis();
+		}
+	}
+
+	/** True once the game has had a few seconds after login to send the real task values. */
+	private boolean settled()
+	{
+		return client.getGameState() == GameState.LOGGED_IN && loggedInAt > 0 && System.currentTimeMillis() - loggedInAt > SETTLE_MS;
 	}
 
 	@Subscribe
@@ -370,7 +386,7 @@ public class TaskTracker
 				: fromChat && discoveredCountVarp >= 0 ? client.getVarpValue(discoveredCountVarp)
 				: fromChat && discoveredCountVarbit >= 0 ? client.getVarbitValue(discoveredCountVarbit)
 				: fromChat ? -1 : client.getVarpValue(VarPlayerID.SLAYER_COUNT);
-			if (count >= 0 && taskName != null && lastCount > 0 && count == 0 && pendingFinishAt == 0 && !recentlyFinished(taskName))
+			if (settled() && count >= 0 && taskName != null && lastCount > 0 && count == 0 && pendingFinishAt == 0 && !recentlyFinished(taskName))
 			{
 				pendingFinishAt = System.currentTimeMillis(); // give the points message two ticks to arrive
 				pendingFinishName = taskName;
@@ -443,7 +459,7 @@ public class TaskTracker
 			taskSeenAt = System.currentTimeMillis();
 			currentLocation = null;
 			boolean countZero = client.getGameState() == GameState.LOGGED_IN && client.getVarpValue(VarPlayerID.SLAYER_COUNT) == 0;
-			boolean finishedNow = name == null && old != null && (remaining <= 0 || countZero || System.currentTimeMillis() - completionMessageAt < 10_000L);
+			boolean finishedNow = settled() && name == null && old != null && (remaining <= 0 || countZero || System.currentTimeMillis() - completionMessageAt < 10_000L);
 			if (old != null && !finishedNow && pendingSpend > 0 && System.currentTimeMillis() - pendingSpendAt <= SPEND_MATCH_MS)
 			{
 				// the task went away right after points were taken: the last drop is the skip (30) or block (100);
@@ -875,7 +891,7 @@ public class TaskTracker
 		{
 			recentVars.pollFirst();
 		}
-		if (e.getVarpId() == VarPlayerID.SLAYER_COUNT && !fromChat && taskName != null && lastCount > 0 && e.getValue() == 0 && pendingFinishAt == 0 && !recentlyFinished(taskName))
+		if (settled() && e.getVarpId() == VarPlayerID.SLAYER_COUNT && !fromChat && taskName != null && lastCount > 0 && e.getValue() == 0 && pendingFinishAt == 0 && !recentlyFinished(taskName))
 		{
 			pendingFinishAt = now;
 		}
