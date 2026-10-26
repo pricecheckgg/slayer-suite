@@ -68,6 +68,7 @@ public class RouteService
 	private long lastRequestMs;
 	private int tick;
 	private int snapshotTick = -1;
+	private volatile boolean fairyRings;
 
 	@Inject
 	public RouteService(Client client, SlayerSuiteConfig config)
@@ -129,6 +130,35 @@ public class RouteService
 	public TransportTable table()
 	{
 		return table;
+	}
+
+	/** The stops of a network you may use, or none until the tables are loaded. */
+	public List<Transport> stops(Transport.Kind kind)
+	{
+		TransportTable t = table;
+		if (t == null)
+		{
+			return Collections.emptyList();
+		}
+		List<Transport> out = new ArrayList<>();
+		for (Transport s : t.stops(kind))
+		{
+			if (usable.contains(s))
+			{
+				out.add(s);
+			}
+		}
+		return out;
+	}
+
+	/** Whether you can use fairy rings (Fairytale II started with a staff, or the Lumbridge elite diary). Client thread. */
+	public void setFairyRingsUsable(boolean usable)
+	{
+		if (usable != fairyRings)
+		{
+			fairyRings = usable;
+			snapshotTick = -1;
+		}
 	}
 
 	/** Adds transports found by using them; they need nothing and are usable at once. Client thread. */
@@ -305,20 +335,27 @@ public class RouteService
 			onRoute = true;
 			return;
 		}
-		// beside the route is still on it; further away means a new plan from here
-		int f = from;
+		// beside the route is still on it (a ride lands you next to its stop); further away means a new plan
 		int nearest = Integer.MAX_VALUE;
+		int nearestAt = -1;
 		int plane = Packed.plane(here);
-		for (int i = Math.max(0, f - 5); i < r.tiles.size() && nearest > OFF_ROUTE_TILES; i++)
+		for (int i = 0; i < r.tiles.size(); i++)
 		{
 			int tile = r.tiles.get(i);
-			if (Packed.plane(tile) == plane)
+			if (Packed.plane(tile) != plane)
 			{
-				nearest = Math.min(nearest, Packed.chebyshev(tile, here));
+				continue;
+			}
+			int d = Packed.chebyshev(tile, here);
+			if (d < nearest || (d == nearest && i > from))
+			{
+				nearest = d;
+				nearestAt = i;
 			}
 		}
 		if (nearest <= OFF_ROUTE_TILES)
 		{
+			from = nearestAt;
 			onRoute = true;
 			return;
 		}
@@ -399,6 +436,10 @@ public class RouteService
 		for (Transport t : tt.all())
 		{
 			if (t.needsItems || !skillsMet(t) || !questsMet(t, done) || !varsMet(t))
+			{
+				continue;
+			}
+			if (t.kind == Transport.Kind.FAIRY_RING && !fairyRings)
 			{
 				continue;
 			}

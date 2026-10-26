@@ -31,7 +31,9 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import javax.inject.Inject;
+import java.awt.Rectangle;
 import net.runelite.api.Client;
+import net.runelite.api.Point;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
@@ -63,6 +65,10 @@ public class TaskCompleteOverlay extends Overlay
 	private volatile int iconFor = -1;
 
 	private volatile long shownAt;
+	/** Where the card was last drawn, to tell when the mouse rests on it. */
+	private volatile Rectangle lastBounds;
+	private long lastFrameAt;
+	private boolean hovered;
 	private volatile long durationMs;
 	private volatile String title = "";
 	private volatile String subtitle = "";
@@ -444,12 +450,25 @@ public class TaskCompleteOverlay extends Overlay
 		long start = shownAt;
 		if (start == 0)
 		{
+			lastBounds = null;
 			return null;
 		}
-		long t = System.currentTimeMillis() - start;
+		long now = System.currentTimeMillis();
+		Point mouse = client.getMouseCanvasPosition();
+		Rectangle b = lastBounds;
+		hovered = b != null && mouse != null && b.contains(mouse.getX(), mouse.getY());
+		if (hovered && lastFrameAt > 0 && now - start > IN_MS)
+		{
+			// the clock stands still while your mouse rests on the card, so you can read it
+			shownAt += now - lastFrameAt;
+			start = shownAt;
+		}
+		lastFrameAt = now;
+		long t = now - start;
 		if (t > durationMs)
 		{
 			shownAt = 0;
+			lastBounds = null;
 			return null;
 		}
 		if (!mortimerShown && tracker.getMortimerTasks() > 0 && tracker.getMortimerAt() >= start - 10_000L)
@@ -530,10 +549,21 @@ public class TaskCompleteOverlay extends Overlay
 		Paint old2 = g.getPaint();
 		g.setPaint(new GradientPaint(left, 0, new Color(0, 0, 0, 0), left + bandW / 2f, 0, BAND, true));
 		g.fillRect(left, top, bandW, bandH);
+		lastBounds = new Rectangle(left, top, bandW, bandH);
 		g.setPaint(new GradientPaint(left, 0, new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 0), left + bandW / 2f, 0, accent, true));
 		g.fillRect(left, top, bandW, 2);
 		g.fillRect(left, top + bandH - 2, bandW, 2);
 		g.setPaint(old2);
+		if (hovered)
+		{
+			String hold = "Stays while your mouse is on it";
+			g.setFont(small);
+			int hw = g.getFontMetrics().stringWidth(hold);
+			g.setColor(new Color(0, 0, 0, 160));
+			g.drawString(hold, cx - hw / 2 + 1, top + bandH - 6 + 1);
+			g.setColor(new Color(200, 200, 200, 220));
+			g.drawString(hold, cx - hw / 2, top + bandH - 6);
+		}
 
 		int textCx = cx + iconW / 2;
 		if (img != null)

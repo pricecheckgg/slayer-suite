@@ -5,6 +5,7 @@ import com.slayersuite.route.Packed;
 import com.slayersuite.route.Planner;
 import com.slayersuite.route.RouteService;
 import com.slayersuite.route.Router;
+import com.slayersuite.route.Transport;
 import com.slayersuite.data.LocationRecord;
 import com.slayersuite.data.TaskRecord;
 import com.slayersuite.readiness.ReadinessChecker;
@@ -421,6 +422,34 @@ public class Advisor
 				ticks = st.contains("no quick way") ? 60 : 18;
 			}
 			out.add(new Planner.Landing(o.getLabel(), st, Packed.of(o.getLanding()[0], o.getLanding()[1], 0), ticks));
+		}
+		// A fairy ring or spirit tree in your house (or the combined tree) reaches every stop of its
+		// network: the few stops nearest the spot become landings, home teleport and ride included.
+		if (loc != null && loc.hasCoordinates() && account.houseScanned())
+		{
+			int goal = Packed.of(loc.getX(), loc.getY(), loc.getPlane() == null ? 0 : loc.getPlane());
+			int home = account.canTeleportHome() ? 18 : 60;
+			if (account.hasHouseFacility("fairy ring") && account.fairyRingsUsable())
+			{
+				out.addAll(houseLandings("House fairy ring", Transport.Kind.FAIRY_RING, goal, home + 5));
+			}
+			if (account.hasHouseFacility("spirit tree") && account.questFinished("TREE_GNOME_VILLAGE"))
+			{
+				out.addAll(houseLandings("House spirit tree", Transport.Kind.SPIRIT_TREE, goal, home + 6));
+			}
+		}
+		return out;
+	}
+
+	private List<Planner.Landing> houseLandings(String label, Transport.Kind kind, int goal, int ticks)
+	{
+		List<Transport> stops = new ArrayList<>(routes.stops(kind));
+		stops.sort(java.util.Comparator.comparingInt(s -> Math.max(Math.abs(Packed.x(s.origin) - Packed.x(goal)), Math.abs(surfaceY(Packed.y(s.origin)) - surfaceY(Packed.y(goal))))));
+		List<Planner.Landing> out = new ArrayList<>();
+		for (int i = 0; i < stops.size() && i < 6; i++)
+		{
+			String where = stops.get(i).display.replace(" ", "");
+			out.add(new Planner.Landing(label + (where.isEmpty() ? "" : " to " + where), "in your house", stops.get(i).origin, ticks));
 		}
 		return out;
 	}
@@ -889,6 +918,7 @@ public class Advisor
 	@Subscribe
 	public void onGameTick(GameTick t)
 	{
+		routes.setFairyRingsUsable(account.fairyRingsUsable());
 		LocationRecord focus = destination;
 		if (focus == null)
 		{

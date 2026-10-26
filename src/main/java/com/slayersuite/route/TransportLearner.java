@@ -70,7 +70,7 @@ public class TransportLearner
 		}
 		try (InputStream in = f.openInputStream())
 		{
-			List<Transport> learned = TransportTable.parse(in, false);
+			List<Transport> learned = TransportTable.parse(in, Transport.Kind.LEARNED);
 			if (!learned.isEmpty())
 			{
 				routes.addTransports(learned);
@@ -146,7 +146,7 @@ public class TransportLearner
 			return;
 		}
 		int duration = Math.max(1, Math.min(10, tick - clickTick));
-		Transport t = new Transport(origin, destination, clickOption, clickTarget, clickObject, duration, "", Collections.emptyMap(), Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), false, false);
+		Transport t = new Transport(origin, destination, clickOption, clickTarget, clickObject, duration, "", Collections.emptyMap(), Collections.emptySet(), Collections.emptyList(), Collections.emptyList(), false, Transport.Kind.LEARNED);
 		List<Transport> one = new ArrayList<>(1);
 		one.add(t);
 		routes.addTransports(one);

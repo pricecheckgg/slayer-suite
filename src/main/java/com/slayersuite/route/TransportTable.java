@@ -28,25 +28,54 @@ public final class TransportTable
 
 	private final Map<Integer, List<Transport>> byOrigin;
 	private final List<Transport> all;
+	private final Map<Transport.Kind, List<Transport>> stops;
+	private final Set<Integer> stopTiles;
 
 	private TransportTable(List<Transport> all)
 	{
 		this.all = Collections.unmodifiableList(all);
 		Map<Integer, List<Transport>> map = new HashMap<>();
+		Map<Transport.Kind, List<Transport>> byKind = new java.util.EnumMap<>(Transport.Kind.class);
+		Set<Integer> tiles = new java.util.HashSet<>();
 		for (Transport t : all)
 		{
+			if (t.kind.network())
+			{
+				// a stop of a network: rides between stops are planned, not searched tile by tile
+				byKind.computeIfAbsent(t.kind, k -> new ArrayList<>()).add(t);
+				tiles.add(t.origin);
+				continue;
+			}
 			map.computeIfAbsent(t.origin, k -> new ArrayList<>(2)).add(t);
 		}
 		this.byOrigin = map;
+		this.stops = byKind;
+		this.stopTiles = tiles;
 	}
 
-	/** Reads the bundled general transports and Agility shortcuts. */
+	/** Reads every bundled table: objects, shortcuts, and the rides between the stops of each network. */
 	public static TransportTable load()
 	{
-		List<Transport> all = new ArrayList<>(8000);
-		all.addAll(parse(resource("transports.tsv"), false));
-		all.addAll(parse(resource("agility_shortcuts.tsv"), true));
+		List<Transport> all = new ArrayList<>(80000);
+		all.addAll(parse(resource("transports.tsv"), Transport.Kind.OBJECT));
+		all.addAll(parse(resource("agility_shortcuts.tsv"), Transport.Kind.SHORTCUT));
+		all.addAll(parse(resource("boats.tsv"), Transport.Kind.BOAT));
+		all.addAll(parse(resource("ships.tsv"), Transport.Kind.SHIP));
+		all.addAll(parse(resource("charter_ships.tsv"), Transport.Kind.CHARTER));
+		all.addAll(parse(resource("teleportation_portals.tsv"), Transport.Kind.PORTAL));
+		all.addAll(parse(resource("teleportation_levers.tsv"), Transport.Kind.LEVER));
+		all.addAll(parse(resource("spirit_trees.tsv"), Transport.Kind.SPIRIT_TREE));
+		all.addAll(parse(resource("fairy_rings.tsv"), Transport.Kind.FAIRY_RING));
+		all.addAll(parse(resource("gnome_gliders.tsv"), Transport.Kind.GLIDER));
+		all.addAll(parse(resource("magic_mushtrees.tsv"), Transport.Kind.MUSHTREE));
+		all.addAll(parse(resource("quetzals.tsv"), Transport.Kind.QUETZAL));
 		return new TransportTable(all);
+	}
+
+	/** A stop of a network sits here (a ring, a tree, a glider pad), possibly on a solid tile. */
+	public boolean isStop(int packed)
+	{
+		return stopTiles.contains(packed);
 	}
 
 	private static InputStream resource(String name)
@@ -66,6 +95,19 @@ public final class TransportTable
 		merged.addAll(all);
 		merged.addAll(extra);
 		return new TransportTable(merged);
+	}
+
+	/** The stops of a network, each with its own requirements and name. */
+	public List<Transport> stops(Transport.Kind kind)
+	{
+		List<Transport> list = stops.get(kind);
+		return list == null ? Collections.emptyList() : list;
+	}
+
+	/** Every network kind that has stops. */
+	public Set<Transport.Kind> networks()
+	{
+		return stops.keySet();
 	}
 
 	/** True when a transport through this object already leaves the tile. */
@@ -97,8 +139,9 @@ public final class TransportTable
 		return all.size();
 	}
 
-	static List<Transport> parse(InputStream source, boolean shortcut)
+	static List<Transport> parse(InputStream source, Transport.Kind kind)
 	{
+		boolean network = kind.network();
 		List<Transport> out = new ArrayList<>();
 		try (BufferedReader in = new BufferedReader(new InputStreamReader(source, StandardCharsets.UTF_8)))
 		{
@@ -121,18 +164,29 @@ public final class TransportTable
 				}
 			}
 			String line;
+			String heading = "";
 			while ((line = in.readLine()) != null)
 			{
-				if (line.isEmpty() || line.startsWith("#"))
+				if (line.startsWith("#"))
+				{
+					heading = line.substring(1).trim();
+					continue;
+				}
+				if (line.isEmpty())
 				{
 					continue;
 				}
 				String[] f = line.split("\t", -1);
 				int origin = point(cell(f, col, "Origin"));
 				int destination = point(cell(f, col, "Destination"));
-				if (origin == Integer.MIN_VALUE || destination == Integer.MIN_VALUE)
+				if (origin == Integer.MIN_VALUE || (destination == Integer.MIN_VALUE && !network))
 				{
 					continue;
+				}
+				if (network)
+				{
+					// a stop: its destination is filled in when the rides are made
+					destination = origin;
 				}
 				String option = cell(f, col, "menuOption menuTarget objectID").trim();
 				String[] tok = option.isEmpty() ? new String[0] : option.split(" +");
@@ -146,19 +200,24 @@ public final class TransportTable
 				String action = tok.length == 0 ? "Use" : tok[0];
 				String name = nameEnd > 1 ? String.join(" ", java.util.Arrays.copyOfRange(tok, 1, nameEnd)) : "";
 				String items = cell(f, col, "Items").trim();
-				int duration = 1;
+				int duration = kind.defaultDuration();
 				try
 				{
 					String d = cell(f, col, "Duration").trim();
-					duration = d.isEmpty() ? 1 : Math.max(1, Integer.parseInt(d));
+					duration = d.isEmpty() ? kind.defaultDuration() : Math.max(1, Integer.parseInt(d));
 				}
 				catch (NumberFormatException ignored)
 				{
-					// a blank or odd duration counts as one tick
+					// a blank or odd duration counts as the kind's usual one
 				}
-				out.add(new Transport(origin, destination, action, name, objectId, duration, cell(f, col, "Display info").trim(),
+				String display = cell(f, col, "Display info").trim();
+				if (display.isEmpty() && network)
+				{
+					display = heading;
+				}
+				out.add(new Transport(origin, destination, action, name, objectId, duration, display,
 					skills(cell(f, col, "Skills")), quests(cell(f, col, "Quests")), vars(cell(f, col, "Varbits")), vars(cell(f, col, "VarPlayers")),
-					needsItems(items), shortcut));
+					needsItems(items), kind));
 			}
 		}
 		catch (IOException e)

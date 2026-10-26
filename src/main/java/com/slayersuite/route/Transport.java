@@ -29,11 +29,42 @@ public final class Transport
 	public final List<VarCheck> varplayers;
 	/** Needs something carried that the plugin does not track yet; left out of routes. */
 	public final boolean needsItems;
-	/** From the Agility shortcut table rather than the general one. */
-	public final boolean shortcut;
+	public final Kind kind;
+
+	/** Which table a transport came from, which also says what it is. */
+	public enum Kind
+	{
+		OBJECT, SHORTCUT, SPIRIT_TREE, FAIRY_RING, GLIDER, BOAT, SHIP, CHARTER, MUSHTREE, QUETZAL, PORTAL, LEVER, LEARNED;
+
+		/** Rows of these tables are stops of one network: every stop reaches every other. */
+		public boolean network()
+		{
+			return this == SPIRIT_TREE || this == FAIRY_RING || this == GLIDER || this == MUSHTREE || this == QUETZAL;
+		}
+
+		/** Ticks a ride takes when the table leaves it blank. */
+		public int defaultDuration()
+		{
+			switch (this)
+			{
+				case SPIRIT_TREE:
+					return 6;
+				case FAIRY_RING:
+					return 5;
+				case GLIDER:
+					return 8;
+				case MUSHTREE:
+					return 4;
+				case QUETZAL:
+					return 6;
+				default:
+					return 1;
+			}
+		}
+	}
 
 	Transport(int origin, int destination, String action, String name, int objectId, int duration, String display,
-			Map<Skill, Integer> skills, Set<Quest> quests, List<VarCheck> varbits, List<VarCheck> varplayers, boolean needsItems, boolean shortcut)
+			Map<Skill, Integer> skills, Set<Quest> quests, List<VarCheck> varbits, List<VarCheck> varplayers, boolean needsItems, Kind kind)
 	{
 		this.origin = origin;
 		this.destination = destination;
@@ -47,7 +78,28 @@ public final class Transport
 		this.varbits = varbits;
 		this.varplayers = varplayers;
 		this.needsItems = needsItems;
-		this.shortcut = shortcut;
+		this.kind = kind;
+	}
+
+	/** A ride from one stop of a network to another, carrying both stops' requirements. */
+	static Transport ride(Transport from, Transport to)
+	{
+		Map<Skill, Integer> skills = new java.util.EnumMap<>(Skill.class);
+		skills.putAll(from.skills);
+		for (Map.Entry<Skill, Integer> e : to.skills.entrySet())
+		{
+			skills.merge(e.getKey(), e.getValue(), Math::max);
+		}
+		Set<Quest> quests = java.util.EnumSet.noneOf(Quest.class);
+		quests.addAll(from.quests);
+		quests.addAll(to.quests);
+		List<VarCheck> varbits = new java.util.ArrayList<>(from.varbits);
+		varbits.addAll(to.varbits);
+		List<VarCheck> varplayers = new java.util.ArrayList<>(from.varplayers);
+		varplayers.addAll(to.varplayers);
+		String display = to.display.isEmpty() ? "" : to.display;
+		return new Transport(from.origin, to.origin, from.action, from.name, from.objectId, Math.max(from.duration, to.duration), display,
+			skills, quests, varbits, varplayers, from.needsItems || to.needsItems, from.kind);
 	}
 
 	/** "Climb-down Trapdoor", or just the action when the object has no name. */

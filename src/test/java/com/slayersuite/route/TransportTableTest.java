@@ -46,7 +46,7 @@ public class TransportTableTest
 		int shortcuts = 0;
 		for (Transport t : table.all())
 		{
-			if (t.shortcut)
+			if (t.kind == Transport.Kind.SHORTCUT)
 			{
 				shortcuts++;
 				assertTrue(t.skills.getOrDefault(Skill.AGILITY, 0) >= 1);
@@ -75,10 +75,47 @@ public class TransportTableTest
 		int origin = Packed.of(2300, 3100, 0);
 		assertFalse(table.knows(origin, 12345));
 		Transport learned = new Transport(origin, Packed.of(1500, 4300, 1), "Enter", "Sewer", 12345, 3, "",
-			java.util.Collections.emptyMap(), java.util.Collections.emptySet(), java.util.Collections.emptyList(), java.util.Collections.emptyList(), false, false);
+			java.util.Collections.emptyMap(), java.util.Collections.emptySet(), java.util.Collections.emptyList(), java.util.Collections.emptyList(), false, Transport.Kind.LEARNED);
 		TransportTable bigger = table.withAdded(java.util.Collections.singletonList(learned));
 		assertTrue(bigger.knows(origin, 12345));
 		assertEquals(table.size() + 1, bigger.size());
 		assertFalse(table.knows(origin, 12345));
+	}
+
+	@Test
+	public void spiritTreeStopsAreKeptApartFromEdges()
+	{
+		int ge = Packed.of(3185, 3508, 0);
+		assertTrue(table.isStop(ge));
+		assertTrue(table.from(ge).isEmpty());
+		boolean geStop = false;
+		boolean poisonWaste = false;
+		for (Transport s : table.stops(Transport.Kind.SPIRIT_TREE))
+		{
+			geStop |= s.origin == ge;
+			poisonWaste |= "Poison Waste".equals(s.display);
+		}
+		assertTrue(geStop && poisonWaste);
+		assertTrue(table.stops(Transport.Kind.FAIRY_RING).size() > 40);
+		assertTrue(table.networks().contains(Transport.Kind.GLIDER));
+	}
+
+	@Test
+	public void fairyRingsAndShipsAreThere()
+	{
+		int zanaris = Packed.of(2412, 4434, 0);
+		assertTrue(table.isStop(zanaris));
+		boolean ring = false;
+		for (Transport t : table.stops(Transport.Kind.FAIRY_RING))
+		{
+			ring |= t.origin == zanaris;
+		}
+		assertTrue(ring);
+		boolean ship = false;
+		for (Transport t : table.from(Packed.of(3029, 3217, 0)))
+		{
+			ship |= t.kind == Transport.Kind.SHIP && !t.needsItems;
+		}
+		assertTrue(ship);
 	}
 }

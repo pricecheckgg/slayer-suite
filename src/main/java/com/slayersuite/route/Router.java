@@ -138,6 +138,33 @@ public final class Router
 					open.push(ng + heuristic(nb, target), nb);
 				}
 			}
+			// a stop that is solid in the map (a fairy ring, a tree) is stepped onto from beside it
+			int nx = Packed.x(node);
+			int ny = Packed.y(node);
+			int nz = Packed.plane(node);
+			for (int dx = -1; dx <= 1; dx++)
+			{
+				for (int dy = -1; dy <= 1; dy++)
+				{
+					if (dx == 0 && dy == 0)
+					{
+						continue;
+					}
+					int adj = Packed.of(nx + dx, ny + dy, nz);
+					if (!map.isBlocked(adj) || (!transports.isStop(adj) && transports.from(adj).isEmpty()) || (avoidWilderness && inWilderness(adj)))
+					{
+						continue;
+					}
+					int ng = gn + 1;
+					if (ng < g.get(adj, Integer.MAX_VALUE))
+					{
+						g.put(adj, ng);
+						parent.put(adj, node);
+						via.remove(adj);
+						open.push(ng + heuristic(adj, target), adj);
+					}
+				}
+			}
 			for (Transport t : transports.from(node))
 			{
 				if (!usable.contains(t) || (avoidWilderness && inWilderness(t.destination)))
@@ -174,6 +201,21 @@ public final class Router
 			}
 		}
 		return new Route(tiles, steps, reached, g.get(best, 0));
+	}
+
+	/** One route: the head, then a ride at its last tile, then the tail. */
+	static Route join(Route head, Transport ride, Route tail)
+	{
+		List<Integer> tiles = new ArrayList<>(head.tiles.size() + tail.tiles.size());
+		tiles.addAll(head.tiles);
+		tiles.addAll(tail.tiles);
+		List<Step> steps = new ArrayList<>(head.steps);
+		steps.add(new Step(head.tiles.size() - 1, ride));
+		for (Step s : tail.steps)
+		{
+			steps.add(new Step(s.index + head.tiles.size(), s.transport));
+		}
+		return new Route(tiles, steps, head.reached && tail.reached, head.cost + ride.duration + tail.cost);
 	}
 
 	/**

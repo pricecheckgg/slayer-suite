@@ -9,7 +9,7 @@ COMMIT="${1:-$(cat "$(dirname "$0")/../src/main/resources/com/slayersuite/route/
 BASE="https://raw.githubusercontent.com/Skretzo/shortest-path/$COMMIT/src/main/resources"
 DEST="$(cd "$(dirname "$0")/.." && pwd)/src/main/resources/com/slayersuite/route"
 curl -fsSL "$BASE/collision-map.zip" -o "$DEST/collision-map.zip"
-for f in transports agility_shortcuts; do
+for f in transports agility_shortcuts spirit_trees fairy_rings gnome_gliders boats ships charter_ships magic_mushtrees quetzals teleportation_portals teleportation_levers; do
 	curl -fsSL "$BASE/transports/$f.tsv" -o "$DEST/transports/$f.tsv"
 	head -1 "$DEST/transports/$f.tsv" | grep -q "Origin" || { echo "$f.tsv: unexpected header"; exit 1; }
 done
