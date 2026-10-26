@@ -286,8 +286,10 @@ public class Advisor
 		return d >= 0 && d <= ARRIVE_TILES;
 	}
 
-	/** Within this many ground tiles of a spot counts as standing at its door (its cave mouth, its stairs). */
-	static final int AT_HAND_TILES = 40;
+	/** Within this many ground tiles of a spot counts as having come to it: a dungeon's door can be this far from its spawns. */
+	static final int NEARBY_TILES = 120;
+	/** The pinned spot must be at least this far away before a nearer spot takes the pin. */
+	static final int FAR_TILES = 200;
 
 	/**
 	 * Tiles from the point to the spot's nearest pin or its centre, with dungeons folded onto the
@@ -323,8 +325,9 @@ public class Advisor
 	}
 
 	/**
-	 * Another spot of the task whose door you are standing at while the pinned one is far away:
-	 * you chose to go there, so the pin follows. Null when the pin should stay. Client thread.
+	 * Another spot of the task you have come to (its door, or the ground above it) while the pinned
+	 * one is far away: you chose to go there, so the pin follows. Null when the pin should stay.
+	 * Client thread.
 	 */
 	private LocationRecord spotAtHand(LocationRecord pinned)
 	{
@@ -334,11 +337,6 @@ public class Advisor
 			return null;
 		}
 		WorldPoint wp = me.getWorldLocation();
-		int pinnedD = foldedDistance(pinned, wp);
-		if (pinnedD >= 0 && pinnedD <= AT_HAND_TILES * 3)
-		{
-			return null;
-		}
 		LocationRecord best = null;
 		int bestD = Integer.MAX_VALUE;
 		for (ScoredLocation s : ranked)
@@ -349,11 +347,21 @@ public class Advisor
 				continue;
 			}
 			int d = foldedDistance(loc, wp);
-			if (d >= 0 && d <= AT_HAND_TILES && d < bestD)
+			if (d >= 0 && d <= NEARBY_TILES && d < bestD)
 			{
 				bestD = d;
 				best = loc;
 			}
+		}
+		if (best == null)
+		{
+			return null;
+		}
+		int pinnedD = foldedDistance(pinned, wp);
+		// the pinned spot stays while it is near too, or not clearly further than the one you are at
+		if (pinnedD >= 0 && pinnedD <= Math.max(FAR_TILES, 3 * bestD))
+		{
+			return null;
 		}
 		return best;
 	}
