@@ -163,4 +163,19 @@ public class PickupMatcherTest
 		List<long[]> takes = PickupMatcher.match(inv(207, 4), inv(207, 3), pending, 2000, 90_000);
 		assertTrue(takes.isEmpty());
 	}
+
+	@Test
+	public void takeNamesTheTaskTheDropCameFrom()
+	{
+		List<PickupMatcher.Pending> pending = new ArrayList<>();
+		PickupMatcher.Pending pd = new PickupMatcher.Pending(995, 500, 1, 1_000L);
+		pd.task = 7;
+		pending.add(pd);
+		List<long[]> takes = PickupMatcher.match(inv(), inv(995, 500), pending, 2_000L, 90_000L);
+		assertEquals(1, takes.size());
+		assertEquals(7, takes.get(0)[3]);
+		List<PickupMatcher.Pending> untagged = new ArrayList<>();
+		untagged.add(new PickupMatcher.Pending(995, 5, 1, 1_000L));
+		assertEquals(-1, PickupMatcher.match(inv(), inv(995, 5), untagged, 2_000L, 90_000L).get(0)[3]);
+	}
 }

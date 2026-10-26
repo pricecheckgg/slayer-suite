@@ -375,7 +375,8 @@ public class TaskHistory
 	private final List<PickupMatcher.Pending> pending = new ArrayList<>();
 	private Map<Integer, Integer> inventory = new HashMap<>();
 	private boolean bankOpen;
-	private static final long PICKUP_WINDOW_MS = 90_000L;
+	/** Loot from your kills lies on the ground for three minutes before it vanishes; a little slack on top. */
+	private static final long PICKUP_WINDOW_MS = 190_000L;
 	/** A drop and the task's kill count must move within this of each other to count as a task kill. */
 	private static final long KILL_MATCH_MS = 4_000L;
 	private static final int PICKUP_TILES = 10;
@@ -1042,7 +1043,7 @@ public class TaskHistory
 			assignmentItems.clear();
 			assignmentMissed.clear();
 		}
-		pending.clear();
+		// drops from the last task may still be on the floor; they keep their task and match on pickup
 	}
 
 	/** Pending drops past their window: the task counted the kill, nothing reached the inventory, so they were left behind. */
@@ -1055,17 +1056,22 @@ public class TaskHistory
 			return;
 		}
 		Ledger l = ledger();
+		int cur = taskIndex(l);
 		for (PickupMatcher.Pending pd : gone)
 		{
 			long value = pd.quantity * pd.priceEach;
-			synchronized (assignmentItems)
+			int task = pd.task >= 0 ? pd.task : cur;
+			if (task == cur && cur >= 0)
 			{
-				long[] tally = assignmentMissed.computeIfAbsent(pd.id, k -> new long[2]);
-				tally[0] += pd.quantity;
-				tally[1] += value;
+				synchronized (assignmentItems)
+				{
+					long[] tally = assignmentMissed.computeIfAbsent(pd.id, k -> new long[2]);
+					tally[0] += pd.quantity;
+					tally[1] += value;
+				}
 			}
 			l.missedValue += value;
-			l.missedLog.add(new long[]{pd.id, pd.quantity, value, t, taskIndex(l)});
+			l.missedLog.add(new long[]{pd.id, pd.quantity, value, t, task});
 			if (l.missedLog.size() > LOG_CAP)
 			{
 				l.missedLog.subList(0, l.missedLog.size() - LOG_CAP).clear();
@@ -1077,17 +1083,32 @@ public class TaskHistory
 	/** Records a drop as picked up. */
 	private synchronized void takeLoot(int id, long quantity, long value, long t)
 	{
-		synchronized (assignmentItems)
-		{
-			long[] tally = assignmentItems.computeIfAbsent(id, k -> new long[2]);
-			tally[0] += quantity;
-			tally[1] += value;
-		}
+		takeLoot(id, quantity, value, t, -1);
+	}
+
+	/** Credits a pickup to the task the drop came from (task = ledger index), or to the current task when unknown. */
+	private synchronized void takeLoot(int id, long quantity, long value, long t, int task)
+	{
 		Ledger l = ledger();
+		int cur = taskIndex(l);
+		if (task < 0)
+		{
+			task = cur;
+		}
+		boolean ours = task == cur && cur >= 0;
+		if (ours)
+		{
+			synchronized (assignmentItems)
+			{
+				long[] tally = assignmentItems.computeIfAbsent(id, k -> new long[2]);
+				tally[0] += quantity;
+				tally[1] += value;
+			}
+		}
 		l.lootValue += value;
-		l.log.add(new long[]{id, quantity, value, t, taskIndex(l)});
+		l.log.add(new long[]{id, quantity, value, t, task});
 		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
-		if (current != null && here != null)
+		if (ours && current != null && here != null)
 		{
 			current.spot(here.getName()).loot += value;
 		}
@@ -1516,6 +1537,7 @@ public class TaskHistory
 			PickupMatcher.Pending pd = new PickupMatcher.Pending(id, s.getQuantity(), price, now,
 				where == null ? -1 : where.getX(), where == null ? -1 : where.getY(), where == null ? -1 : where.getPlane(), killConfirmed);
 			Ledger l = ledger();
+			pd.task = taskIndex(l);
 			String name = l.names.get(String.valueOf(id));
 			if (name == null)
 			{
@@ -1586,7 +1608,7 @@ public class TaskHistory
 		inventory = now;
 		long t = System.currentTimeMillis();
 		expirePending(t);
-		if (bankOpen || current == null)
+		if (bankOpen || pending.isEmpty())
 		{
 			return;
 		}
@@ -1594,9 +1616,10 @@ public class TaskHistory
 		int px = me == null ? -1 : me.getX();
 		int py = me == null ? -1 : me.getY();
 		int pplane = me == null ? -1 : me.getPlane();
+		// the last task's drops still on the floor match too: a drop is credited to the task it came from
 		for (long[] take : PickupMatcher.match(before, now, pending, t, PICKUP_WINDOW_MS, px, py, pplane, PICKUP_TILES))
 		{
-			takeLoot((int) take[0], take[1], take[2], t);
+			takeLoot((int) take[0], take[1], take[2], t, (int) take[3]);
 		}
 	}
 

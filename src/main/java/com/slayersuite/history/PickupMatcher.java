@@ -26,6 +26,8 @@ public final class PickupMatcher
 		public boolean killConfirmed;
 		/** Goes straight into a carried herb sack or seed box, so the inventory never shows it. */
 		public boolean autoStored;
+		/** The task the drop came from (an index the caller owns); -1 when unknown. */
+		public int task = -1;
 
 		public Pending(int id, long quantity, long priceEach, long at)
 		{
@@ -83,7 +85,7 @@ public final class PickupMatcher
 	/**
 	 * Drops pending drops older than the window, then for every item whose count grew between
 	 * the two inventory snapshots takes as much as the pending drops of that item allow.
-	 * Returns the takes as {item id, quantity, value}; the pending list is updated in place.
+	 * Returns the takes as {item id, quantity, value, task}; the pending list is updated in place.
 	 */
 	public static List<long[]> match(Map<Integer, Integer> before, Map<Integer, Integer> now, List<Pending> pending, long nowMs, long windowMs)
 	{
@@ -117,7 +119,7 @@ public final class PickupMatcher
 					continue;
 				}
 				long take = Math.min(gain, pd.quantity);
-				out.add(new long[]{pd.id, take, take * pd.priceEach});
+				out.add(new long[]{pd.id, take, take * pd.priceEach, pd.task});
 				pd.quantity -= take;
 				gain -= take;
 				if (pd.quantity <= 0)
