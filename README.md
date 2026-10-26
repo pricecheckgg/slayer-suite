@@ -61,7 +61,7 @@ Type `::ss done`, `::ss superior`, `::ss level`, `::ss alert`, `::ss supplies` o
 
 ## Sounds
 
-A chime when the task ends, an 8-bit encounter jingle when a superior spawns, a beep for critical alerts, a tick on the last kills. All of them are synthesised by `tools/make-sounds.py`; nothing is sampled from any game. Drop your own `task-done.wav`, `superior.wav`, `alert.wav` or `level-up.wav` into `.runelite/slayer-suite/sounds/` to replace them.
+A chime when the task ends, an 8-bit encounter jingle when a superior spawns, a beep for critical alerts, a tick on the last kills. All of them are synthesised by `tools/make-sounds.py`; nothing is sampled from any game. Drop your own `task-done.wav`, `superior.wav`, `alert.wav` or `level-up.wav` into `.runelite/plugin-data/slayer-suite/sounds/` (RuneLite's folder for this plugin) to replace them.
 
 ## The dataset
 

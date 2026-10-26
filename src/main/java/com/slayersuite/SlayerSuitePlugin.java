@@ -53,13 +53,14 @@ import net.runelite.client.ui.overlay.OverlayManager;
 @Slf4j
 @PluginDescriptor(
 	name = "Slayer Suite",
+	internalName = "slayer-suite",
 	description = "Slayer in one plugin: a task card with kills left, ETA, style and gear; a side panel that ranks spots for your account and guides you there; a readiness check at the bank; one alert engine with banner and sounds; task complete and level up cards; an off-task attack guard; and your own loot and history per task.",
 	tags = {"slayer", "aio", "task", "alerts", "readiness", "superior", "afk", "bank", "combat", "eta", "gps", "panel", "loot", "history", "sounds"}
 )
 @PluginDependency(SlayerPlugin.class)
 public class SlayerSuitePlugin extends Plugin
 {
-	public static final String VERSION = "0.7.0";
+	public static final String VERSION = "0.7.1";
 
 	@Inject
 	private EventBus eventBus;
@@ -213,6 +214,15 @@ public class SlayerSuitePlugin extends Plugin
 		panel = injector.getInstance(SlayerSuitePanel.class);
 		advisor.setListener(panel::refreshLater);
 		advisor.setOwnRatesSource(history::ownRates);
+		try
+		{
+			sounds.setDirectory(getPluginDirectory().joinSegment("sounds"));
+			log.debug("Slayer Suite: custom sounds are read from {}", sounds.getDirectory());
+		}
+		catch (java.io.IOException | RuntimeException e)
+		{
+			log.warn("Slayer Suite: no plugin folder for custom sounds ({})", e.toString());
+		}
 
 		eventBus.register(tracker);
 		eventBus.register(readiness);

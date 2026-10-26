@@ -36,7 +36,7 @@ public interface SlayerSuiteConfig extends Config
 	@ConfigSection(name = "Task complete", description = "The celebration when the assignment ends, and the countdown before it.", position = 4)
 	String celebrateSection = "celebrate";
 
-	@ConfigSection(name = "Sounds", description = "Which sounds play and how loud. Drop your own .wav files into .runelite/slayer-suite/sounds to replace them.", position = 5)
+	@ConfigSection(name = "Sounds", description = "Which sounds play and how loud. Drop your own .wav files into .runelite/plugin-data/slayer-suite/sounds to replace them.", position = 5)
 	String soundsSection = "sounds";
 
 	@ConfigSection(name = "Attack guard", description = "Keeps Attack away from monsters that do not count for your task.", position = 6)
@@ -360,7 +360,7 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "soundLevelUp", name = "Level up", description = "Plays .runelite/slayer-suite/sounds/level-up.wav when a skill levels up. No bundled sound: nothing plays without that file.", section = soundsSection, position = 3)
+	@ConfigItem(keyName = "soundLevelUp", name = "Level up", description = "Plays level-up.wav from .runelite/plugin-data/slayer-suite/sounds when a skill levels up. No bundled sound: nothing plays without that file.", section = soundsSection, position = 3)
 	default boolean soundLevelUp()
 	{
 		return true;
@@ -368,7 +368,7 @@ public interface SlayerSuiteConfig extends Config
 
 	@Range(min = 0, max = 100)
 	@Units(Units.PERCENT)
-	@ConfigItem(keyName = "soundVolume", name = "Volume", description = "Volume of every sound above. Your own task-done.wav, superior.wav, alert.wav or level-up.wav in .runelite/slayer-suite/sounds replaces the bundled one.", section = soundsSection, position = 4)
+	@ConfigItem(keyName = "soundVolume", name = "Volume", description = "Volume of every sound above. Your own task-done.wav, superior.wav, alert.wav or level-up.wav in .runelite/plugin-data/slayer-suite/sounds replaces the bundled one.", section = soundsSection, position = 4)
 	default int soundVolume()
 	{
 		return 70;
