@@ -16,6 +16,9 @@ public final class Planner
 {
 	/** Walks this short are never worth a teleport: a charge is a charge, and the chevrons are the point. */
 	static final int NEAR_TILES = 100;
+	/** A teleport or ride must save at least this many ticks, and this share of the walk, to replace it. */
+	static final int MARGIN_TICKS = 25;
+	static final double MARGIN_SHARE = 0.7;
 	/** Tiles a search to or from a network stop may look at; stops are close to roads, so this is plenty. */
 	static final int NETWORK_EXPANSIONS = 120_000;
 
@@ -46,13 +49,27 @@ public final class Planner
 		/** Where the plan was made from. */
 		public final int start;
 		public final int ticks;
+		/** The plain walk from where you stand, when one reaches the spot; null otherwise. */
+		public final Router.Route walk;
 
 		Plan(Landing teleport, Router.Route route, int start, int ticks)
+		{
+			this(teleport, route, start, ticks, null);
+		}
+
+		Plan(Landing teleport, Router.Route route, int start, int ticks, Router.Route walk)
 		{
 			this.teleport = teleport;
 			this.route = route;
 			this.start = start;
 			this.ticks = ticks;
+			this.walk = walk;
+		}
+
+		/** Ticks the plain walk would take; -1 when there is none. */
+		public int walkTicks()
+		{
+			return walk != null && walk.reached ? ticksFor(walk.cost) : -1;
 		}
 
 		public boolean reached()
@@ -81,11 +98,20 @@ public final class Planner
 
 	public static Plan plan(WorldMap map, TransportTable table, Set<Transport> usable, int start, int goal, List<Landing> landings, boolean avoidWilderness, int maxExpansions, long budgetNanos)
 	{
+		return plan(map, table, usable, start, goal, landings, avoidWilderness, maxExpansions, budgetNanos, 200);
+	}
+
+	/**
+	 * As above; walkUpTo is how long a walk is still searched for the chevrons when a teleport is
+	 * quicker, so there is a line to follow from where you stand whenever one exists.
+	 */
+	public static Plan plan(WorldMap map, TransportTable table, Set<Transport> usable, int start, int goal, List<Landing> landings, boolean avoidWilderness, int maxExpansions, long budgetNanos, int walkUpTo)
+	{
 		// A short walk first: cheap, and it settles most cases.
 		Router.Route near = Router.find(map, table, usable, start, goal, maxExpansions, System.nanoTime() + budgetNanos, avoidWilderness, NEAR_TILES + 1);
 		if (near.reached && near.cost <= NEAR_TILES)
 		{
-			return new Plan(null, near, start, ticksFor(near.cost));
+			return new Plan(null, near, start, ticksFor(near.cost), near);
 		}
 		// Then the landings, nearest the spot first; once one plan exists, a later landing only
 		// searches as far as it could still beat it, so a landing on the wrong continent fails fast.
@@ -177,12 +203,20 @@ public final class Planner
 		}
 		// Finally the full walk, but only as far as it could still beat the best plan so far. (The
 		// straight line is no lower bound here: a well or a cave can jump the route a long way.)
-		int cap = best == null ? Integer.MAX_VALUE : best.ticks * 2 + 1;
+		// A teleport or ride only replaces a walk it beats clearly, so the walk is searched a little
+		// beyond the point where it would tie.
+		int cap = best == null ? Integer.MAX_VALUE : (int) Math.max(walkUpTo + 1, Math.min(Integer.MAX_VALUE, 2L * ((best.ticks + MARGIN_TICKS) / MARGIN_SHARE) + 1));
 		int walkBudget = best == null ? maxExpansions : Math.min(maxExpansions, 400_000);
 		Router.Route walk = Router.find(map, table, usable, start, goal, walkBudget, System.nanoTime() + budgetNanos, avoidWilderness, cap);
-		if (walk.reached && (best == null || ticksFor(walk.cost) <= best.ticks))
+		if (walk.reached)
 		{
-			return new Plan(null, walk, start, ticksFor(walk.cost));
+			int walkTicks = ticksFor(walk.cost);
+			boolean clearlyBetter = best != null && best.ticks + MARGIN_TICKS <= walkTicks && best.ticks <= walkTicks * MARGIN_SHARE;
+			if (!clearlyBetter)
+			{
+				return new Plan(null, walk, start, walkTicks, walk);
+			}
+			return new Plan(best.teleport, best.route, start, best.ticks, walk);
 		}
 		return best != null ? best : new Plan(null, walk, start, Integer.MAX_VALUE);
 	}

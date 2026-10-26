@@ -62,6 +62,8 @@ public class RouteService
 	private volatile Router.Route route;
 	private volatile int from;
 	private volatile boolean onRoute;
+	/** True while the chevrons follow the plain walk although the plan names a quicker teleport. */
+	private volatile boolean showingWalk;
 	private volatile WorldPoint target;
 	private volatile List<Planner.Landing> landings = Collections.emptyList();
 	private Future<?> pending;
@@ -69,6 +71,7 @@ public class RouteService
 	private int tick;
 	private int snapshotTick = -1;
 	private volatile boolean fairyRings;
+	private int lastTile = Integer.MIN_VALUE;
 
 	@Inject
 	public RouteService(Client client, SlayerSuiteConfig config)
@@ -199,6 +202,7 @@ public class RouteService
 		route = null;
 		from = 0;
 		onRoute = false;
+		showingWalk = false;
 		if (wp != null)
 		{
 			request(true);
@@ -220,6 +224,12 @@ public class RouteService
 	public boolean onRoute()
 	{
 		return onRoute;
+	}
+
+	/** True while the chevrons show the plain walk and the plan's teleport is only offered as quicker. */
+	public boolean showingWalk()
+	{
+		return showingWalk;
 	}
 
 	public WorldPoint getTarget()
@@ -320,14 +330,22 @@ public class RouteService
 			onRoute = false;
 			return;
 		}
+		int here = Packed.of(me.getWorldLocation());
+		boolean jumped = lastTile != Integer.MIN_VALUE && (Packed.plane(here) != Packed.plane(lastTile) || Packed.chebyshev(here, lastTile) > 25);
+		lastTile = here;
 		Planner.Plan p = plan;
 		Router.Route r = route;
+		if (jumped && (r == null || r.indexOf(here) < 0))
+		{
+			// you teleported, rode or climbed somewhere the route did not expect: plan again from here now
+			request(true);
+			return;
+		}
 		if (p == null || r == null)
 		{
 			request(false);
 			return;
 		}
-		int here = Packed.of(me.getWorldLocation());
 		int idx = r.indexOf(here);
 		if (idx >= 0)
 		{
@@ -402,17 +420,22 @@ public class RouteService
 		final WorldMap m = map;
 		final TransportTable tt = table;
 		final boolean keepOut = config.avoidWilderness();
+		final int walkUpTo = Math.max(100, config.floorPathMaxDistance());
 		final List<Planner.Landing> l = landings;
 		pending = executor.submit(() ->
 		{
 			try
 			{
-				Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, l, keepOut, MAX_EXPANSIONS, SEARCH_BUDGET_NANOS);
+				Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, l, keepOut, MAX_EXPANSIONS, SEARCH_BUDGET_NANOS, walkUpTo);
 				if (to.equals(target))
 				{
 					from = 0;
-					onRoute = made.teleport == null;
-					route = made.route;
+					// whenever a walk exists it is drawn, even when a teleport is quicker: the chevrons
+					// are what people follow, and the card still names the teleport
+					boolean walkShown = made.teleport != null && made.walk != null && made.walk.reached;
+					showingWalk = walkShown;
+					onRoute = made.teleport == null || walkShown;
+					route = walkShown ? made.walk : made.route;
 					plan = made;
 				}
 			}

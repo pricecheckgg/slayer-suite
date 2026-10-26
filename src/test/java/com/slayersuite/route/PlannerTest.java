@@ -85,4 +85,18 @@ public class PlannerTest
 		}
 		assertTrue(ring);
 	}
+
+	@Test
+	public void aTeleportMustBeatTheWalkClearly()
+	{
+		// a landing that only shaves a few ticks off a short walk loses to the walk, and the walk is kept either way
+		Planner.Landing nearby = new Planner.Landing("Nearby ring", "fairy rings", Packed.of(3215, 3212, 0), 10);
+		Planner.Plan p = Planner.plan(map, table, all, Packed.of(3222, 3218, 0), Packed.of(3100, 3250, 0), Collections.singletonList(nearby), false, 800_000, 3_000_000_000L);
+		assertTrue(p.reached());
+		assertNull(p.teleport);
+		assertNotNull(p.walk);
+		Planner.Plan far = Planner.plan(map, table, all, Packed.of(3222, 3218, 0), SMOKE_DUNGEON, Arrays.asList(POLLNIVNEACH), false, 800_000, 3_000_000_000L);
+		assertNotNull(far.teleport);
+		assertTrue(far.walk == null || !far.walk.reached || far.walkTicks() > far.ticks + Planner.MARGIN_TICKS);
+	}
 }

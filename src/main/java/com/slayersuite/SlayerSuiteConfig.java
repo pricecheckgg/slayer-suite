@@ -456,7 +456,7 @@ public interface SlayerSuiteConfig extends Config
 	}
 
 	@Range(min = 50, max = 1000)
-	@ConfigItem(keyName = "floorPathMaxDistance", name = "Walk up to", description = "Tiles. A spot further than this by foot is a teleport away when you own one, and the next step names it; the chevrons still show the walk.", section = advisorSection, position = 6)
+	@ConfigItem(keyName = "floorPathMaxDistance", name = "Walk up to", description = "Tiles. A walk this long is always drawn, even when a quicker teleport is named; beyond it, the chevrons appear once you have used the teleport.", section = advisorSection, position = 6)
 	default int floorPathMaxDistance()
 	{
 		return 200;

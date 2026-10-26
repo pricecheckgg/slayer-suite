@@ -408,6 +408,12 @@ public class Advisor
 			{
 				continue;
 			}
+			String label = o.getLabel() == null ? "" : o.getLabel();
+			if (label.startsWith("Fairy ring") || label.equalsIgnoreCase("Spirit tree"))
+			{
+				// rings and trees are stops you walk to; the planner rides them from the nearest stop
+				continue;
+			}
 			String st = o.getStatus() == null ? "" : o.getStatus();
 			int ticks = 10;
 			if (st.startsWith("in bank") || st.startsWith("seen in your bank"))
@@ -539,7 +545,14 @@ public class Advisor
 					: plan.teleport.status.startsWith("needs") ? " (" + plan.teleport.status + ")" : "";
 				return "Use " + how + where + ", then " + rest + time;
 			}
-			return Character.toUpperCase(rest.charAt(0)) + rest.substring(1) + (steps.isEmpty() && walk > 1 ? "; follow the chevrons" : "") + time;
+			String quicker = "";
+			if (plan.teleport != null && routes.showingWalk())
+			{
+				int saved = plan.walkTicks() - plan.ticks;
+				quicker = " (" + plan.teleport.label.replace("House: ", "house ") + " is about " + TaskTracker.formatDuration(Math.max(1, saved) * 600L) + " quicker)";
+				time = "";
+			}
+			return Character.toUpperCase(rest.charAt(0)) + rest.substring(1) + (steps.isEmpty() && walk > 1 ? "; follow the chevrons" : "") + time + quicker;
 		}
 		if (dist <= config.floorPathMaxDistance() || nearLanding)
 		{
