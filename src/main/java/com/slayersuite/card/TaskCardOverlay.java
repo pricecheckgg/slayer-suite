@@ -17,6 +17,7 @@ import com.slayersuite.task.TaskTracker;
 import com.slayersuite.trip.TripMath;
 import com.slayersuite.trip.TripTracker;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -42,15 +43,15 @@ import net.runelite.client.ui.overlay.components.BackgroundComponent;
  */
 public class TaskCardOverlay extends Overlay
 {
-	private static final Color OK = new Color(120, 220, 120);
-	private static final Color MISSING = new Color(255, 90, 90);
-	private static final Color RECOMMENDED = new Color(255, 200, 80);
-	private static final Color DIM = new Color(170, 170, 170);
+	private static final Color OK = Palette.OK;
+	private static final Color MISSING = Palette.BAD;
+	private static final Color RECOMMENDED = Palette.WARN;
+	private static final Color DIM = Palette.DIM;
 	private static final Color CYAN = new Color(80, 220, 255);
 	private static final Color BAR = new Color(90, 160, 90);
 	private static final Color BAR_BG = new Color(60, 60, 60);
-	private static final Color TILE = new Color(0, 0, 0, 45);
-	private static final Color RULE = new Color(255, 255, 255, 28);
+	private static final Color TILE = Palette.TILE;
+	private static final Color RULE = Palette.RULE;
 	private static final Color ACCENT = ColorScheme.BRAND_ORANGE;
 	private static final int PAD = 6;
 	private static final int DEFAULT_WIDTH = 260;
@@ -122,6 +123,10 @@ public class TaskCardOverlay extends Overlay
 		BackgroundComponent bg = new BackgroundComponent();
 		bg.setRectangle(new Rectangle(0, 0, w, h));
 		bg.render(g);
+		// a hairline in the chevron colour, so the card and the route read as one thing
+		Color accent = config.chevronColour().resolve(config.customChevronColour());
+		g.setColor(new Color(accent.getRed(), accent.getGreen(), accent.getBlue(), 200));
+		g.fillRect(1, 1, w - 2, 2);
 		layout(g, true, w);
 		return new Dimension(w, h);
 	}

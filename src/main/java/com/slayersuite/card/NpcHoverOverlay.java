@@ -10,6 +10,7 @@ import com.slayersuite.guard.AttackGuard;
 import com.slayersuite.readiness.ReadinessChecker;
 import com.slayersuite.task.TaskTracker;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -38,12 +39,12 @@ public class NpcHoverOverlay extends Overlay
 	private static final Color BORDER = new Color(255, 255, 255, 45);
 	private static final Color TILE = new Color(255, 255, 255, 16);
 	private static final Color RULE = new Color(255, 255, 255, 30);
-	private static final Color DIM = new Color(170, 170, 170);
-	private static final Color OK = new Color(120, 220, 120);
-	private static final Color WARN = new Color(255, 200, 80);
-	private static final Color BAD = new Color(255, 100, 100);
-	private static final Color INFO = new Color(120, 205, 255);
-	private static final Color GOLD = new Color(232, 180, 60);
+	private static final Color DIM = Palette.DIM;
+	private static final Color OK = Palette.OK;
+	private static final Color WARN = Palette.WARN;
+	private static final Color BAD = Palette.BAD;
+	private static final Color INFO = Palette.INFO;
+	private static final Color GOLD = Palette.GOLD;
 	private static final int PAD = 7;
 	private static final int WIDTH = 236;
 

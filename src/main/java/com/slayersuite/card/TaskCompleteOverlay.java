@@ -24,6 +24,7 @@ import net.runelite.client.game.ItemManager;
 import com.slayersuite.data.TaskRecord;
 import net.runelite.client.util.ImageUtil;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -43,13 +44,13 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 /** A big centred "TASK COMPLETE" card that fades in, holds and fades out. Decoration only. */
 public class TaskCompleteOverlay extends Overlay
 {
-	private static final Color GOLD = new Color(232, 180, 60);
+	private static final Color GOLD = Palette.GOLD;
 	private static final Color RED = new Color(235, 90, 70);
-	private static final Color XP_BLUE = new Color(120, 205, 255);
+	private static final Color XP_BLUE = Palette.INFO;
 	private static final Color GREEN = new Color(110, 230, 150);
 	private static final Color ORANGE = new Color(255, 152, 31);
 	private static final Color MORTIMER = new Color(200, 150, 255);
-	private static final Color LABEL = new Color(165, 165, 165);
+	private static final Color LABEL = Palette.DIM;
 	private static final long COUNT_MS = 1200;
 	private static final long POP_MS = 260;
 	private static final Color BAND = new Color(0, 0, 0, 170);
@@ -82,7 +83,7 @@ public class TaskCompleteOverlay extends Overlay
 	private volatile List<Object[]> loot = Collections.emptyList();
 	/** Drops from your task kills that were left on the floor. */
 	private volatile List<Object[]> missed = Collections.emptyList();
-	private static final Color MISSED = new Color(225, 135, 135);
+	private static final Color MISSED = Palette.MISSED;
 	private static final String MISSED_LABEL = "LEFT BEHIND";
 	private static final int LOOT_SLOT = 58;
 	private static final int LOOT_ICON_W = 54;
@@ -437,8 +438,8 @@ public class TaskCompleteOverlay extends Overlay
 		g.setFont(f);
 		String s = Integer.toString(digit);
 		FontMetrics fm = g.getFontMetrics();
-		int x = client.getCanvasWidth() / 2 - fm.stringWidth(s) / 2;
-		int y = (int) (client.getCanvasHeight() * 0.42) + fm.getAscent() / 2;
+		int x = client.getViewportXOffset() + client.getViewportWidth() / 2 - fm.stringWidth(s) / 2;
+		int y = client.getViewportYOffset() + (int) (client.getViewportHeight() * 0.42) + fm.getAscent() / 2;
 		shadowed(g, f, s, x, y, digit == 1 ? GOLD : Color.WHITE);
 		g.setComposite(old);
 	}
@@ -495,10 +496,11 @@ public class TaskCompleteOverlay extends Overlay
 			alpha = 1f;
 		}
 
-		int w = client.getCanvasWidth();
-		int h = client.getCanvasHeight();
-		int cx = w / 2;
-		int cy = (int) (h * 0.30);
+		// the game viewport, not the whole canvas: in the fixed layout the sidebar sits to the right
+		int w = client.getViewportWidth();
+		int h = client.getViewportHeight();
+		int cx = client.getViewportXOffset() + w / 2;
+		int cy = client.getViewportYOffset() + (int) (h * 0.30);
 
 		Composite old = g.getComposite();
 		Object aa = g.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);

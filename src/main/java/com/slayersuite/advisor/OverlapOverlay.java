@@ -2,6 +2,7 @@ package com.slayersuite.advisor;
 
 import com.slayersuite.SlayerSuiteConfig;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.List;
@@ -22,7 +23,7 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 public class OverlapOverlay extends OverlayPanel
 {
 	private static final Color ACCENT = new Color(255, 176, 0);
-	private static final Color DIM = new Color(170, 170, 170);
+	private static final Color DIM = Palette.DIM;
 	private static final long RESCAN_MS = 2000;
 
 	private final Client client;

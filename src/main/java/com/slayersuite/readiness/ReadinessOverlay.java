@@ -7,6 +7,7 @@ import com.slayersuite.data.SlayerDataset;
 import com.slayersuite.data.TaskRecord;
 import com.slayersuite.task.TaskTracker;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import javax.inject.Inject;
@@ -18,10 +19,10 @@ import net.runelite.client.ui.overlay.components.TitleComponent;
 /** The "you have everything for this task" list, shown while the bank is open. */
 public class ReadinessOverlay extends OverlayPanel
 {
-	private static final Color OK = new Color(120, 220, 120);
-	private static final Color MISSING = new Color(255, 90, 90);
-	private static final Color RECOMMENDED = new Color(255, 200, 80);
-	private static final Color DIM = new Color(170, 170, 170);
+	private static final Color OK = Palette.OK;
+	private static final Color MISSING = Palette.BAD;
+	private static final Color RECOMMENDED = Palette.WARN;
+	private static final Color DIM = Palette.DIM;
 
 	private final ReadinessChecker checker;
 	private final TaskTracker tracker;

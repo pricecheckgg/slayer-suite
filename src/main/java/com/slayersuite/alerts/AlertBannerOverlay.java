@@ -2,6 +2,7 @@ package com.slayersuite.alerts;
 
 import com.slayersuite.SlayerSuiteConfig;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -15,8 +16,8 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 /** Draws the highest-priority active alert as one banner line. */
 public class AlertBannerOverlay extends Overlay
 {
-	private static final Color CRITICAL = new Color(255, 70, 70);
-	private static final Color WARNING = new Color(255, 190, 60);
+	private static final Color CRITICAL = Palette.BAD;
+	private static final Color WARNING = Palette.WARN;
 	private static final Color INFO = new Color(110, 230, 150);
 	private static final Color PAUSED = new Color(190, 190, 190);
 	private static final Color BOX = new Color(0, 0, 0, 150);

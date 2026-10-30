@@ -3,6 +3,7 @@ package com.slayersuite.history;
 import com.slayersuite.SlayerSuiteConfig;
 import com.slayersuite.trip.TripMath;
 import java.awt.Color;
+import com.slayersuite.ui.Palette;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
@@ -33,10 +34,10 @@ import net.runelite.client.ui.overlay.OverlayUtil;
  */
 public class FloorLootOverlay extends Overlay
 {
-	private static final Color GOLD = new Color(255, 200, 80);
-	private static final Color GREEN = new Color(120, 220, 120);
+	private static final Color GOLD = Palette.GOLD;
+	private static final Color GREEN = Palette.OK;
 	private static final Color PLAIN = new Color(235, 235, 235);
-	private static final Color URGENT = new Color(255, 90, 90);
+	private static final Color URGENT = Palette.BAD;
 	/** Tiles around the recorded death tile to look on; big monsters drop a tile or two away. */
 	private static final int SEARCH = 2;
 
