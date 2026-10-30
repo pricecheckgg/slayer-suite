@@ -188,7 +188,8 @@ public class AlertEngine
 		if (left > 0 && left <= com.slayersuite.history.FloorLootMath.URGENT_MS && floorWarnedFor != soonest)
 		{
 			floorWarnedFor = soonest;
-			raise(AlertKind.FLOOR_LOOT, com.slayersuite.trip.TripMath.formatK(value) + " gp of yours on the floor vanishes in " + (left / 1000) + "s");
+			long going = h.getFloorSoonestValue() > 0 ? h.getFloorSoonestValue() : value;
+			raise(AlertKind.FLOOR_LOOT, com.slayersuite.trip.TripMath.formatK(going) + " gp of yours on the floor vanishes in " + (left / 1000) + "s");
 		}
 	}
 

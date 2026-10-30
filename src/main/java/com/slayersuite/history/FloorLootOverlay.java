@@ -119,7 +119,7 @@ public class FloorLootOverlay extends Overlay
 			{
 				continue;
 			}
-			WorldPoint at = locate(wv, tiles, (int) d[0], (int) d[1], (int) d[2], (int) d[3]);
+			WorldPoint at = locate(wv, tiles, (int) d[0], (int) d[1], (int) d[2], (int) (d.length > 7 ? d[7] : d[3]));
 			if (at == null)
 			{
 				continue;
@@ -135,7 +135,7 @@ public class FloorLootOverlay extends Overlay
 	}
 
 	/** The tile the item is really on: the death tile, then the rings around it; null when it is gone or out of view. */
-	private static WorldPoint locate(WorldView wv, Tile[][][] tiles, int x, int y, int plane, int id)
+	static WorldPoint locate(WorldView wv, Tile[][][] tiles, int x, int y, int plane, int id)
 	{
 		if (plane < 0 || plane >= tiles.length)
 		{

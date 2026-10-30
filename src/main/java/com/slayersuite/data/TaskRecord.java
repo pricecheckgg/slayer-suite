@@ -148,7 +148,7 @@ public class TaskRecord
 	private transient List<DropRecord> rareCache;
 
 	/** The rare drops of the monsters you grind this task on (superiors left out; a boss task uses the boss), rarest first, one row per item. */
-	public List<DropRecord> rareDrops()
+	public synchronized List<DropRecord> rareDrops()
 	{
 		List<DropRecord> cached = rareCache;
 		if (cached != null)

@@ -41,6 +41,9 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.api.GameState;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.api.NPC;
+import net.runelite.api.Tile;
+import net.runelite.api.WorldView;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.Skill;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.GameStateChanged;
@@ -456,7 +459,11 @@ public class TaskHistory
 		}
 		catch (RuntimeException e)
 		{
-			log.debug("history load failed for {}", key, e);
+			log.warn("Slayer Suite: history for {} could not be read; it is left as it is", key, e);
+			TaskStats broken = new TaskStats();
+			broken.setKey(key);
+			broken.setUnreadable(true);
+			return broken;
 		}
 		TaskStats s = new TaskStats();
 		s.setKey(key);
@@ -465,7 +472,7 @@ public class TaskHistory
 
 	private void save(TaskStats stats)
 	{
-		if (stats == null || stats.getKey() == null || configManager.getRSProfileKey() == null)
+		if (stats == null || stats.getKey() == null || stats.isUnreadable() || configManager.getRSProfileKey() == null)
 		{
 			return;
 		}
@@ -542,7 +549,16 @@ public class TaskHistory
 		{
 			return null;
 		}
-		TaskStats s = current.copy();
+		TaskStats s;
+		synchronized (this)
+		{
+			TaskStats c = current;
+			if (c == null)
+			{
+				return null;
+			}
+			s = c.copy();
+		}
 		s.add(sessionKills, sessionActiveMs, sessionXp, sessionGp);
 		TripTracker t = trip.get();
 		if (t != null && t.getSessionKills() >= 5)
@@ -940,11 +956,21 @@ public class TaskHistory
 				// or the real one would be overwritten with nothing after login
 				return new Ledger();
 			}
-			ledger = new Ledger();
+			Ledger l;
 			try
 			{
 				String json = configManager.getRSProfileConfiguration(SlayerSuiteConfig.GROUP, LEDGER_KEY);
-				Ledger l = json == null ? null : gson.fromJson(json, Ledger.class);
+				l = json == null ? null : gson.fromJson(json, Ledger.class);
+			}
+			catch (RuntimeException e)
+			{
+				// a scratch ledger that is never cached, so the stored one is never saved over
+				log.warn("Slayer Suite: the loot ledger could not be read; it is left as it is", e);
+				return new Ledger();
+			}
+			ledger = new Ledger();
+			try
+			{
 				if (l != null)
 				{
 					if (l.log == null)
@@ -1592,7 +1618,11 @@ public class TaskHistory
 			sessionActiveMs += now - lastKillAt;
 		}
 		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
-		TaskStats.SpotStats spot = here == null ? null : current.spot(here.getName());
+		TaskStats.SpotStats spot;
+		synchronized (this)
+		{
+			spot = here == null ? null : current.spot(here.getName());
+		}
 		if (spot != null)
 		{
 			spot.kills += e.getDelta();
@@ -1674,7 +1704,10 @@ public class TaskHistory
 			com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
 			if (here != null)
 			{
-				current.spot(here.getName()).xp += xp - lastSlayerXp;
+				synchronized (this)
+				{
+					current.spot(here.getName()).xp += xp - lastSlayerXp;
+				}
 			}
 			dirty = true;
 		}
@@ -1701,7 +1734,10 @@ public class TaskHistory
 		String monsterKey = monsterKeyFor(rec, npc.getName());
 		if (monsterKey != null)
 		{
-			current.monsterKill(monsterKey);
+			synchronized (this)
+			{
+				current.monsterKill(monsterKey);
+			}
 		}
 		for (ItemStack s : e.getItems())
 		{
@@ -1712,20 +1748,26 @@ public class TaskHistory
 			// only if the task's kill counter moved for this death (see onItemContainerChanged)
 			PickupMatcher.Pending pd = new PickupMatcher.Pending(id, s.getQuantity(), price, now,
 				where == null ? -1 : where.getX(), where == null ? -1 : where.getY(), where == null ? -1 : where.getPlane(), killConfirmed);
-			Ledger l = ledger();
-			pd.task = taskIndex(l);
+			pd.rawId = s.getId();
 			pd.windowMs = tradeable(id) ? PICKUP_WINDOW_TRADEABLE_MS : PICKUP_WINDOW_MS;
-			String name = l.names.get(String.valueOf(id));
-			if (name == null)
+			String name;
+			synchronized (this)
 			{
-				try
+				// the panel reads these maps on its own thread
+				Ledger l = ledger();
+				pd.task = taskIndex(l);
+				name = l.names.get(String.valueOf(id));
+				if (name == null)
 				{
-					name = itemManager.getItemComposition(id).getName();
-					l.names.put(String.valueOf(id), name);
-				}
-				catch (RuntimeException ignored)
-				{
-					// name unknown
+					try
+					{
+						name = itemManager.getItemComposition(id).getName();
+						l.names.put(String.valueOf(id), name);
+					}
+					catch (RuntimeException ignored)
+					{
+						// name unknown
+					}
 				}
 			}
 			markRareDrop(rec, name, now);
@@ -1767,10 +1809,13 @@ public class TaskHistory
 		{
 			if (ItemNames.key(d.getName()).equals(k))
 			{
-				long[] m = current.drop(d.getName());
-				m[0]++;
-				m[1] = killsOf(current, d);
-				m[2] = now;
+				synchronized (this)
+				{
+					long[] m = current.drop(d.getName());
+					m[0]++;
+					m[1] = killsOf(current, d);
+					m[2] = now;
+				}
 				dirty = true;
 				return;
 			}
@@ -1951,7 +1996,7 @@ public class TaskHistory
 			PickupMatcher.Pending pd = it.next();
 			if (pd.autoStored && pd.killConfirmed && pd.x >= 0 && pd.near(me.getX(), me.getY(), me.getPlane(), 0))
 			{
-				takeLoot(pd.id, pd.quantity, pd.quantity * pd.priceEach, t);
+				takeLoot(pd.id, pd.quantity, pd.quantity * pd.priceEach, t, pd.task);
 				it.remove();
 			}
 		}
@@ -1962,22 +2007,45 @@ public class TaskHistory
 	private volatile long floorValue;
 	@Getter
 	private volatile long floorSoonestAt;
+	/** Value of the drop(s) that vanish first. */
+	@Getter
+	private volatile long floorSoonestValue;
 
 	private void refreshFloor()
 	{
 		long value = 0;
 		long soonest = Long.MAX_VALUE;
+		long soonValue = 0;
 		long min = config.floorLootMin();
+		long now = System.currentTimeMillis();
+		WorldView wv = client.getTopLevelWorldView();
+		Tile[][][] tiles = wv == null || wv.getScene() == null ? null : wv.getScene().getTiles();
 		for (long[] d : floorDrops())
 		{
-			if (d[5] >= min)
+			if (d[5] < min || d[6] <= now)
 			{
-				value += d[5];
-				soonest = Math.min(soonest, d[6]);
+				continue;
+			}
+			// a drop whose tile is loaded but holds no such item is gone: taken by someone, or vanished
+			if (tiles != null && LocalPoint.fromWorld(wv, (int) d[0], (int) d[1]) != null
+				&& FloorLootOverlay.locate(wv, tiles, (int) d[0], (int) d[1], (int) d[2], (int) d[7]) == null)
+			{
+				continue;
+			}
+			value += d[5];
+			if (d[6] < soonest)
+			{
+				soonest = d[6];
+				soonValue = d[5];
+			}
+			else if (d[6] == soonest)
+			{
+				soonValue += d[5];
 			}
 		}
 		floorValue = value;
 		floorSoonestAt = soonest == Long.MAX_VALUE ? 0 : soonest;
+		floorSoonestValue = soonest == Long.MAX_VALUE ? 0 : soonValue;
 	}
 
 	/** Your drops still lying where they fell: {x, y, plane, item id, quantity, value, vanishes at (ms)}. Client thread. */
@@ -1991,7 +2059,7 @@ public class TaskHistory
 				continue;
 			}
 			long window = pd.windowMs > 0 ? pd.windowMs : PICKUP_WINDOW_MS;
-			out.add(new long[]{pd.x, pd.y, pd.plane, pd.id, pd.quantity, pd.quantity * pd.priceEach, pd.at + FloorLootMath.vanishAfter(window)});
+			out.add(new long[]{pd.x, pd.y, pd.plane, pd.id, pd.quantity, pd.quantity * pd.priceEach, pd.at + FloorLootMath.vanishAfter(window), pd.rawId >= 0 ? pd.rawId : pd.id});
 		}
 		return out;
 	}

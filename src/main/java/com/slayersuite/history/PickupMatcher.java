@@ -30,6 +30,8 @@ public final class PickupMatcher
 		public int task = -1;
 		/** How long this drop lies on the ground; 0 or less means the caller's window applies. */
 		public long windowMs;
+		/** The id as it lies on the floor (a noted drop keeps its noted id there); -1 when the same as id. */
+		public int rawId = -1;
 
 		public Pending(int id, long quantity, long priceEach, long at)
 		{

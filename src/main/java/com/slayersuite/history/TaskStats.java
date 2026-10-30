@@ -42,6 +42,8 @@ public class TaskStats
 	private java.util.Map<String, long[]> drops = new java.util.LinkedHashMap<>();
 	/** Kills per monster on this task (deaths that dropped loot), by dataset monster name. */
 	private java.util.Map<String, Long> monsterKills = new java.util.LinkedHashMap<>();
+	/** Set when the stored record could not be read: nothing is saved over it. */
+	private transient boolean unreadable;
 
 	public static class SpotStats
 	{
@@ -188,6 +190,7 @@ public class TaskStats
 		c.cannonKph = cannonKph;
 		c.plainKph = plainKph;
 		c.superiors = superiors;
+		c.unreadable = unreadable;
 		c.monsterKills = monsterKills == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(monsterKills);
 		c.drops = new java.util.LinkedHashMap<>();
 		if (drops != null)
