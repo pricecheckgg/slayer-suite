@@ -22,6 +22,9 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.events.WidgetClosed;
+import net.runelite.api.events.WidgetLoaded;
+import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.Skill;
 import net.runelite.api.NPCComposition;
@@ -132,6 +135,8 @@ public class TaskTracker
 	private int pendingSpend;
 	private int lastDrop;
 	private long pendingSpendAt;
+	/** The Slayer rewards screen is open: a task that goes away now was skipped or blocked, not finished. */
+	private boolean rewardsOpen;
 	private static final long SPEND_MATCH_MS = 10_000L;
 	@Getter
 	private boolean storageUnlocked;
@@ -461,8 +466,13 @@ public class TaskTracker
 			killsThisSession = 0;
 			taskSeenAt = System.currentTimeMillis();
 			currentLocation = null;
+			long tNow = System.currentTimeMillis();
 			boolean countZero = client.getGameState() == GameState.LOGGED_IN && client.getVarpValue(VarPlayerID.SLAYER_COUNT) == 0;
-			boolean finishedNow = settled() && name == null && old != null && (remaining <= 0 || countZero || System.currentTimeMillis() - completionMessageAt < 10_000L);
+			boolean saidDone = tNow - completionMessageAt < 10_000L;
+			// A skip or block also empties the game's kill counter: points taken moments ago, or the rewards
+			// screen still open, mean the task was paid away, and only the completion message says otherwise.
+			boolean paidAway = pendingSpend > 0 && tNow - pendingSpendAt <= SPEND_MATCH_MS && (lastDrop == 30 || lastDrop == 100);
+			boolean finishedNow = settled() && name == null && old != null && (saidDone || ((remaining <= 0 || countZero) && !paidAway && !rewardsOpen));
 			if (old != null && !finishedNow && pendingSpend > 0 && System.currentTimeMillis() - pendingSpendAt <= SPEND_MATCH_MS)
 			{
 				// the task went away right after points were taken: the last drop is the skip (30) or block (100);
@@ -890,6 +900,24 @@ public class TaskTracker
 			: (pointsAtTaskStart >= 0 && slayerPoints > pointsAtTaskStart ? slayerPoints - pointsAtTaskStart : 0);
 		log.info("Slayer Suite: task finished {} (+{} points, streak {})", name, awarded, taskStreak);
 		eventBus.post(new TaskFinished(name, awarded, taskStreak));
+	}
+
+	@Subscribe
+	public void onWidgetLoaded(WidgetLoaded e)
+	{
+		if (e.getGroupId() == InterfaceID.SLAYER_REWARDS || e.getGroupId() == InterfaceID.SLAYER_REWARDS_TASK_LIST)
+		{
+			rewardsOpen = true;
+		}
+	}
+
+	@Subscribe
+	public void onWidgetClosed(WidgetClosed e)
+	{
+		if (e.getGroupId() == InterfaceID.SLAYER_REWARDS || e.getGroupId() == InterfaceID.SLAYER_REWARDS_TASK_LIST)
+		{
+			rewardsOpen = false;
+		}
 	}
 
 	@Subscribe
