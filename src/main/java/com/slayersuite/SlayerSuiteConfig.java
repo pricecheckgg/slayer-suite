@@ -22,32 +22,32 @@ public interface SlayerSuiteConfig extends Config
 {
 	String GROUP = "slayersuite";
 
-	@ConfigSection(name = "Task card", description = "The card in the corner: kills left, ETA, how to fight it, where you are, what you still need.", position = 0)
+	@ConfigSection(name = "Task card", description = "The card in the corner: kills left, ETA, how to fight it, where you are, what you still need, the drops you wait on. The hover card too.", position = 0)
 	String cardSection = "card";
 
-	@ConfigSection(name = "Hover card", description = "The card beside the cursor when you hover a task monster.", position = 1)
-	String monsterSection = "monsters";
-
-	@ConfigSection(name = "Readiness check", description = "At the bank: everything this task needs, checked against your gear, inventory and bank.", position = 2)
+	@ConfigSection(name = "Readiness check", description = "At the bank: everything this task needs, checked against your gear, inventory and bank.", position = 1)
 	String readinessSection = "readiness";
 
-	@ConfigSection(name = "Alerts", description = "One prioritised alert at a time: banner, RuneLite notification, chat line and sound.", position = 3)
+	@ConfigSection(name = "Alerts", description = "One prioritised alert at a time: banner, RuneLite notification, chat line and sound.", position = 2)
 	String alertsSection = "alerts";
 
-	@ConfigSection(name = "Task complete", description = "The celebration when the assignment ends, and the countdown before it.", position = 4)
+	@ConfigSection(name = "Task complete", description = "The celebration when the assignment ends, and the countdown before it.", position = 3)
 	String celebrateSection = "celebrate";
 
-	@ConfigSection(name = "Sounds", description = "Which sounds play and how loud. Drop your own .wav files into .runelite/plugin-data/slayer-suite/sounds to replace them.", position = 5)
+	@ConfigSection(name = "Sounds", description = "Which sounds play and how loud. Drop your own .wav files into .runelite/plugin-data/slayer-suite/sounds to replace them.", position = 4)
 	String soundsSection = "sounds";
 
-	@ConfigSection(name = "Attack guard", description = "Keeps Attack away from monsters that do not count for your task.", position = 6)
+	@ConfigSection(name = "Attack guard", description = "Keeps Attack away from monsters that do not count for your task.", position = 5)
 	String guardSection = "guard";
 
-	@ConfigSection(name = "History and advice", description = "Your own kills, xp and loot per task, and the skip advice built from them.", position = 7)
+	@ConfigSection(name = "History and loot", description = "Your own kills, xp and loot per task, the skip advice built from them, and your drops marked on the floor.", position = 6)
 	String historySection = "history";
 
-	@ConfigSection(name = "Spots and travel", description = "The side panel, the spot ranking for your account, the world-map pin, the arrow and the floor path.", position = 8)
+	@ConfigSection(name = "Spots", description = "The side panel and the spot ranking for your account: what it prefers and what it hides.", position = 7)
 	String advisorSection = "advisor";
+
+	@ConfigSection(name = "Route", description = "From you to the pinned spot: the minimap arrow, the chevrons on the floor, the maps, the colour, and what happens between tasks.", position = 8)
+	String routeSection = "route";
 
 	// ---------------------------------------------------------------- top level
 
@@ -127,7 +127,7 @@ public interface SlayerSuiteConfig extends Config
 
 	// ---------------------------------------------------------------- over the monsters
 
-	@ConfigItem(keyName = "hoverInfo", name = "Hover card", description = "Hover a task monster for its Hitpoints, max hit, attack style, weakness, Slayer xp, poison, cannon immunity and finishing item.", section = monsterSection, position = 0)
+	@ConfigItem(keyName = "hoverInfo", name = "Hover card", description = "Hover a task monster for its Hitpoints, max hit, attack style, weakness, Slayer xp, poison, cannon immunity and finishing item.", section = cardSection, position = 10)
 	default boolean hoverInfo()
 	{
 		return true;
@@ -469,75 +469,75 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "gpsArrow", name = "Minimap arrow", description = "An arrow on the minimap edge pointing at the pinned spot, with the distance.", section = advisorSection, position = 3)
+	@ConfigItem(keyName = "gpsArrow", name = "Minimap arrow", description = "An arrow on the minimap edge pointing at the pinned spot, with the distance.", section = routeSection, position = 0)
 	default boolean gpsArrow()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Chevrons from you to the pinned spot along the route, door to door across the whole map: doors, stairs, ladders, caves and the Agility shortcuts you can use are known, and each one on the way is marked with the option that uses it.", section = advisorSection, position = 4)
+	@ConfigItem(keyName = "floorPath", name = "Floor path", description = "Chevrons from you to the pinned spot along the route, door to door across the whole map: doors, stairs, ladders, caves and the Agility shortcuts you can use are known, and each one on the way is marked with the option that uses it.", section = routeSection, position = 1)
 	default boolean floorPath()
 	{
 		return true;
 	}
 
 	@Range(min = 10, max = 120)
-	@ConfigItem(keyName = "floorPathTiles", name = "Chevrons ahead", description = "How many tiles of the route are drawn ahead of you.", section = advisorSection, position = 5)
+	@ConfigItem(keyName = "floorPathTiles", name = "Chevrons ahead", description = "How many tiles of the route are drawn ahead of you.", section = routeSection, position = 2)
 	default int floorPathTiles()
 	{
 		return 60;
 	}
 
 	@Range(min = 50, max = 1000)
-	@ConfigItem(keyName = "floorPathMaxDistance", name = "Walk up to", description = "Tiles. A walk this long is always drawn, even when a quicker teleport is named; beyond it, the chevrons appear once you have used the teleport.", section = advisorSection, position = 6)
+	@ConfigItem(keyName = "floorPathMaxDistance", name = "Walk up to", description = "Tiles. A walk this long is always drawn, even when a quicker teleport is named; beyond it, the chevrons appear once you have used the teleport.", section = routeSection, position = 3)
 	default int floorPathMaxDistance()
 	{
 		return 200;
 	}
 
-	@ConfigItem(keyName = "loopGuide", name = "After a task", description = "Keep routing once the assignment ends: back to the Slayer master you took it from, or first to the nearest bank you can use when you carry fewer than three food or have three or fewer free inventory slots. Runs for twenty minutes or until the next task.", section = advisorSection, position = 7)
+	@ConfigItem(keyName = "loopGuide", name = "After a task", description = "Keep routing once the assignment ends: back to the Slayer master you took it from, or first to the nearest bank you can use when you carry fewer than three food or have three or fewer free inventory slots. Runs for twenty minutes or until the next task.", section = routeSection, position = 4)
 	default LoopMode loopGuide()
 	{
 		return LoopMode.BANK_THEN_MASTER;
 	}
 
-	@ConfigItem(keyName = "routeMinimap", name = "Route on the minimap", description = "Dots along the next stretch of the route on the minimap.", section = advisorSection, position = 8)
+	@ConfigItem(keyName = "routeMinimap", name = "Route on the minimap", description = "Dots along the next stretch of the route on the minimap.", section = routeSection, position = 5)
 	default boolean routeMinimap()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "routeWorldMap", name = "Route on the world map", description = "The whole plan on the world map: the route as a line, and where your teleport lands.", section = advisorSection, position = 9)
+	@ConfigItem(keyName = "routeWorldMap", name = "Route on the world map", description = "The whole plan on the world map: the route as a line, and where your teleport lands.", section = routeSection, position = 6)
 	default boolean routeWorldMap()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "chevronColour", name = "Chevron colour", description = "Colour of the route chevrons, the markers on the way, the minimap dots and the world map line. Picking a custom colour below switches this to Custom by itself.", section = advisorSection, position = 10)
+	@ConfigItem(keyName = "chevronColour", name = "Chevron colour", description = "Colour of the route chevrons, the markers on the way, the minimap dots and the world map line. Picking a custom colour below switches this to Custom by itself.", section = routeSection, position = 7)
 	default com.slayersuite.advisor.ChevronColour chevronColour()
 	{
 		return com.slayersuite.advisor.ChevronColour.CYAN;
 	}
 
-	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Any colour you like; it applies as soon as you close the picker.", section = advisorSection, position = 11)
+	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Any colour you like; it applies as soon as you close the picker.", section = routeSection, position = 8)
 	default java.awt.Color customChevronColour()
 	{
 		return new java.awt.Color(80, 220, 255);
 	}
 
-	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 8)
+	@ConfigItem(keyName = "preferCannon", name = "Prefer cannon spots", description = "Rank spots that allow a cannon higher when you own one.", section = advisorSection, position = 3)
 	default boolean preferCannon()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "avoidWilderness", name = "Avoid the Wilderness", description = "Rank Wilderness spots lower.", section = advisorSection, position = 9)
+	@ConfigItem(keyName = "avoidWilderness", name = "Avoid the Wilderness", description = "Rank Wilderness spots lower.", section = advisorSection, position = 4)
 	default boolean avoidWilderness()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "hideLocked", name = "Hide locked spots", description = "Hide spots whose quest, diary or level requirement you have not met.", section = advisorSection, position = 10)
+	@ConfigItem(keyName = "hideLocked", name = "Hide locked spots", description = "Hide spots whose quest, diary or level requirement you have not met.", section = advisorSection, position = 5)
 	default boolean hideLocked()
 	{
 		return true;
