@@ -27,6 +27,7 @@ import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 
 /**
  * Makes a superior impossible to miss: its outline and tile pulse red with SUPERIOR over its head
@@ -40,13 +41,15 @@ public class SuperiorOverlay extends Overlay
 	private final Client client;
 	private final TaskTracker tracker;
 	private final SlayerSuiteConfig config;
+	private final ModelOutlineRenderer outlines;
 
 	@Inject
-	public SuperiorOverlay(Client client, TaskTracker tracker, SlayerSuiteConfig config)
+	public SuperiorOverlay(Client client, TaskTracker tracker, SlayerSuiteConfig config, ModelOutlineRenderer outlines)
 	{
 		this.client = client;
 		this.tracker = tracker;
 		this.config = config;
+		this.outlines = outlines;
 		setPosition(OverlayPosition.DYNAMIC);
 		setLayer(OverlayLayer.ABOVE_WIDGETS);
 		setPriority(PRIORITY_HIGH);
@@ -70,9 +73,7 @@ public class SuperiorOverlay extends Overlay
 		float pulse = engaged ? 1f : 0.6f + 0.4f * (float) Math.abs(Math.sin(now / 160.0));
 		Color base = engaged ? Palette.SUPERIOR_CALM : Palette.SUPERIOR;
 		Color c = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(255 * pulse));
-		Color glow = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(70 * pulse));
 		Color fill = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(40 * pulse));
-		Color inner = new Color(Palette.SUPERIOR_GLOW.getRed(), Palette.SUPERIOR_GLOW.getGreen(), Palette.SUPERIOR_GLOW.getBlue(), Math.round(200 * pulse));
 		String name = tracker.getSuperiorName() == null ? "Superior" : tracker.getSuperiorName();
 		WorldPoint mine = me.getWorldLocation();
 		WorldPoint theirs = s.getWorldLocation();
@@ -93,29 +94,15 @@ public class SuperiorOverlay extends Overlay
 		{
 			g.setColor(fill);
 			g.fill(tile);
-			g.setColor(glow);
-			g.setStroke(new BasicStroke(6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.draw(tile);
 			g.setColor(c);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(tile);
 		}
-		Shape hull = s.getConvexHull();
-		if (hull != null)
-		{
-			// a soft outer glow, the violet line, and a pale hairline inside it
-			g.setColor(glow);
-			g.setStroke(new BasicStroke(9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.draw(hull);
-			g.setColor(c);
-			g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-			g.draw(hull);
-			g.setColor(inner);
-			g.setStroke(new BasicStroke(1f));
-			g.draw(hull);
-		}
+		// the creature's own silhouette, feathered into a glow, rather than a hull boxing its wings
+		outlines.drawOutline(s, engaged ? 2 : 3, c, engaged ? 2 : 6);
 		int plane = theirs == null ? 0 : theirs.getPlane();
-		Point above = lp == null ? null : Perspective.localToCanvas(client, lp, plane, s.getLogicalHeight() + 40);
+		// well above the head, clear of the name tags other plugins draw there
+		Point above = lp == null ? null : Perspective.localToCanvas(client, lp, plane, s.getLogicalHeight() + 110);
 		boolean onScreen = above != null && view.contains(above.getX(), above.getY());
 		if (onScreen)
 		{
