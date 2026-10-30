@@ -338,6 +338,28 @@ public class RouteService
 		return out;
 	}
 
+	/** The fairy ring code the route wants next: the first ring ride ahead, else a house ring landing's code; null when none. */
+	public String nextFairyCode()
+	{
+		for (Router.Step s : remainingSteps())
+		{
+			if (s.transport.kind == Transport.Kind.FAIRY_RING && s.transport.display != null && s.transport.display.matches("[A-D][IJKL][PQRS]"))
+			{
+				return s.transport.display;
+			}
+		}
+		Planner.Plan p = plan;
+		if (p != null && p.teleport != null && p.teleport.label != null && !onRoute)
+		{
+			java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?i)fairy ring to ([A-D][IJKL][PQRS])\\b").matcher(p.teleport.label);
+			if (m.find())
+			{
+				return m.group(1).toUpperCase(java.util.Locale.ROOT);
+			}
+		}
+		return null;
+	}
+
 	/** True when the route gets all the way to the target. */
 	public boolean reached()
 	{

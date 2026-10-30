@@ -128,6 +128,8 @@ public class SlayerSuitePlugin extends Plugin
 	@Inject
 	private com.slayersuite.history.FloorLootOverlay floorLootOverlay;
 	@Inject
+	private com.slayersuite.advisor.FairyDialOverlay fairyDialOverlay;
+	@Inject
 	private NpcHoverOverlay hoverOverlay;
 	@Inject
 	private TaskCompleteOverlay completeOverlay;
@@ -269,6 +271,8 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.add(routeMinimapOverlay);
 		overlayManager.add(routeMapOverlay);
 		overlayManager.add(floorLootOverlay);
+		overlayManager.add(fairyDialOverlay);
+		eventBus.register(fairyDialOverlay);
 		eventBus.register(pathOverlay);
 		overlayManager.add(hoverOverlay);
 		overlayManager.add(completeOverlay);
@@ -311,6 +315,8 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(routeMinimapOverlay);
 		overlayManager.remove(routeMapOverlay);
 		overlayManager.remove(floorLootOverlay);
+		overlayManager.remove(fairyDialOverlay);
+		eventBus.unregister(fairyDialOverlay);
 		eventBus.unregister(pathOverlay);
 		eventBus.unregister(routeService);
 		eventBus.unregister(loopGuide);

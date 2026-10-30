@@ -108,6 +108,41 @@ public final class TransportTable
 		return out;
 	}
 
+	private static volatile Map<String, String> fairyPlaces;
+
+	/** Where a fairy ring code lands, in the wiki's words ("Morytania: Canifis"), or "" when unknown. */
+	public static String fairyPlace(String code)
+	{
+		Map<String, String> places = fairyPlaces;
+		if (places == null)
+		{
+			places = new HashMap<>();
+			try (InputStream in = TransportTable.class.getResourceAsStream(FAIRY_CODES))
+			{
+				if (in != null)
+				{
+					java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+					String line;
+					while ((line = r.readLine()) != null)
+					{
+						String[] f = line.split("\t");
+						if (!line.startsWith("#") && f.length >= 4)
+						{
+							places.put(f[0].trim(), f[3].trim());
+						}
+					}
+				}
+			}
+			catch (IOException | RuntimeException e)
+			{
+				// no places
+			}
+			fairyPlaces = places;
+		}
+		String p = code == null ? null : places.get(code.toUpperCase(java.util.Locale.ROOT));
+		return p == null ? "" : p;
+	}
+
 	/** Ring tile (plane 0) -> code, from fairy-codes.tsv; empty when the file is missing. */
 	static Map<Integer, String> fairyCodes()
 	{

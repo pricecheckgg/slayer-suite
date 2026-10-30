@@ -75,18 +75,26 @@ public class PathOverlay extends Overlay
 		final String action;
 		final String name;
 		final WorldPoint tile;
+		/** Words of the transport's own choosing ("Fairy ring to CKS"); null means action and name. */
+		final String text;
 
 		Obstacle(TileObject object, String action, String name, WorldPoint tile)
+		{
+			this(object, action, name, tile, null);
+		}
+
+		Obstacle(TileObject object, String action, String name, WorldPoint tile, String text)
 		{
 			this.object = object;
 			this.action = action;
 			this.name = name;
 			this.tile = tile;
+			this.text = text;
 		}
 
 		String label()
 		{
-			return action + " " + name;
+			return text != null ? text : action + " " + name;
 		}
 	}
 
@@ -235,7 +243,7 @@ public class PathOverlay extends Overlay
 				continue;
 			}
 			WorldPoint at = Packed.toWorld(route.tiles.get(s.index));
-			Obstacle o = new Obstacle(findObject(wv, at, s.transport.objectId), s.transport.action, s.transport.name, at);
+			Obstacle o = new Obstacle(findObject(wv, at, s.transport.objectId), s.transport.action, s.transport.name, at, s.transport.label());
 			marks.add(o);
 			if (first == null)
 			{

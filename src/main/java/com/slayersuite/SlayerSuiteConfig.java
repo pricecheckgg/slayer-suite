@@ -519,6 +519,18 @@ public interface SlayerSuiteConfig extends Config
 		return com.slayersuite.advisor.ChevronColour.CYAN;
 	}
 
+	@ConfigItem(keyName = "fairyDialHelper", name = "Fairy ring dials", description = "On the ring's dial screen: the code the route wants, which dial to turn, which way and how many clicks, then the teleport button once it reads right.", section = routeSection, position = 9)
+	default boolean fairyDialHelper()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "fairyDialSense", name = "Fairy dial sense", description = "Learned: whether a clockwise click raises the dial value.", section = routeSection, position = 30, hidden = true)
+	default int fairyDialSense()
+	{
+		return 1;
+	}
+
 	@ConfigItem(keyName = "customChevronColour", name = "Custom chevron colour", description = "Any colour you like; it applies as soon as you close the picker.", section = routeSection, position = 8)
 	default java.awt.Color customChevronColour()
 	{
