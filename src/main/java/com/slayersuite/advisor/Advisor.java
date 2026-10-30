@@ -32,6 +32,7 @@ import net.runelite.api.gameval.InventoryID;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.callback.ClientThread;
 import java.util.HashMap;
 import java.util.Map;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPoint;
@@ -58,6 +59,7 @@ public class Advisor
 	private final EventBus eventBus;
 	private final RouteService routes;
 	private final LoopGuide loop;
+	private final ClientThread clientThread;
 
 	private volatile List<ScoredLocation> ranked = Collections.emptyList();
 	@Getter
@@ -87,11 +89,12 @@ public class Advisor
 	private boolean autoPinned;
 
 	@Inject
-	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes, LoopGuide loop)
+	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes, LoopGuide loop, ClientThread clientThread)
 	{
 		this.eventBus = eventBus;
 		this.routes = routes;
 		this.loop = loop;
+		this.clientThread = clientThread;
 		this.client = client;
 		this.config = config;
 		this.tracker = tracker;
@@ -1082,7 +1085,8 @@ public class Advisor
 		String k = e.getKey();
 		if (k.startsWith("filter") || k.equals("hideLocked") || k.equals("avoidWilderness") || k.equals("preferCannon"))
 		{
-			refresh();
+			// the settings panel posts this on its own thread; ranking asks the router and the game state
+			clientThread.invokeLater(this::refresh);
 		}
 	}
 
@@ -1157,6 +1161,7 @@ public class Advisor
 			// you reached one of the task's spots, pinned or not: that is the destination now
 			destination = here;
 			arrived = true;
+			autoPinned = false;
 			updatePin();
 			updateRoute();
 			notifyListener();
@@ -1170,6 +1175,7 @@ public class Advisor
 				// standing at the way into another of the task's spots: that is where you are going
 				destination = atHand;
 				arrived = nearSpawn(atHand);
+				autoPinned = false;
 				updatePin();
 				updateRoute();
 				notifyListener();

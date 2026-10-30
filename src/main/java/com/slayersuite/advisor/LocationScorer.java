@@ -252,7 +252,7 @@ public class LocationScorer
 	}
 
 	/** Seconds to the spot from where you stand: the router's plan when it has answered, else a straight-line guess against the best teleport you own. */
-	static int travelSeconds(LocationRecord loc, Options opt, String travelLabel, int bestHops)
+	int travelSeconds(LocationRecord loc, Options opt, String travelLabel, int bestHops)
 	{
 		Integer ticks = loc.getName() == null || opt.travelTicks == null ? null : opt.travelTicks.get(loc.getName());
 		if (ticks != null && ticks >= 0)
@@ -264,6 +264,13 @@ public class LocationScorer
 			return -1;
 		}
 		int d = straightLine(loc, opt.playerX, opt.playerY);
+		// a spot stored in a detached map area is reached through its travel anchor on the ground
+		int[] anchor = travel.anchor(loc.getName());
+		if (anchor != null)
+		{
+			int da = (int) Math.round(Math.hypot(anchor[0] - opt.playerX, fold(anchor[1]) - opt.playerY));
+			d = d < 0 ? da : Math.min(d, da);
+		}
 		if (d < 0)
 		{
 			return -1;

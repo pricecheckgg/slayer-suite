@@ -120,13 +120,18 @@ public class LoopGuide
 	{
 		long now = System.currentTimeMillis();
 		long fin = tracker.getFinishedAt();
-		if (config.loopGuide() == LoopMode.OFF || fin <= 0 || now - fin > LOOP_MS || tracker.hasTask() || client.getGameState() != GameState.LOGGED_IN)
+		if (config.loopGuide() == LoopMode.OFF || fin <= 0 || now - fin > LOOP_MS || tracker.hasTask())
 		{
 			if (leg != Leg.NONE || startedFor != 0)
 			{
 				reset();
 			}
 			return null;
+		}
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			// a hop, a loading screen or a dropped connection: hold what we have rather than start again
+			return leg == Leg.NONE ? null : target;
 		}
 		if (startedFor != fin)
 		{
@@ -282,7 +287,8 @@ public class LoopGuide
 	boolean suppliesShort()
 	{
 		TripTracker t = trip.get();
-		int food = t == null ? Integer.MAX_VALUE : t.getFoodCount();
+		// an inventory not read yet is not short
+		int food = t == null || !t.foodKnown() ? Integer.MAX_VALUE : t.getFoodCount();
 		return food < FOOD_SHORT || freeSlots() <= SLOTS_SHORT;
 	}
 
@@ -317,10 +323,15 @@ public class LoopGuide
 		return r;
 	}
 
+	private static boolean isBank(int groupId)
+	{
+		return groupId == InterfaceID.BANKMAIN || groupId == InterfaceID.BANK_DEPOSITBOX;
+	}
+
 	@Subscribe
 	public void onWidgetLoaded(WidgetLoaded e)
 	{
-		if (e.getGroupId() == InterfaceID.BANKMAIN)
+		if (isBank(e.getGroupId()))
 		{
 			bankOpen = true;
 			if (leg == Leg.BANK)
@@ -333,7 +344,7 @@ public class LoopGuide
 	@Subscribe
 	public void onWidgetClosed(WidgetClosed e)
 	{
-		if (e.getGroupId() == InterfaceID.BANKMAIN)
+		if (isBank(e.getGroupId()))
 		{
 			bankOpen = false;
 		}
@@ -344,7 +355,10 @@ public class LoopGuide
 	{
 		if (e.getGameState() == GameState.LOGIN_SCREEN || e.getGameState() == GameState.HOPPING)
 		{
-			reset();
+			// keep the leg and what was banked; only the timing starts over
+			arrivedAt = 0;
+			candidateAt = System.currentTimeMillis();
+			bankOpen = false;
 		}
 	}
 }

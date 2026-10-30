@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.gameval.InterfaceID;
 import net.runelite.api.gameval.VarbitID;
 import net.runelite.api.widgets.Widget;
@@ -213,6 +214,15 @@ public class FairyDialOverlay extends Overlay
 				pendingValue = client.getVarbitValue(VARBITS[i]);
 				return;
 			}
+		}
+	}
+
+	@Subscribe
+	public void onWidgetClosed(WidgetClosed e)
+	{
+		if (e.getGroupId() == InterfaceID.FAIRYRINGS)
+		{
+			pendingDial = -1;
 		}
 	}
 

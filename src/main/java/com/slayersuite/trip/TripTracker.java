@@ -192,6 +192,12 @@ public class TripTracker
 		return Math.max(0, foodCount);
 	}
 
+	/** False until the inventory has been read this login. */
+	public boolean foodKnown()
+	{
+		return foodCount >= 0;
+	}
+
 	public int getDoseCount()
 	{
 		return Math.max(0, doseCount);

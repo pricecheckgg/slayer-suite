@@ -67,6 +67,7 @@ public class RouteService
 	private volatile WorldPoint target;
 	private volatile List<Planner.Landing> landings = Collections.emptyList();
 	private Future<?> pending;
+	private Future<?> estimating;
 	private long lastRequestMs;
 	private int tick;
 	private int snapshotTick = -1;
@@ -233,6 +234,8 @@ public class RouteService
 
 	private static final int ESTIMATE_EXPANSIONS = 300_000;
 	private static final long ESTIMATE_BUDGET_NANOS = 800_000_000L;
+	/** The whole batch of estimates shares this much of the executor; the pin's own route must not wait behind them. */
+	private static final long ESTIMATE_BATCH_NANOS = 1_500_000_000L;
 
 	/**
 	 * Costs each target from where you stand on the background thread, teleports and rides weighed
@@ -240,6 +243,10 @@ public class RouteService
 	 */
 	public void estimate(List<Target> targets, java.util.function.Consumer<Map<String, Integer>> done)
 	{
+		if (!client.isClientThread())
+		{
+			return;
+		}
 		Player me = client.getLocalPlayer();
 		if (me == null || targets.isEmpty() || !ready() || client.getGameState() != GameState.LOGGED_IN || inInstance())
 		{
@@ -250,21 +257,36 @@ public class RouteService
 			usable = computeUsable();
 			snapshotTick = tick;
 		}
+		if (estimating != null && !estimating.isDone())
+		{
+			estimating.cancel(true);
+		}
 		final int start = Packed.of(me.getWorldLocation());
 		final Set<Transport> allowed = usable;
 		final WorldMap m = map;
 		final TransportTable tt = table;
 		final boolean keepOut = config.avoidWilderness();
 		final List<Target> list = new ArrayList<>(targets);
-		executor.submit(() ->
+		final long deadline = System.nanoTime() + ESTIMATE_BATCH_NANOS;
+		estimating = executor.submit(() ->
 		{
 			Map<String, Integer> out = new HashMap<>();
 			for (Target t : list)
 			{
+				if (Thread.currentThread().isInterrupted())
+				{
+					return;
+				}
+				long left = deadline - System.nanoTime();
+				if (left <= 0)
+				{
+					out.put(t.key, -1);
+					continue;
+				}
 				try
 				{
 					int goal = Router.walkableNear(m, t.tile);
-					Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, t.landings, keepOut, ESTIMATE_EXPANSIONS, ESTIMATE_BUDGET_NANOS, 0);
+					Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, t.landings, keepOut, ESTIMATE_EXPANSIONS, Math.min(ESTIMATE_BUDGET_NANOS, left), 0);
 					out.put(t.key, made != null && made.reached() ? made.ticks : -1);
 				}
 				catch (RuntimeException e)
@@ -272,7 +294,10 @@ public class RouteService
 					out.put(t.key, -1);
 				}
 			}
-			done.accept(out);
+			if (!Thread.currentThread().isInterrupted())
+			{
+				done.accept(out);
+			}
 		});
 	}
 

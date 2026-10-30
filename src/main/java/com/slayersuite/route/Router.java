@@ -109,7 +109,7 @@ public final class Router
 				best = node;
 				break;
 			}
-			if (++expanded > maxExpansions || (expanded & 1023) == 0 && System.nanoTime() > deadlineNanos)
+			if (++expanded > maxExpansions || (expanded & 1023) == 0 && (System.nanoTime() > deadlineNanos || Thread.currentThread().isInterrupted()))
 			{
 				break;
 			}
