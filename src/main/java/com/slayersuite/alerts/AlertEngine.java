@@ -66,6 +66,9 @@ public class AlertEngine
 	private final Notifier notifier;
 	private final SoundPlayer sounds;
 	private final javax.inject.Provider<com.slayersuite.task.SlayerMode> mode;
+	private final javax.inject.Provider<com.slayersuite.history.TaskHistory> history;
+	/** The vanish time of the floor drop last warned about, so each is called once. */
+	private long floorWarnedFor;
 
 	private final Map<AlertKind, Alert> active = new EnumMap<>(AlertKind.class);
 	private final Map<Skill, Integer> peakBoost = new EnumMap<>(Skill.class);
@@ -87,9 +90,10 @@ public class AlertEngine
 	private final HotkeyListener pauseHotkey;
 
 	@Inject
-	public AlertEngine(Client client, SlayerSuiteConfig config, TaskTracker tracker, ReadinessChecker readiness, AttackGuard guard, Notifier notifier, SoundPlayer sounds, javax.inject.Provider<com.slayersuite.task.SlayerMode> mode)
+	public AlertEngine(Client client, SlayerSuiteConfig config, TaskTracker tracker, ReadinessChecker readiness, AttackGuard guard, Notifier notifier, SoundPlayer sounds, javax.inject.Provider<com.slayersuite.task.SlayerMode> mode, javax.inject.Provider<com.slayersuite.history.TaskHistory> history)
 	{
 		this.mode = mode;
+		this.history = history;
 		this.client = client;
 		this.config = config;
 		this.tracker = tracker;
@@ -159,6 +163,28 @@ public class AlertEngine
 	}
 
 	// ---------------------------------------------------------------- raise / clear
+
+	/** A marked drop of yours has half a minute left on the floor. */
+	private void checkFloor(long now)
+	{
+		if (!config.alertFloorLoot() || !config.floorLoot())
+		{
+			return;
+		}
+		com.slayersuite.history.TaskHistory h = history.get();
+		long value = h.getFloorValue();
+		long soonest = h.getFloorSoonestAt();
+		if (value <= 0 || soonest <= 0)
+		{
+			return;
+		}
+		long left = soonest - now;
+		if (left > 0 && left <= com.slayersuite.history.FloorLootMath.URGENT_MS && floorWarnedFor != soonest)
+		{
+			floorWarnedFor = soonest;
+			raise(AlertKind.FLOOR_LOOT, com.slayersuite.trip.TripMath.formatK(value) + " gp of yours on the floor vanishes in " + (left / 1000) + "s");
+		}
+	}
 
 	private void raise(AlertKind kind, String message)
 	{
@@ -306,6 +332,7 @@ public class AlertEngine
 			clear(AlertKind.OUT_OF_COMBAT);
 		}
 		checkBank();
+		checkFloor(now);
 
 		// re-notify unresolved sticky alerts
 		for (Alert a : active.values())

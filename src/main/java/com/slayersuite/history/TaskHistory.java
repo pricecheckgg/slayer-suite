@@ -1796,10 +1796,13 @@ public class TaskHistory
 	{
 		if (pending.isEmpty())
 		{
+			floorValue = 0;
+			floorSoonestAt = 0;
 			return;
 		}
 		long t = System.currentTimeMillis();
 		expirePending(t);
+		refreshFloor();
 		WorldPoint me = client.getLocalPlayer() == null ? null : client.getLocalPlayer().getWorldLocation();
 		if (me == null)
 		{
@@ -1814,6 +1817,45 @@ public class TaskHistory
 				it.remove();
 			}
 		}
+	}
+
+	/** Value of your marked drops still on the floor, and when the first of them vanishes; refreshed each tick, safe from Swing. */
+	@Getter
+	private volatile long floorValue;
+	@Getter
+	private volatile long floorSoonestAt;
+
+	private void refreshFloor()
+	{
+		long value = 0;
+		long soonest = Long.MAX_VALUE;
+		long min = config.floorLootMin();
+		for (long[] d : floorDrops())
+		{
+			if (d[5] >= min)
+			{
+				value += d[5];
+				soonest = Math.min(soonest, d[6]);
+			}
+		}
+		floorValue = value;
+		floorSoonestAt = soonest == Long.MAX_VALUE ? 0 : soonest;
+	}
+
+	/** Your drops still lying where they fell: {x, y, plane, item id, quantity, value, vanishes at (ms)}. Client thread. */
+	public List<long[]> floorDrops()
+	{
+		List<long[]> out = new ArrayList<>();
+		for (PickupMatcher.Pending pd : pending)
+		{
+			if (pd.x < 0 || pd.autoStored || pd.quantity <= 0)
+			{
+				continue;
+			}
+			long window = pd.windowMs > 0 ? pd.windowMs : PICKUP_WINDOW_MS;
+			out.add(new long[]{pd.x, pd.y, pd.plane, pd.id, pd.quantity, pd.quantity * pd.priceEach, pd.at + FloorLootMath.vanishAfter(window)});
+		}
+		return out;
 	}
 
 	@Subscribe

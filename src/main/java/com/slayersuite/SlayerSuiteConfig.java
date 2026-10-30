@@ -274,6 +274,12 @@ public interface SlayerSuiteConfig extends Config
 		return 5;
 	}
 
+	@ConfigItem(keyName = "alertFloorLoot", name = "Drop about to vanish", description = "Warn when a marked drop of yours has thirty seconds left on the floor.", section = alertsSection, position = 26)
+	default boolean alertFloorLoot()
+	{
+		return true;
+	}
+
 	@ConfigItem(keyName = "notifyCritical", name = "Critical: notification", description = "RuneLite notification for critical alerts (Hitpoints, venom, poison without a cure).", section = alertsSection, position = 30)
 	default Notification notifyCritical()
 	{
@@ -413,6 +419,18 @@ public interface SlayerSuiteConfig extends Config
 	default boolean historyChat()
 	{
 		return true;
+	}
+
+	@ConfigItem(keyName = "floorLoot", name = "Mark your drops on the floor", description = "Outline the tiles where your valuable drops still lie, with the item, its value and the time until it vanishes.", section = historySection, position = 3)
+	default boolean floorLoot()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "floorLootMin", name = "Mark drops worth at least (gp)", description = "Drops below this value are neither marked nor counted on the card.", section = historySection, position = 4)
+	default int floorLootMin()
+	{
+		return 5000;
 	}
 
 	@Range(min = 10, max = 100)

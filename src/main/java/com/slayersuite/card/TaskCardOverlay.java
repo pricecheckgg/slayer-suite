@@ -282,6 +282,12 @@ public class TaskCardOverlay extends Overlay
 			{
 				foot.add(new String[]{history.getAdvice(), history.getAdvice().startsWith("Low") ? "warn" : "ok"});
 			}
+			if (config.floorLoot() && history.getFloorValue() > 0)
+			{
+				long floorLeft = history.getFloorSoonestAt() - System.currentTimeMillis();
+				foot.add(new String[]{"On the floor  " + TripMath.formatK(history.getFloorValue()) + " gp" + (floorLeft > 0 ? ",  " + com.slayersuite.history.FloorLootMath.countdown(floorLeft) + " left" : ""),
+					floorLeft > 0 && floorLeft <= com.slayersuite.history.FloorLootMath.URGENT_MS ? "warn" : null});
+			}
 		}
 		GameTaskTable.GameTask gt = tracker.getGameTask();
 		if (gt != null && tracker.rollChance() > 0)

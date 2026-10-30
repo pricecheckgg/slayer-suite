@@ -126,6 +126,8 @@ public class SlayerSuitePlugin extends Plugin
 	@Inject
 	private RouteMapOverlay routeMapOverlay;
 	@Inject
+	private com.slayersuite.history.FloorLootOverlay floorLootOverlay;
+	@Inject
 	private NpcHoverOverlay hoverOverlay;
 	@Inject
 	private TaskCompleteOverlay completeOverlay;
@@ -266,6 +268,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.add(pathOverlay);
 		overlayManager.add(routeMinimapOverlay);
 		overlayManager.add(routeMapOverlay);
+		overlayManager.add(floorLootOverlay);
 		eventBus.register(pathOverlay);
 		overlayManager.add(hoverOverlay);
 		overlayManager.add(completeOverlay);
@@ -307,6 +310,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(pathOverlay);
 		overlayManager.remove(routeMinimapOverlay);
 		overlayManager.remove(routeMapOverlay);
+		overlayManager.remove(floorLootOverlay);
 		eventBus.unregister(pathOverlay);
 		eventBus.unregister(routeService);
 		eventBus.unregister(loopGuide);

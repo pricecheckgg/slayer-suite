@@ -16,6 +16,7 @@ public enum AlertKind
 	STREAK_RESET(66, Severity.WARNING, false, 15_000),
 	BOOST_DROPPED(60, Severity.WARNING, false, 20_000),
 	SUPPLIES_LOW(58, Severity.WARNING, false, 25_000),
+	FLOOR_LOOT(57, Severity.WARNING, false, 20_000),
 	CANNON(55, Severity.WARNING, false, 20_000),
 	SUPERIOR(50, Severity.INFO, false, 12_000),
 	AGGRESSION(45, Severity.WARNING, false, 12_000),
