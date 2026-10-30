@@ -1508,6 +1508,10 @@ public class SlayerSuitePanel extends PluginPanel
 		}
 
 		String travel = s.getTravel() != null ? "Via " + s.getTravel() : "No teleport you own";
+		if (s.getTravelSeconds() >= 0)
+		{
+			travel += ", " + LocationScorer.travelWords(s.getTravelSeconds()) + " from here";
+		}
 		for (String r : s.getReasons())
 		{
 			if (r.startsWith("needs"))

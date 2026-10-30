@@ -216,6 +216,66 @@ public class RouteService
 		setTarget(wp, Collections.emptyList());
 	}
 
+	/** A spot to cost from where you stand: a key to report it under, its tile, and the teleports that could start the trip. */
+	public static final class Target
+	{
+		public final String key;
+		public final int tile;
+		public final List<Planner.Landing> landings;
+
+		public Target(String key, int tile, List<Planner.Landing> landings)
+		{
+			this.key = key;
+			this.tile = tile;
+			this.landings = landings == null ? Collections.emptyList() : landings;
+		}
+	}
+
+	private static final int ESTIMATE_EXPANSIONS = 300_000;
+	private static final long ESTIMATE_BUDGET_NANOS = 800_000_000L;
+
+	/**
+	 * Costs each target from where you stand on the background thread, teleports and rides weighed
+	 * like a real plan, and hands back ticks per key, -1 where nothing reaches. Client thread.
+	 */
+	public void estimate(List<Target> targets, java.util.function.Consumer<Map<String, Integer>> done)
+	{
+		Player me = client.getLocalPlayer();
+		if (me == null || targets.isEmpty() || !ready() || client.getGameState() != GameState.LOGGED_IN || inInstance())
+		{
+			return;
+		}
+		if (snapshotTick < 0 || tick - snapshotTick >= SNAPSHOT_EVERY_TICKS)
+		{
+			usable = computeUsable();
+			snapshotTick = tick;
+		}
+		final int start = Packed.of(me.getWorldLocation());
+		final Set<Transport> allowed = usable;
+		final WorldMap m = map;
+		final TransportTable tt = table;
+		final boolean keepOut = config.avoidWilderness();
+		final List<Target> list = new ArrayList<>(targets);
+		executor.submit(() ->
+		{
+			Map<String, Integer> out = new HashMap<>();
+			for (Target t : list)
+			{
+				try
+				{
+					int goal = Router.walkableNear(m, t.tile);
+					Planner.Plan made = Planner.plan(m, tt, allowed, start, goal, t.landings, keepOut, ESTIMATE_EXPANSIONS, ESTIMATE_BUDGET_NANOS, 0);
+					out.put(t.key, made != null && made.reached() ? made.ticks : -1);
+				}
+				catch (RuntimeException e)
+				{
+					out.put(t.key, -1);
+				}
+			}
+			done.accept(out);
+		});
+	}
+
 	/** The current plan, or null while none is known. */
 	public Planner.Plan plan()
 	{

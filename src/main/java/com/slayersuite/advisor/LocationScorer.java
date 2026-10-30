@@ -18,6 +18,14 @@ public class LocationScorer
 		public boolean preferMulti = true;
 		/** Spot name -> {kills/h, gp/h, xp/h} from your own history on this task. */
 		public java.util.Map<String, double[]> ownRates = java.util.Collections.emptyMap();
+		/** Spot name -> ticks from where you stand, from the router; absent or negative means not known yet. */
+		public java.util.Map<String, Integer> travelTicks = java.util.Collections.emptyMap();
+		/** Where you stand (y folded onto the surface) for the straight-line guess; -1 when not logged in. */
+		public int playerX = -1;
+		public int playerY = -1;
+		/** Kills left and your rate on this task, so travel is weighed against how long the task runs. */
+		public int remainingKills;
+		public double killsPerHour;
 	}
 
 	private final TravelData travel;
@@ -204,6 +212,17 @@ public class LocationScorer
 			reasons.add("no teleport you own");
 		}
 
+		// Getting there costs time the task does not have: a second of travel is worth 100/T points,
+		// so a two-minute trip to a cannon spot loses on a forty-kill task and wins on a two-hundred-kill one.
+		int travelSeconds = travelSeconds(loc, opt, travelLabel, bestHops);
+		if (travelSeconds >= 0)
+		{
+			double taskSeconds = opt.remainingKills > 0 && opt.killsPerHour > 0 ? opt.remainingKills * 3600.0 / opt.killsPerHour : 600;
+			taskSeconds = Math.max(120, Math.min(3600, taskSeconds));
+			score -= (int) Math.round(travelSeconds * 100.0 / taskSeconds);
+			reasons.add(travelWords(travelSeconds) + " from here");
+		}
+
 		if (wild)
 		{
 			reasons.add("Wilderness");
@@ -216,7 +235,67 @@ public class LocationScorer
 		{
 			score -= 100;
 		}
-		return new ScoredLocation(loc, score, locked, wild, travelLabel, reasons, own);
+		return new ScoredLocation(loc, score, locked, wild, travelLabel, reasons, own, travelSeconds);
+	}
+
+	/** Seconds to the spot from where you stand: the router's plan when it has answered, else a straight-line guess against the best teleport you own. */
+	static int travelSeconds(LocationRecord loc, Options opt, String travelLabel, int bestHops)
+	{
+		Integer ticks = loc.getName() == null || opt.travelTicks == null ? null : opt.travelTicks.get(loc.getName());
+		if (ticks != null && ticks >= 0)
+		{
+			return (int) Math.round(ticks * 0.6);
+		}
+		if (opt.playerX < 0 || opt.playerY < 0)
+		{
+			return -1;
+		}
+		int d = straightLine(loc, opt.playerX, opt.playerY);
+		if (d < 0)
+		{
+			return -1;
+		}
+		// running covers about 3.3 tiles a second and real routes run about 1.4x the straight line
+		int walk = (int) Math.round(d / 2.4);
+		int teleport = travelLabel == null ? Integer.MAX_VALUE : bestHops <= 1 ? 15 : bestHops == 2 ? 45 : 90;
+		return Math.min(walk, teleport);
+	}
+
+	/** Tiles from (px, py) to the spot's nearest pin or its centre, dungeon levels folded onto the surface. */
+	private static int straightLine(LocationRecord loc, int px, int py)
+	{
+		int best = -1;
+		if (loc.getPins() != null)
+		{
+			for (List<Integer> pin : loc.getPins())
+			{
+				if (pin == null || pin.size() < 2)
+				{
+					continue;
+				}
+				int d = (int) Math.round(Math.hypot(pin.get(0) - px, fold(pin.get(1)) - py));
+				if (best < 0 || d < best)
+				{
+					best = d;
+				}
+			}
+		}
+		if (best < 0 && loc.hasCoordinates())
+		{
+			best = (int) Math.round(Math.hypot(loc.getX() - px, fold(loc.getY()) - py));
+		}
+		return best;
+	}
+
+	private static int fold(int y)
+	{
+		return y >= 6400 ? y - 6400 : y;
+	}
+
+	/** "27s" or "3m". */
+	public static String travelWords(int seconds)
+	{
+		return seconds < 90 ? seconds + "s" : Math.round(seconds / 60.0) + "m";
 	}
 
 	/** Region ids with y >= 3520 inside the Wilderness x band. */

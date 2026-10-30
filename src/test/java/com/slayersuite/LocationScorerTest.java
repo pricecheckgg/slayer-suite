@@ -144,6 +144,52 @@ public class LocationScorerTest
 	}
 
 	@Test
+	public void aNearSpotWinsAShortTaskAndAFarCannonSpotWinsALongOne()
+	{
+		TaskRecord rec = new TaskRecord();
+		LocationRecord tower = loc("Slayer Tower", false, false, true, 24, 13623);
+		tower.setX(3421);
+		tower.setY(3567);
+		LocationRecord labs = loc("Meiyerditch Laboratories", true, true, true, 10, 14488);
+		labs.setX(3616);
+		labs.setY(9759);
+		rec.setLocations(Arrays.asList(tower, labs));
+		Stub acc = new Stub();
+		acc.quests.add("PRIEST_IN_PERIL");
+		acc.quests.add("DWARF_CANNON");
+		acc.quests.add("SINS_OF_THE_FATHER");
+		acc.cannon = true;
+		LocationScorer.Options o = new LocationScorer.Options();
+		o.travelTicks = new java.util.HashMap<>();
+		o.travelTicks.put("Slayer Tower", 45);
+		o.travelTicks.put("Meiyerditch Laboratories", 300);
+		o.remainingKills = 46;
+		o.killsPerHour = 765;
+		List<ScoredLocation> r = new LocationScorer(travel()).rank(rec, acc, o);
+		assertEquals("Slayer Tower", r.get(0).getLocation().getName());
+		assertEquals(27, r.get(0).getTravelSeconds());
+		assertTrue(r.get(0).getReasons().contains("27s from here"));
+		assertEquals(180, r.get(1).getTravelSeconds());
+		o.remainingKills = 200;
+		r = new LocationScorer(travel()).rank(rec, acc, o);
+		assertEquals("Meiyerditch Laboratories", r.get(0).getLocation().getName());
+		// before the router answers, a straight-line guess from where you stand already counts
+		LocationScorer.Options g = new LocationScorer.Options();
+		g.playerX = 3495;
+		g.playerY = 3490;
+		g.remainingKills = 46;
+		g.killsPerHour = 765;
+		r = new LocationScorer(travel()).rank(rec, acc, g);
+		for (ScoredLocation s : r)
+		{
+			assertTrue(s.getLocation().getName(), s.getTravelSeconds() > 0);
+		}
+		// nothing known about where you are: no travel term at all
+		r = new LocationScorer(travel()).rank(rec, acc, new LocationScorer.Options());
+		assertEquals(-1, r.get(0).getTravelSeconds());
+	}
+
+	@Test
 	public void locksSpotsBehindQuests()
 	{
 		TaskRecord rec = new TaskRecord();

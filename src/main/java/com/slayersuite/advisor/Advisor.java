@@ -79,6 +79,12 @@ public class Advisor
 	/** The one thing to do next to get to the pin, in words; refreshed each tick on the client thread. */
 	@Getter
 	private volatile String nextStep = "";
+	/** Ticks from where you stood to each of the task's spots, by name, as the router last answered; for travelTicksFor's task. */
+	private volatile Map<String, Integer> travelTicks = Collections.emptyMap();
+	private volatile String travelTicksFor;
+	private volatile boolean rerank;
+	/** True while the pin is the plugin's own choice, so a better answer from the router may move it. */
+	private boolean autoPinned;
 
 	@Inject
 	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes, LoopGuide loop)
@@ -134,6 +140,19 @@ public class Advisor
 		}
 		o.preferCannon = config.preferCannon();
 		o.preferMulti = true;
+		if (rec != null && rec.getKey() != null && rec.getKey().equals(travelTicksFor))
+		{
+			o.travelTicks = travelTicks;
+		}
+		o.remainingKills = tracker.getRemaining();
+		o.killsPerHour = tracker.effectiveKph();
+		Player me = client.getGameState() == GameState.LOGGED_IN ? client.getLocalPlayer() : null;
+		if (me != null)
+		{
+			WorldPoint wp = me.getWorldLocation();
+			o.playerX = wp.getX();
+			o.playerY = surfaceY(wp.getY());
+		}
 		return o;
 	}
 
@@ -197,6 +216,14 @@ public class Advisor
 	public void refresh()
 	{
 		TaskRecord rec = tracker.getRecord();
+		List<ScoredLocation> list = rankNow(rec);
+		ranked = Collections.unmodifiableList(list);
+		notifyListener();
+		requestTravel(rec, list);
+	}
+
+	private List<ScoredLocation> rankNow(TaskRecord rec)
+	{
 		List<ScoredLocation> list = rec == null ? Collections.emptyList() : scorer.rank(rec, account, options());
 		// Konar assigns a place with the monster: only spots in that area count, when the dataset knows any of them.
 		String area = tracker.getTaskLocation();
@@ -215,8 +242,56 @@ public class Advisor
 				list = inArea;
 			}
 		}
-		ranked = Collections.unmodifiableList(list);
+		return list;
+	}
+
+	/** Asks the router how long each spot takes from here, with the teleports you own; the ranking is redone when it answers. Client thread. */
+	private void requestTravel(TaskRecord rec, List<ScoredLocation> list)
+	{
+		if (rec == null || rec.getKey() == null || client.getGameState() != GameState.LOGGED_IN || client.getLocalPlayer() == null)
+		{
+			return;
+		}
+		List<RouteService.Target> targets = new ArrayList<>();
+		for (ScoredLocation s : list)
+		{
+			LocationRecord loc = s.getLocation();
+			if (loc == null || loc.getName() == null || !loc.hasCoordinates() || s.isLocked())
+			{
+				continue;
+			}
+			int plane = loc.getPlane() == null ? 0 : loc.getPlane();
+			targets.add(new RouteService.Target(loc.getName(), Packed.of(loc.getX(), loc.getY(), plane), landings(loc)));
+		}
+		if (targets.isEmpty())
+		{
+			return;
+		}
+		final String key = rec.getKey();
+		routes.estimate(targets, ticks ->
+		{
+			travelTicks = ticks;
+			travelTicksFor = key;
+			rerank = true;
+		});
+	}
+
+	/** Ranks again with the router's travel times and moves a pin the plugin chose itself to the new best. Client thread. */
+	private void rankWithTravel()
+	{
+		TaskRecord rec = tracker.getRecord();
+		if (rec == null || rec.getKey() == null || !rec.getKey().equals(travelTicksFor))
+		{
+			return;
+		}
+		ranked = Collections.unmodifiableList(rankNow(rec));
 		notifyListener();
+		ScoredLocation best = best();
+		if (config.autoDestination() && autoPinned && !arrived && best != null && (destination == null || !sameLocation(destination, best.getLocation())))
+		{
+			setDestination(best.getLocation());
+			autoPinned = true;
+		}
 	}
 
 	/** Loose place-name match: equal, one inside the other, or the same first two words ("Fremennik Slayer Dungeon" and "... Cave"). */
@@ -367,7 +442,7 @@ public class Advisor
 		}
 		int pinnedD = foldedDistance(pinned, wp);
 		// the pinned spot stays while it is near too, or not clearly further than the one you are at
-		if (pinnedD >= 0 && pinnedD <= Math.max(FAR_TILES, 3 * bestD))
+		if (pinnedD >= 0 && pinnedD <= Math.max(NEARBY_TILES, 2 * bestD))
 		{
 			return null;
 		}
@@ -388,6 +463,7 @@ public class Advisor
 
 	public void setDestination(LocationRecord loc)
 	{
+		autoPinned = false;
 		destination = loc;
 		arrived = loc != null && nearSpawn(loc);
 		updatePin();
@@ -949,11 +1025,14 @@ public class Advisor
 			clearDestination();
 			return;
 		}
+		travelTicks = Collections.emptyMap();
+		travelTicksFor = null;
 		refresh();
 		ScoredLocation best = best();
 		if (config.autoDestination())
 		{
 			setDestination(best == null ? null : best.getLocation());
+			autoPinned = best != null;
 		}
 		else
 		{
@@ -1011,6 +1090,11 @@ public class Advisor
 	public void onGameTick(GameTick t)
 	{
 		routes.setFairyRingsUsable(account.fairyRingsUsable());
+		if (rerank)
+		{
+			rerank = false;
+			rankWithTravel();
+		}
 		if (!tracker.hasTask())
 		{
 			LocationRecord want = loop.tick(arrived && destination != null && loop.owns(destination));
