@@ -437,7 +437,7 @@ public class SlayerSuitePanel extends PluginPanel
 		sb.append(sum.getSlayerXp()).append('|').append(sum.getSinceKills()).append('|').append(sum.getSinceMs() / 60_000L).append('|').append(sum.getSinceValue()).append('|')
 			.append(sum.getLifeKills()).append('|').append(sum.getLifeValue()).append('|').append(sum.getSlayerLevels().size()).append('|').append(sum.getRecentItems().size()).append('|').append(sum.getSinceItems().size())
 			.append('|').append(sum.getSinceMissedValue()).append('|').append(sum.getLifeMissedValue()).append('|').append(tracker.getTaskName()).append('|').append(history.getAssignmentKills()).append('|')
-			.append(history.getAssignmentGp()).append('|').append(history.getAssignmentMissedValue()).append('|').append(olderLevelsShown).append('|').append(openedLevels).append('|').append(openedMonsters).append('|').append(history.all().size());
+			.append(history.getAssignmentGp()).append('|').append(history.getAssignmentMissedValue()).append('|').append(olderLevelsShown).append('|').append(weekSignature()).append('|').append(openedLevels).append('|').append(openedMonsters).append('|').append(history.all().size());
 		String sig = sb.toString();
 		if (!force && sig.equals(lastLootSignature))
 		{
@@ -460,6 +460,10 @@ public class SlayerSuitePanel extends PluginPanel
 		lootContent.removeAll();
 		lootContent.add(title("Slayer level"));
 		lootContent.add(levelCard(sum));
+		TaskHistory.WeekSummary week = history.week();
+		lootContent.add(gap(10));
+		lootContent.add(titleWithNote("This week", week.getKills() > 0 ? TripMath.formatK(week.getKills()) + " kills" : ""));
+		lootContent.add(weekCard(week, sum.getNames()));
 		if (tracker.hasTask())
 		{
 			lootContent.add(gap(10));
@@ -835,6 +839,120 @@ public class SlayerSuitePanel extends PluginPanel
 		p.add(gap(4));
 		p.add(wrap(String.format("%,d", xp) + " xp" + (level > Experience.MAX_REAL_LEVEL && !maxed ? ", " + TripMath.formatK(Experience.MAX_SKILL_XP - xp) + " to 200m" : ""), DIM));
 		return p;
+	}
+
+	private String weekSignature()
+	{
+		TaskHistory.WeekSummary w = history.week();
+		return w.getKills() + ":" + (w.getActiveMs() / 60_000L) + ":" + w.getXp() + ":" + w.getLoot() + ":" + w.getTasks() + ":" + w.getBestValue();
+	}
+
+	/** Seven days of slaying against the seven before: totals, kills per day, the best drop. */
+	private JPanel weekCard(TaskHistory.WeekSummary w, Map<Integer, String> names)
+	{
+		JPanel p = card(null, false);
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		if (w.getKills() == 0 && w.getTasks() == 0)
+		{
+			p.add(label("nothing slain in the last seven days", FontManager.getRunescapeSmallFont(), DIM));
+			return p;
+		}
+		List<String[]> cells = new ArrayList<>();
+		cells.add(new String[]{"kills", TripMath.formatK(w.getKills())});
+		cells.add(new String[]{"time", w.getActiveMs() >= 60_000L ? TaskTracker.formatDuration(w.getActiveMs()) : "--"});
+		cells.add(new String[]{"xp", TripMath.formatK(w.getXp())});
+		cells.add(new String[]{"loot", TripMath.formatK(w.getLoot())});
+		cells.add(new String[]{"tasks", Long.toString(w.getTasks())});
+		p.add(tiles(cells));
+		p.add(gap(6));
+		p.add(dayBars(w.getKillsPerDay(), w.getDayLabels(), w.getTodayIndex()));
+		p.add(gap(4));
+		p.add(wrap("vs last week: kills " + TaskHistory.percentChange(w.getKills(), w.getPrevKills()) + ", xp " + TaskHistory.percentChange(w.getXp(), w.getPrevXp())
+			+ ", loot " + TaskHistory.percentChange(w.getLoot(), w.getPrevLoot()) + ", tasks " + TaskHistory.percentChange(w.getTasks(), w.getPrevTasks()), DIM));
+		if (w.getBestItemId() >= 0 && w.getBestValue() > 0)
+		{
+			p.add(gap(4));
+			JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+			row.setOpaque(false);
+			row.setAlignmentX(LEFT_ALIGNMENT);
+			row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
+			JLabel ic = new JLabel();
+			try
+			{
+				net.runelite.client.util.AsyncBufferedImage img = itemManager.getImage(w.getBestItemId(), 1, false);
+				if (img != null)
+				{
+					img.addTo(ic);
+				}
+			}
+			catch (RuntimeException ignored)
+			{
+				// no sprite
+			}
+			row.add(ic);
+			String name = names.get(w.getBestItemId());
+			if (name == null)
+			{
+				try
+				{
+					name = itemManager.getItemComposition(w.getBestItemId()).getName();
+				}
+				catch (RuntimeException e)
+				{
+					name = "Item " + w.getBestItemId();
+				}
+			}
+			row.add(label("Best drop: " + name + ", " + TripMath.formatK(w.getBestValue()), FontManager.getRunescapeSmallFont(), new Color(232, 180, 60)));
+			p.add(row);
+		}
+		return p;
+	}
+
+	/** Seven bars, one per day, today in the accent colour. */
+	private static JComponent dayBars(long[] values, String[] labels, int todayIndex)
+	{
+		StringBuilder tip = new StringBuilder();
+		for (int i = 0; i < values.length; i++)
+		{
+			tip.append(i > 0 ? ", " : "").append(labels[i] == null ? "?" : labels[i]).append(' ').append(values[i]);
+		}
+		JComponent c = new JComponent()
+		{
+			@Override
+			protected void paintComponent(Graphics g)
+			{
+				Graphics2D g2 = (Graphics2D) g;
+				g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				int n = values.length;
+				int w = getWidth();
+				int h = getHeight();
+				int labelH = 12;
+				int gapPx = 4;
+				int bw = Math.max(4, (w - gapPx * (n - 1)) / n);
+				long max = 1;
+				for (long v : values)
+				{
+					max = Math.max(max, v);
+				}
+				g2.setFont(FontManager.getRunescapeSmallFont());
+				for (int i = 0; i < n; i++)
+				{
+					int x = i * (bw + gapPx);
+					int bh = Math.max(2, (int) Math.round((h - labelH - 4) * (values[i] / (double) max)));
+					g2.setColor(values[i] > 0 ? (i == todayIndex ? ACCENT : new Color(90, 160, 90)) : TAG_BG);
+					g2.fillRoundRect(x, h - labelH - 2 - bh, bw, bh, 3, 3);
+					g2.setColor(i == todayIndex ? Color.WHITE : DIM);
+					String s = labels[i] == null ? "" : labels[i];
+					g2.drawString(s, x + (bw - g2.getFontMetrics().stringWidth(s)) / 2, h - 1);
+				}
+			}
+		};
+		c.setOpaque(false);
+		c.setPreferredSize(new Dimension(WRAP, 52));
+		c.setMaximumSize(new Dimension(Integer.MAX_VALUE, 52));
+		c.setAlignmentX(LEFT_ALIGNMENT);
+		c.setToolTipText("Kills per day: " + tip);
+		return c;
 	}
 
 	/** Since the last Slayer level: kills, time, loot and the drops picked up. */

@@ -18,6 +18,9 @@ import com.slayersuite.task.TaskFinished;
 import com.slayersuite.task.TaskTracker;
 import com.slayersuite.trip.TripMath;
 import com.slayersuite.trip.TripTracker;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -635,6 +638,120 @@ public class TaskHistory
 		List<LevelRecord> levels = new ArrayList<>();
 		/** Item id -> name, filled on the client thread as drops arrive, for the panel's tooltips. */
 		Map<String, String> names = new HashMap<>();
+		/** Per local day (yyyy-mm-dd): {kills, active ms, Slayer xp, loot value, tasks finished, best drop item id, best drop value}. */
+		Map<String, long[]> days = new HashMap<>();
+	}
+
+	private static final int DAYS_KEPT = 60;
+
+	/** Today's row of the per-day ledger, made on first use; the oldest rows go once sixty are kept. */
+	private static long[] today(Ledger l)
+	{
+		if (l.days == null)
+		{
+			l.days = new HashMap<>();
+		}
+		String key = LocalDate.now(ZoneId.systemDefault()).toString();
+		long[] row = l.days.get(key);
+		if (row == null)
+		{
+			row = new long[]{0, 0, 0, 0, 0, -1, 0};
+			l.days.put(key, row);
+			while (l.days.size() > DAYS_KEPT)
+			{
+				String oldest = null;
+				for (String k : l.days.keySet())
+				{
+					if (oldest == null || k.compareTo(oldest) < 0)
+					{
+						oldest = k;
+					}
+				}
+				l.days.remove(oldest);
+			}
+		}
+		else if (row.length < 7)
+		{
+			long[] grown = new long[]{0, 0, 0, 0, 0, -1, 0};
+			System.arraycopy(row, 0, grown, 0, row.length);
+			l.days.put(key, grown);
+			row = grown;
+		}
+		return row;
+	}
+
+	/** Seven days of slaying against the seven before, from the per-day ledger. */
+	@lombok.Value
+	public static class WeekSummary
+	{
+		long kills;
+		long activeMs;
+		long xp;
+		long loot;
+		long tasks;
+		int bestItemId;
+		long bestValue;
+		long prevKills;
+		long prevActiveMs;
+		long prevXp;
+		long prevLoot;
+		long prevTasks;
+		/** Kills on each of the last seven days, oldest first, with a weekday initial for each. */
+		long[] killsPerDay;
+		String[] dayLabels;
+		int todayIndex;
+	}
+
+	public synchronized WeekSummary week()
+	{
+		Ledger l = ledger();
+		LocalDate today = LocalDate.now(ZoneId.systemDefault());
+		long[] cur = new long[5];
+		long[] prev = new long[5];
+		long[] perDay = new long[7];
+		String[] labels = new String[7];
+		int bestId = -1;
+		long bestValue = 0;
+		for (int i = 0; i < 14; i++)
+		{
+			LocalDate d = today.minusDays(13 - i);
+			long[] v = l.days == null ? null : l.days.get(d.toString());
+			boolean thisWeek = i >= 7;
+			if (thisWeek)
+			{
+				labels[i - 7] = d.getDayOfWeek().getDisplayName(TextStyle.SHORT, Locale.ENGLISH).substring(0, 1);
+			}
+			if (v == null)
+			{
+				continue;
+			}
+			long[] into = thisWeek ? cur : prev;
+			for (int k = 0; k < 5 && k < v.length; k++)
+			{
+				into[k] += v[k];
+			}
+			if (thisWeek)
+			{
+				perDay[i - 7] = v[0];
+				if (v.length >= 7 && v[6] > bestValue)
+				{
+					bestValue = v[6];
+					bestId = (int) v[5];
+				}
+			}
+		}
+		return new WeekSummary(cur[0], cur[1], cur[2], cur[3], cur[4], bestId, bestValue, prev[0], prev[1], prev[2], prev[3], prev[4], perDay, labels, 6);
+	}
+
+	/** "+12%", "-8%", "new" when there was nothing before, "--" when there is nothing either way. */
+	public static String percentChange(long now, long before)
+	{
+		if (before <= 0)
+		{
+			return now > 0 ? "new" : "--";
+		}
+		long pct = Math.round((now - before) * 100.0 / before);
+		return (pct >= 0 ? "+" : "") + pct + "%";
 	}
 
 	/** One level reached, with everything slain and picked up on the way. */
@@ -845,6 +962,10 @@ public class TaskHistory
 					if (l.names == null)
 					{
 						l.names = new HashMap<>();
+					}
+					if (l.days == null)
+					{
+						l.days = new HashMap<>();
 					}
 					if (l.missedLog == null)
 					{
@@ -1112,6 +1233,13 @@ public class TaskHistory
 			}
 		}
 		l.lootValue += value;
+		long[] day = today(l);
+		day[3] += value;
+		if (value > day[6])
+		{
+			day[5] = id;
+			day[6] = value;
+		}
 		l.log.add(new long[]{id, quantity, value, t, task});
 		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
 		if (ours && current != null && here != null)
@@ -1316,6 +1444,10 @@ public class TaskHistory
 		if (current != null)
 		{
 			current.setTasksFinished(current.getTasksFinished() + 1);
+			synchronized (this)
+			{
+				today(ledger())[4]++;
+			}
 			if (e.getPoints() > 0)
 			{
 				current.setPoints(current.getPoints() + e.getPoints());
@@ -1487,6 +1619,7 @@ public class TaskHistory
 			synchronized (this)
 			{
 				ledger().activeMs += gap;
+				today(ledger())[1] += gap;
 			}
 		}
 		lastKillAt = now;
@@ -1503,6 +1636,7 @@ public class TaskHistory
 		synchronized (this)
 		{
 			ledger().kills += e.getDelta();
+			today(ledger())[0] += e.getDelta();
 		}
 		dirty = true;
 		if (sessionKills >= 3)
@@ -1532,6 +1666,10 @@ public class TaskHistory
 		if (current != null && lastSlayerXp >= 0 && xp > lastSlayerXp)
 		{
 			sessionXp += xp - lastSlayerXp;
+			synchronized (this)
+			{
+				today(ledger())[2] += xp - lastSlayerXp;
+			}
 			assignmentXp += xp - lastSlayerXp;
 			com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
 			if (here != null)
