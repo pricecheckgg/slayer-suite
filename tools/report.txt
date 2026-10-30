@@ -1,5 +1,5 @@
 generated 2026-10-30
-149 tasks, 433 monsters, 502 wiki pages
+149 tasks, 433 monsters, 517 wiki pages
 
 monster pins merged: Slayer task/Abyssal demons (filled 0, added 1)
 monster pins merged: Slayer task/Ankou (filled 0, added 1)
@@ -170,6 +170,7 @@ fallback record from monster page: Commander Zilyana <- Commander Zilyana
 fallback record from monster page: TzKal-Zuk <- TzKal-Zuk
 fallback record from monster page: Zulrah <- Zulrah
 superiors from the wiki table: 8 added, 3 base names dropped
+travel points: 129 banks, 14 Slayer masters
 drop tables: 142 of 149 tasks carry rare drops (5698 rows at 1/16 or rarer)
 
 GAP CHECK: 5 tasks with no locations, 9 with locations but no map regions

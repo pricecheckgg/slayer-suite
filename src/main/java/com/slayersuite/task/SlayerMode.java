@@ -49,6 +49,11 @@ public class SlayerMode
 	{
 		if (!tracker.hasTask())
 		{
+			if (config.loopGuide() != com.slayersuite.advisor.LoopMode.OFF && tracker.getFinishedAt() > 0
+				&& System.currentTimeMillis() - tracker.getFinishedAt() < com.slayersuite.advisor.LoopGuide.LOOP_MS)
+			{
+				return "between tasks";
+			}
 			return null;
 		}
 		if (tracker.isInTaskArea())

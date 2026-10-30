@@ -979,6 +979,258 @@
           "hops": 3
         }
       ]
+    },
+    {
+      "name": "Loop travel",
+      "requires": [],
+      "teleports": [
+        {
+          "item": "Amulet of glory",
+          "hops": 2
+        },
+        {
+          "item": "Amulet of glory",
+          "poh": "Jewellery Box",
+          "hops": 2
+        },
+        {
+          "poh": "Amulet of Glory",
+          "hops": 2
+        },
+        {
+          "item": "Ring of dueling",
+          "hops": 2
+        },
+        {
+          "item": "Ring of dueling",
+          "poh": "Jewellery Box",
+          "hops": 2
+        },
+        {
+          "item": "Games necklace",
+          "hops": 2
+        },
+        {
+          "item": "Games necklace",
+          "poh": "Jewellery Box",
+          "hops": 2
+        },
+        {
+          "item": "Combat bracelet",
+          "hops": 2
+        },
+        {
+          "item": "Combat bracelet",
+          "poh": "Jewellery Box",
+          "hops": 2
+        },
+        {
+          "item": "Skills necklace",
+          "hops": 2
+        },
+        {
+          "item": "Skills necklace",
+          "poh": "Jewellery Box",
+          "hops": 2
+        },
+        {
+          "item": "Ring of wealth",
+          "hops": 2
+        },
+        {
+          "item": "Ectophial",
+          "hops": 2
+        },
+        {
+          "item": "Royal seed pod",
+          "hops": 2
+        },
+        {
+          "item": "Rada's blessing",
+          "hops": 2
+        },
+        {
+          "item": "Karamja gloves",
+          "hops": 2
+        },
+        {
+          "item": "Xeric's talisman",
+          "hops": 2
+        },
+        {
+          "poh": "Xeric's Talisman",
+          "hops": 2
+        },
+        {
+          "item": "Kharedst's memoirs",
+          "hops": 2
+        },
+        {
+          "item": "Book of the dead",
+          "hops": 2
+        },
+        {
+          "item": "Teleport crystal",
+          "hops": 2
+        },
+        {
+          "item": "Drakan's medallion",
+          "hops": 2
+        },
+        {
+          "item": "Enchanted lyre",
+          "hops": 2
+        },
+        {
+          "item": "Explorer's ring",
+          "hops": 2
+        },
+        {
+          "item": "Digsite pendant",
+          "hops": 2
+        },
+        {
+          "poh": "Digsite Pendant",
+          "hops": 2
+        },
+        {
+          "item": "Camulet",
+          "hops": 2
+        },
+        {
+          "item": "Pharaoh's sceptre",
+          "hops": 2
+        },
+        {
+          "item": "Desert amulet",
+          "hops": 2
+        },
+        {
+          "item": "Morytania legs",
+          "hops": 2
+        },
+        {
+          "item": "Falador shield",
+          "hops": 2
+        },
+        {
+          "item": "Mythical cape",
+          "hops": 2
+        },
+        {
+          "poh": "Mythical Cape",
+          "hops": 2
+        },
+        {
+          "spell": "Varrock Teleport",
+          "book": "standard",
+          "level": 25,
+          "hops": 2
+        },
+        {
+          "poh": "Varrock Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Lumbridge Teleport",
+          "book": "standard",
+          "level": 31,
+          "hops": 2
+        },
+        {
+          "poh": "Lumbridge Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Falador Teleport",
+          "book": "standard",
+          "level": 37,
+          "hops": 2
+        },
+        {
+          "poh": "Falador Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Camelot Teleport",
+          "book": "standard",
+          "level": 45,
+          "hops": 2
+        },
+        {
+          "poh": "Camelot Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Kourend Castle Teleport",
+          "book": "standard",
+          "level": 48,
+          "hops": 2,
+          "quest": "CLIENT_OF_KOUREND"
+        },
+        {
+          "poh": "Kourend Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Ardougne Teleport",
+          "book": "standard",
+          "level": 51,
+          "hops": 2,
+          "quest": "PLAGUE_CITY"
+        },
+        {
+          "poh": "Ardougne Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Civitas illa Fortis Teleport",
+          "book": "standard",
+          "level": 54,
+          "hops": 2,
+          "quest": "CHILDREN_OF_THE_SUN"
+        },
+        {
+          "spell": "Trollheim Teleport",
+          "book": "standard",
+          "level": 61,
+          "hops": 2,
+          "quest": "EADGARS_RUSE"
+        },
+        {
+          "poh": "Troll Stronghold Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Kharyrll Teleport",
+          "book": "ancient",
+          "level": 66,
+          "hops": 2,
+          "quest": "DESERT_TREASURE_I"
+        },
+        {
+          "poh": "Kharyrll Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Moonclan Teleport",
+          "book": "lunar",
+          "level": 69,
+          "hops": 2,
+          "quest": "LUNAR_DIPLOMACY"
+        },
+        {
+          "poh": "Lunar Isle Portal",
+          "hops": 2
+        },
+        {
+          "spell": "Catherby Teleport",
+          "book": "lunar",
+          "level": 87,
+          "hops": 2,
+          "quest": "LUNAR_DIPLOMACY"
+        }
+      ]
     }
   ]
 }

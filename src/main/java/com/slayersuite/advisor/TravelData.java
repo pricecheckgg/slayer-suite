@@ -111,6 +111,8 @@ public class TravelData
 			{"CKS", "3447", "3470"}, {"AIQ", "2996", "3114"}, {"AJR", "2780", "3613"}, {"CIR", "1302", "3762"}, {"DJR", "1455", "3658"},
 			{"DLQ", "3423", "3016"}, {"BIQ", "3251", "3095"}, {"DKP", "2900", "3111"}, {"AJQ", "2735", "5221"}, {"ALP", "2503", "3636"},
 			{"DKS", "2744", "3719"}, {"BKS", "2412", "4434"}, {"BKP", "2385", "3035"},
+			{"Varrock Teleport", "3212", "3424"}, {"Camelot Teleport", "2757", "3479"}, {"Ring of wealth", "3163", "3478"},
+			{"Civitas illa Fortis Teleport", "1681", "3133"}, {"Catherby Teleport", "2801", "3450"},
 		};
 		for (String[] r : rows)
 		{
@@ -169,6 +171,9 @@ public class TravelData
 		POH_LANDING_KEYS.put("ardougne portal", "ardougne teleport");
 		POH_LANDING_KEYS.put("falador portal", "falador teleport");
 		POH_LANDING_KEYS.put("lumbridge portal", "lumbridge teleport");
+		POH_LANDING_KEYS.put("varrock portal", "varrock teleport");
+		POH_LANDING_KEYS.put("camelot portal", "camelot teleport");
+		POH_LANDING_KEYS.put("civitas illa fortis portal", "civitas illa fortis teleport");
 		POH_LANDING_KEYS.put("lunar isle portal", "moonclan teleport");
 		POH_LANDING_KEYS.put("waterbirth island portal", "waterbirth teleport");
 		POH_LANDING_KEYS.put("troll stronghold portal", "trollheim teleport");

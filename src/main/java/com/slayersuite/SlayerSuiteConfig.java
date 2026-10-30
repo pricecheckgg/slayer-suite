@@ -1,5 +1,6 @@
 package com.slayersuite;
 
+import com.slayersuite.advisor.LoopMode;
 import com.slayersuite.guard.GuardMode;
 import com.slayersuite.task.SlayerModeSetting;
 import net.runelite.client.config.Config;
@@ -466,6 +467,12 @@ public interface SlayerSuiteConfig extends Config
 	default int floorPathMaxDistance()
 	{
 		return 200;
+	}
+
+	@ConfigItem(keyName = "loopGuide", name = "After a task", description = "Keep routing once the assignment ends: back to the Slayer master you took it from, or first to the nearest bank you can use when you carry fewer than three food or have three or fewer free inventory slots. Runs for twenty minutes or until the next task.", section = advisorSection, position = 7)
+	default LoopMode loopGuide()
+	{
+		return LoopMode.BANK_THEN_MASTER;
 	}
 
 	@ConfigItem(keyName = "routeMinimap", name = "Route on the minimap", description = "Dots along the next stretch of the route on the minimap.", section = advisorSection, position = 8)

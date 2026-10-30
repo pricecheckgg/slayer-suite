@@ -38,6 +38,8 @@ CACHE = os.path.join(ROOT, "tools", "cache")
 OUT_JSON = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "monsters.json")
 OUT_ATTR = os.path.join(ROOT, "DATA-ATTRIBUTION.md")
 OUT_REPORT = os.path.join(ROOT, "tools", "report.txt")
+OUT_BANKS = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "banks.tsv")
+OUT_MASTERS = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "masters.tsv")
 OVERRIDES = os.path.join(ROOT, "tools", "overrides.json")
 CORE_NAMES = os.path.join(ROOT, "tools", "runelite-task-names.txt")
 TASK_ICONS = os.path.join(ROOT, "tools", "task-icons.txt")
@@ -183,6 +185,105 @@ def render_template(tpl):
     if n == "sic":
         return pos[0] if pos else ""
     return " ".join(p for p in pos if p)
+
+
+# ---------------------------------------------------------------- banks and Slayer masters
+
+# Slayer master NPC pages and the id the game's task tables use for their task list (-1: not in the tables we read).
+MASTER_PLACES = {"Vannaka": "Edgeville Dungeon", "Steve": "Tree Gnome Stronghold"}
+SLAYER_MASTERS = [
+    ("Turael", 1), ("Aya", 1), ("Spria", -1), ("Mazchna", 2), ("Achtryn", 2), ("Vannaka", 3), ("Chaeldar", 4),
+    ("Duradel", 5), ("Kuradal", 5), ("Nieve", 6), ("Steve", 6), ("Krystilia", 7), ("Konar quo Maten", 8), ("Mortimer", 10),
+]
+
+
+def map_centre(tpl):
+    """(x, y, plane) from a {{Map|...}} template: x=/y= params, "x,y" points (polygon or rectangle: their centre), or x:..,y:.."""
+    name, params, pos = template_params(tpl)
+    plane = int(params.get("plane", "0") or 0) if params.get("plane", "0").strip().lstrip("-").isdigit() else 0
+    if params.get("x", "").strip().isdigit() and params.get("y", "").strip().isdigit():
+        return int(params["x"]), int(params["y"]), plane
+    pts = []
+    for p in pos:
+        m = re.fullmatch(r"\s*(\d+)\s*,\s*(\d+)\s*", p)
+        if m:
+            pts.append((int(m.group(1)), int(m.group(2))))
+        m = re.fullmatch(r"\s*x:\s*(\d+)\s*,\s*y:\s*(\d+)\s*", p)
+        if m:
+            pts.append((int(m.group(1)), int(m.group(2))))
+    if not pts:
+        return None
+    return round(sum(x for x, _ in pts) / len(pts)), round(sum(y for _, y in pts) / len(pts)), plane
+
+
+def clean_requirement(cell):
+    """The requirements cell as plain words: quest names, 'Farming 85' for a skill template, nothing for None."""
+    s = cell
+    for tpl in find_templates(s):
+        s = s.replace(tpl, render_template(tpl))
+    s = re.sub(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", "", s, flags=re.S)
+    s = strip_markup(s).replace("<br>", "; ").replace("<br />", "; ").strip(" ;")
+    s = re.sub(r"\s+", " ", s)
+    return "" if s.lower() in ("", "none", "-") else s
+
+
+def build_travel_points(refresh, sources, report):
+    """banks.tsv from the wiki's list of banks (full banks and chests only) and masters.tsv from each Slayer master's page."""
+    title, text, rev = parse_page("List of banks", refresh)
+    banks = []
+    if text:
+        sources.append((title, rev))
+        heads = [(m.start(), m.group(2).strip()) for m in re.finditer(r"^(=+)\s*(.+?)\s*\1\s*$", text, re.M)]
+        body = ""
+        for i, (pos, h) in enumerate(heads):
+            if h == "Banks and chests":
+                body = text[pos:heads[i + 1][0] if i + 1 < len(heads) else len(text)]
+        for row in body.split("|-"):
+            maps = find_templates(row, "Map")
+            if not maps:
+                continue
+            centre = map_centre(maps[0])
+            if centre is None:
+                report.append(f"bank without coordinates: {row.strip()[:60]}")
+                continue
+            cells = [c.strip() for c in re.split(r"\n\|", "\n" + row) if c.strip()]
+            name = template_params(maps[0])[1].get("name", "").strip()
+            if not name or name == "name":
+                name = strip_markup(cells[0]).strip() if cells else "Bank"
+            name = re.sub(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>", "", name, flags=re.S).strip()
+            members = "yes" if re.search(r"\{\{Members\|Yes\}\}", row, re.I) else "no"
+            req = clean_requirement(cells[-1]) if len(cells) >= 6 else ""
+            if "classification" in req.lower() or not name:
+                continue
+            banks.append((name, centre[0], centre[1], centre[2], members, req))
+    else:
+        report.append("no List of banks page")
+    masters = []
+    for npc, master_id in SLAYER_MASTERS:
+        title, text, rev = parse_page(npc, refresh)
+        if not text:
+            report.append(f"no page for Slayer master {npc}")
+            continue
+        sources.append((title, rev))
+        maps = find_templates(text, "Map", deep=True)
+        centre = map_centre(maps[0]) if maps else None
+        if centre is None:
+            report.append(f"no map coordinates for Slayer master {npc}")
+            continue
+        loc = re.search(r"\|\s*location\s*=\s*([^\n]+)", text)
+        place = first_link(loc.group(1)) or strip_markup(loc.group(1)).strip() if loc else ""
+        place = re.sub(r"\s*\(location\)", "", place).strip()
+        place = MASTER_PLACES.get(npc, place) if not place else place
+        masters.append((npc, centre[0], centre[1], centre[2], master_id, place))
+    with open(OUT_BANKS, "w") as f:
+        f.write("# name\tx\ty\tplane\tmembers\trequirement   (Old School RuneScape Wiki, List of banks; CC BY-NC-SA 3.0)\n")
+        for b in banks:
+            f.write("\t".join(str(v) for v in b) + "\n")
+    with open(OUT_MASTERS, "w") as f:
+        f.write("# npc\tx\ty\tplane\tmasterId\tplace   (Old School RuneScape Wiki NPC pages; CC BY-NC-SA 3.0)\n")
+        for m in masters:
+            f.write("\t".join(str(v) for v in m) + "\n")
+    report.append(f"travel points: {len(banks)} banks, {len(masters)} Slayer masters")
 
 
 # ---------------------------------------------------------------- drop tables
@@ -1127,6 +1228,7 @@ def main():
             if l.get("notes"):
                 l["notes"] = [n for n in l["notes"] if not guidance.search(n)]
     # Every task needs at least one location with map regions, or the card cannot place you and the pin cannot be set.
+    build_travel_points(args.refresh, sources, report)
     with_drops = sum(1 for t in tasks if any(m.get("drops") for m in t["monsters"]))
     drop_rows = sum(len(m.get("drops", [])) for t in tasks for m in t["monsters"])
     report.append(f"drop tables: {with_drops} of {len(tasks)} tasks carry rare drops ({drop_rows} rows at 1/16 or rarer)")

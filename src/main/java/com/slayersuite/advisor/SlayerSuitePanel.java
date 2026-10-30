@@ -314,6 +314,12 @@ public class SlayerSuitePanel extends PluginPanel
 			content.add(gap(8));
 		}
 		content.add(taskCard(rec));
+		if (!tracker.hasTask() && advisor.loopActive() && advisor.getDestination() != null)
+		{
+			content.add(gap(10));
+			content.add(title("Between tasks"));
+			content.add(loopCard());
+		}
 		if (tracker.hasTask())
 		{
 			com.slayersuite.trip.TripTracker.Projection proj = trip.getProjection();
@@ -1029,6 +1035,36 @@ public class SlayerSuitePanel extends PluginPanel
 			return "yesterday " + time;
 		}
 		return Instant.ofEpochMilli(at).atZone(zone).format(DateTimeFormatter.ofPattern("d MMM"));
+	}
+
+	/** Where the loop guide is taking you now, with the distance and the next move. */
+	private JPanel loopCard()
+	{
+		JPanel p = card(null, false);
+		p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+		p.add(wrap(advisor.loopText(), Color.WHITE, FontManager.getRunescapeBoldFont()));
+		p.add(gap(4));
+		if (advisor.isArrived())
+		{
+			p.add(dotRow(OK, "You are there", null, false));
+		}
+		else
+		{
+			int dist = advisor.cachedDistance();
+			if (dist >= 0)
+			{
+				p.add(kv("Distance", TripMath.formatK(dist) + " tiles " + compassWord(advisor.cachedDirection()) + ", pinned on the map", DIM));
+			}
+			String step = advisor.getNextStep();
+			if (step != null && !step.isEmpty())
+			{
+				p.add(gap(6));
+				p.add(callout("Next", step));
+			}
+		}
+		p.add(gap(4));
+		p.add(wrap("Switch this off or change it under Spots and travel, After a task.", DIM));
+		return p;
 	}
 
 	// ---------------------------------------------------------------- task card

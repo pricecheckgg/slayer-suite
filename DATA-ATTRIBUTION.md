@@ -12,6 +12,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Abhorrent spectre](https://oldschool.runescape.wiki/w/Abhorrent_spectre) | 15373806 |
 | [Abyssal Sire](https://oldschool.runescape.wiki/w/Abyssal_Sire) | 15337396 |
 | [Abyssal demon](https://oldschool.runescape.wiki/w/Abyssal_demon) | 15357583 |
+| [Achtryn](https://oldschool.runescape.wiki/w/Achtryn) | 15220380 |
 | [Adamant dragon](https://oldschool.runescape.wiki/w/Adamant_dragon) | 15373867 |
 | [Albino bat](https://oldschool.runescape.wiki/w/Albino_bat) | 15199384 |
 | [Alchemical Hydra](https://oldschool.runescape.wiki/w/Alchemical_Hydra) | 15375803 |
@@ -29,6 +30,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Artio](https://oldschool.runescape.wiki/w/Artio) | 15358758 |
 | [Asyn Shade](https://oldschool.runescape.wiki/w/Asyn_Shade) | 15199705 |
 | [Aviansie](https://oldschool.runescape.wiki/w/Aviansie) | 15332856 |
+| [Aya](https://oldschool.runescape.wiki/w/Aya) | 15279905 |
 | [Baby Roc](https://oldschool.runescape.wiki/w/Baby_Roc) | 15199674 |
 | [Baby black dragon](https://oldschool.runescape.wiki/w/Baby_black_dragon) | 15376099 |
 | [Baby blue dragon](https://oldschool.runescape.wiki/w/Baby_blue_dragon) | 15369927 |
@@ -75,6 +77,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Cave kraken](https://oldschool.runescape.wiki/w/Cave_kraken) | 15342837 |
 | [Cave slime](https://oldschool.runescape.wiki/w/Cave_slime) | 15365366 |
 | [Cerberus](https://oldschool.runescape.wiki/w/Cerberus) | 15363026 |
+| [Chaeldar](https://oldschool.runescape.wiki/w/Chaeldar) | 15372650 |
 | [Chaos Elemental](https://oldschool.runescape.wiki/w/Chaos_Elemental) | 15346650 |
 | [Chaos Fanatic](https://oldschool.runescape.wiki/w/Chaos_Fanatic) | 15346616 |
 | [Chaos druid](https://oldschool.runescape.wiki/w/Chaos_druid) | 15259337 |
@@ -124,6 +127,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Duck](https://oldschool.runescape.wiki/w/Duck) | 15375539 |
 | [Duke Sucellus](https://oldschool.runescape.wiki/w/Duke_Sucellus) | 15365802 |
 | [Dungeon rat](https://oldschool.runescape.wiki/w/Dungeon_rat) | 15199206 |
+| [Duradel](https://oldschool.runescape.wiki/w/Duradel) | 15374373 |
 | [Dusk](https://oldschool.runescape.wiki/w/Dusk) | 15352439 |
 | [Dust devil](https://oldschool.runescape.wiki/w/Dust_devil) | 15339619 |
 | [Dwarf](https://oldschool.runescape.wiki/w/Dwarf) | 15324634 |
@@ -221,13 +225,17 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [King Scorpion](https://oldschool.runescape.wiki/w/King_Scorpion) | 15199348 |
 | [King kurask](https://oldschool.runescape.wiki/w/King_kurask) | 15373844 |
 | [Kolodion](https://oldschool.runescape.wiki/w/Kolodion) | 15372805 |
+| [Konar quo Maten](https://oldschool.runescape.wiki/w/Konar_quo_Maten) | 15367337 |
 | [Kraka](https://oldschool.runescape.wiki/w/Kraka) | 15199547 |
 | [Kraken](https://oldschool.runescape.wiki/w/Kraken) | 15368743 |
 | [Kree'arra](https://oldschool.runescape.wiki/w/Kree%27arra) | 15337073 |
+| [Krystilia](https://oldschool.runescape.wiki/w/Krystilia) | 15372066 |
+| [Kuradal](https://oldschool.runescape.wiki/w/Kuradal) | 15319065 |
 | [Kurask](https://oldschool.runescape.wiki/w/Kurask) | 15373546 |
 | [Lava Strykewyrm](https://oldschool.runescape.wiki/w/Lava_Strykewyrm) | 15352211 |
 | [Lava dragon](https://oldschool.runescape.wiki/w/Lava_dragon) | 15343124 |
 | [Lesser demon](https://oldschool.runescape.wiki/w/Lesser_demon) | 15366848 |
+| [List of banks](https://oldschool.runescape.wiki/w/List_of_banks) | 15367318 |
 | [Lizard](https://oldschool.runescape.wiki/w/Lizard) | 15374564 |
 | [Lizardman](https://oldschool.runescape.wiki/w/Lizardman) | 15362647 |
 | [Lizardman brute](https://oldschool.runescape.wiki/w/Lizardman_brute) | 15339921 |
@@ -243,6 +251,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Maniacal monkey](https://oldschool.runescape.wiki/w/Maniacal_monkey) | 15322121 |
 | [Marble gargoyle](https://oldschool.runescape.wiki/w/Marble_gargoyle) | 15373861 |
 | [Mature custodian stalker](https://oldschool.runescape.wiki/w/Mature_custodian_stalker) | 15341242 |
+| [Mazchna](https://oldschool.runescape.wiki/w/Mazchna) | 15356066 |
 | [Minotaur](https://oldschool.runescape.wiki/w/Minotaur) | 15204227 |
 | [Mithril dragon](https://oldschool.runescape.wiki/w/Mithril_dragon) | 15351490 |
 | [Mogre](https://oldschool.runescape.wiki/w/Mogre) | 15346116 |
@@ -253,6 +262,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Monkey Guard](https://oldschool.runescape.wiki/w/Monkey_Guard) | 15199592 |
 | [Monkey Zombie](https://oldschool.runescape.wiki/w/Monkey_Zombie) | 15322124 |
 | [Monstrous basilisk](https://oldschool.runescape.wiki/w/Monstrous_basilisk) | 15373758 |
+| [Mortimer](https://oldschool.runescape.wiki/w/Mortimer) | 15382971 |
 | [Moss Giant (Iorwerth Dungeon)](https://oldschool.runescape.wiki/w/Moss_Giant_%28Iorwerth_Dungeon%29) | 15366308 |
 | [Moss giant](https://oldschool.runescape.wiki/w/Moss_giant) | 15366318 |
 | [Mountain troll](https://oldschool.runescape.wiki/w/Mountain_troll) | 15360669 |
@@ -263,6 +273,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Mutated Tortoise](https://oldschool.runescape.wiki/w/Mutated_Tortoise) | 15373803 |
 | [Nechryael](https://oldschool.runescape.wiki/w/Nechryael) | 15381589 |
 | [Nechryarch](https://oldschool.runescape.wiki/w/Nechryarch) | 15373905 |
+| [Nieve](https://oldschool.runescape.wiki/w/Nieve) | 15359405 |
 | [Nuclear smoke devil](https://oldschool.runescape.wiki/w/Nuclear_smoke_devil) | 15373917 |
 | [Obor](https://oldschool.runescape.wiki/w/Obor) | 15338289 |
 | [Ogre](https://oldschool.runescape.wiki/w/Ogre) | 15367212 |
@@ -436,7 +447,9 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Spiritual ranger](https://oldschool.runescape.wiki/w/Spiritual_ranger) | 15341103 |
 | [Spiritual warrior](https://oldschool.runescape.wiki/w/Spiritual_warrior) | 15341102 |
 | [Spitting Wyvern](https://oldschool.runescape.wiki/w/Spitting_Wyvern) | 15366068 |
+| [Spria](https://oldschool.runescape.wiki/w/Spria) | 15374584 |
 | [Steel dragon](https://oldschool.runescape.wiki/w/Steel_dragon) | 15365305 |
+| [Steve](https://oldschool.runescape.wiki/w/Steve) | 15361943 |
 | [Stick](https://oldschool.runescape.wiki/w/Stick) | 15215947 |
 | [Sulphur Lizard](https://oldschool.runescape.wiki/w/Sulphur_Lizard) | 15339650 |
 | [Sulphur Nagua](https://oldschool.runescape.wiki/w/Sulphur_Nagua) | 15352431 |
@@ -460,6 +473,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Troll general](https://oldschool.runescape.wiki/w/Troll_general) | 15267877 |
 | [Troll spectator](https://oldschool.runescape.wiki/w/Troll_spectator) | 15215954 |
 | [Tstanon Karlak](https://oldschool.runescape.wiki/w/Tstanon_Karlak) | 15298479 |
+| [Turael](https://oldschool.runescape.wiki/w/Turael) | 15356069 |
 | [Turoth](https://oldschool.runescape.wiki/w/Turoth) | 15373604 |
 | [Twig](https://oldschool.runescape.wiki/w/Twig) | 15326896 |
 | [Twisted Banshee](https://oldschool.runescape.wiki/w/Twisted_Banshee) | 15339672 |
@@ -478,6 +492,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Urium Shade](https://oldschool.runescape.wiki/w/Urium_Shade) | 15200239 |
 | [Vampyre Juvenile](https://oldschool.runescape.wiki/w/Vampyre_Juvenile) | 15305880 |
 | [Vampyre Juvinate](https://oldschool.runescape.wiki/w/Vampyre_Juvinate) | 15305872 |
+| [Vannaka](https://oldschool.runescape.wiki/w/Vannaka) | 15372649 |
 | [Vardorvis](https://oldschool.runescape.wiki/w/Vardorvis) | 15365789 |
 | [Venator](https://oldschool.runescape.wiki/w/Venator) | 15338733 |
 | [Venenatis](https://oldschool.runescape.wiki/w/Venenatis) | 15361982 |

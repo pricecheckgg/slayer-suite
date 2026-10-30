@@ -112,7 +112,7 @@ public class TaskCardOverlay extends Overlay
 		{
 			return null;
 		}
-		if (!tracker.hasTask() && !config.cardWithoutTask())
+		if (!tracker.hasTask() && !config.cardWithoutTask() && !advisor.loopActive())
 		{
 			return null;
 		}
@@ -138,6 +138,10 @@ public class TaskCardOverlay extends Overlay
 
 		if (!tracker.hasTask())
 		{
+			if (advisor.loopActive())
+			{
+				return loopCard(g, draw, x0, y, cw, fb, fn, fs);
+			}
 			String t = "No slayer task";
 			text(g, draw, small, t, x0 + (cw - fs.stringWidth(t)) / 2, y + fs.getAscent(), DIM);
 			return y + fs.getHeight() + PAD;
@@ -306,6 +310,43 @@ public class TaskCardOverlay extends Overlay
 	}
 
 	// ---------------------------------------------------------------- blocks
+
+	/** Between tasks: where the loop guide is taking you, the next move and the distance. */
+	private int loopCard(Graphics2D g, boolean draw, int x0, int y, int cw, FontMetrics fb, FontMetrics fn, FontMetrics fs)
+	{
+		text(g, draw, small, "BETWEEN TASKS", x0, y + fs.getAscent(), DIM);
+		y += fs.getHeight() + 2;
+		for (String line : wrap(fb, advisor.loopText(), cw))
+		{
+			text(g, draw, bold, line, x0, y + fb.getAscent(), Color.WHITE);
+			y += fb.getHeight();
+		}
+		if (advisor.isArrived())
+		{
+			text(g, draw, std, "You are there", x0, y + fn.getAscent(), OK);
+			y += fn.getHeight();
+		}
+		else
+		{
+			String step = advisor.getNextStep();
+			if (step != null && !step.isEmpty())
+			{
+				y += 2;
+				for (String line : wrap(fs, step, cw))
+				{
+					text(g, draw, small, line, x0, y + fs.getAscent(), DIM);
+					y += fs.getHeight();
+				}
+			}
+			int dist = advisor.cachedDistance();
+			if (dist >= 0)
+			{
+				text(g, draw, small, TripMath.formatK(dist) + " tiles " + advisor.cachedDirection(), x0, y + fs.getAscent(), DIM);
+				y += fs.getHeight();
+			}
+		}
+		return y + PAD - 2;
+	}
 
 	private int place(Graphics2D g, boolean draw, int x0, int y, int cw, TaskRecord rec, FontMetrics fn, FontMetrics fs)
 	{

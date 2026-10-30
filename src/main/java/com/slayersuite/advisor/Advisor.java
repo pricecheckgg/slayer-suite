@@ -57,6 +57,7 @@ public class Advisor
 	private final LocationScorer scorer;
 	private final EventBus eventBus;
 	private final RouteService routes;
+	private final LoopGuide loop;
 
 	private volatile List<ScoredLocation> ranked = Collections.emptyList();
 	@Getter
@@ -80,10 +81,11 @@ public class Advisor
 	private volatile String nextStep = "";
 
 	@Inject
-	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes)
+	public Advisor(Client client, SlayerSuiteConfig config, TaskTracker tracker, AccountState account, TravelData travel, ReadinessChecker readiness, WorldMapPointManager mapPoints, EventBus eventBus, RouteService routes, LoopGuide loop)
 	{
 		this.eventBus = eventBus;
 		this.routes = routes;
+		this.loop = loop;
 		this.client = client;
 		this.config = config;
 		this.tracker = tracker;
@@ -370,6 +372,18 @@ public class Advisor
 			return null;
 		}
 		return best;
+	}
+
+	/** True while the loop guide is routing you between tasks. */
+	public boolean loopActive()
+	{
+		return !tracker.hasTask() && loop.active();
+	}
+
+	/** The loop guide's current leg in words. */
+	public String loopText()
+	{
+		return loop.describe();
 	}
 
 	public void setDestination(LocationRecord loc)
@@ -794,6 +808,11 @@ public class Advisor
 	{
 		List<TravelOption> out = new ArrayList<>();
 		TravelData.Entry e = loc == null ? null : travel.find(loc.getName());
+		if (e == null && loc != null && loop.owns(loc))
+		{
+			// a bank or a Slayer master: every teleport you own is a candidate, the planner weighs them
+			e = travel.find("Loop travel");
+		}
 		if (e == null)
 		{
 			return out;
@@ -992,6 +1011,21 @@ public class Advisor
 	public void onGameTick(GameTick t)
 	{
 		routes.setFairyRingsUsable(account.fairyRingsUsable());
+		if (!tracker.hasTask())
+		{
+			LocationRecord want = loop.tick(arrived && destination != null && loop.owns(destination));
+			if (want != destination)
+			{
+				if (want == null)
+				{
+					clearDestination();
+				}
+				else
+				{
+					setDestination(want);
+				}
+			}
+		}
 		LocationRecord focus = destination;
 		if (focus == null)
 		{

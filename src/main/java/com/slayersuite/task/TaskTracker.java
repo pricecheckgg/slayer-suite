@@ -21,6 +21,8 @@ import net.runelite.api.WorldView;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.InteractingChanged;
+import net.runelite.api.Player;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
@@ -158,7 +160,19 @@ public class TaskTracker
 	private long pendingFinishAt;
 	private String pendingFinishName;
 	private String finishedName;
+	/** When the last task ended; the loop guide runs from it. */
+	@Getter
 	private long finishedAt;
+	/** The master whose list the current (or last) task came from, as the game's tables say; -1 unknown. */
+	@Getter
+	private int lastMasterId = -1;
+	/** The Slayer master you last spoke to, and when. */
+	@Getter
+	private String lastMasterName;
+	@Getter
+	private long lastMasterAt;
+	private static final java.util.Set<String> MASTER_NAMES = new java.util.HashSet<>(java.util.Arrays.asList(
+		"Turael", "Aya", "Spria", "Mazchna", "Achtryn", "Vannaka", "Chaeldar", "Konar quo Maten", "Nieve", "Steve", "Duradel", "Kuradal", "Krystilia", "Mortimer"));
 	/** Last task name we held, kept after it clears so a late finish message can still be attributed. */
 	private String lastTaskName;
 
@@ -304,6 +318,11 @@ public class TaskTracker
 				pendingSpendAt = System.currentTimeMillis();
 			}
 			prevPoints = slayerPoints;
+			int masterNow = currentMasterId();
+			if (masterNow >= 0)
+			{
+				lastMasterId = masterNow;
+			}
 			if (pendingSpend > 0 && System.currentTimeMillis() - pendingSpendAt > SPEND_MATCH_MS)
 			{
 				eventBus.post(new PointsSpent(PointsSpent.Kind.OTHER, pendingSpend, null, slayerPoints));
@@ -900,6 +919,22 @@ public class TaskTracker
 			: (pointsAtTaskStart >= 0 && slayerPoints > pointsAtTaskStart ? slayerPoints - pointsAtTaskStart : 0);
 		log.info("Slayer Suite: task finished {} (+{} points, streak {})", name, awarded, taskStreak);
 		eventBus.post(new TaskFinished(name, awarded, taskStreak));
+	}
+
+	@Subscribe
+	public void onInteractingChanged(InteractingChanged e)
+	{
+		Player me = client.getLocalPlayer();
+		if (me == null || e.getSource() != me || !(e.getTarget() instanceof NPC))
+		{
+			return;
+		}
+		String who = ((NPC) e.getTarget()).getName();
+		if (who != null && MASTER_NAMES.contains(who))
+		{
+			lastMasterName = who;
+			lastMasterAt = System.currentTimeMillis();
+		}
 	}
 
 	@Subscribe

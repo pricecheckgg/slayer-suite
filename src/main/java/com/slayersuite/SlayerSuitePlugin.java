@@ -96,6 +96,10 @@ public class SlayerSuitePlugin extends Plugin
 	private TravelData travelData;
 	@Inject
 	private Advisor advisor;
+	@Inject
+	private com.slayersuite.data.TravelPoints travelPoints;
+	@Inject
+	private com.slayersuite.advisor.LoopGuide loopGuide;
 	/** Built in startUp, after RuneLite's look and feel is installed, so it gets RuneLite's scrollbar and widgets. */
 	private SlayerSuitePanel panel;
 	@Inject
@@ -215,6 +219,7 @@ public class SlayerSuitePlugin extends Plugin
 			dataset.load();
 		}
 		travelData.load();
+		travelPoints.load();
 		migrateDefaults();
 		tracker.reset();
 		readiness.reset();
@@ -245,6 +250,7 @@ public class SlayerSuitePlugin extends Plugin
 		eventBus.register(history);
 		eventBus.register(trip);
 		eventBus.register(advisor);
+		eventBus.register(loopGuide);
 		eventBus.register(houseScanner);
 		eventBus.register(pluginOverlap);
 		routeService.start();
@@ -303,6 +309,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(routeMapOverlay);
 		eventBus.unregister(pathOverlay);
 		eventBus.unregister(routeService);
+		eventBus.unregister(loopGuide);
 		eventBus.unregister(transportLearner);
 		routeService.stop();
 		overlayManager.remove(hoverOverlay);
