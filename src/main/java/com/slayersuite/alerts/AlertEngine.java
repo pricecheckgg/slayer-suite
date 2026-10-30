@@ -73,6 +73,9 @@ public class AlertEngine
 	/** Damage you took, newest last: {time, amount}, kept for the trend window. */
 	private final java.util.ArrayDeque<long[]> damage = new java.util.ArrayDeque<>();
 	private long trendWarnedAt;
+	/** When the superior sound last played again for a superior nobody has attacked. */
+	private long superiorNudgeAt;
+	private static final long SUPERIOR_NUDGE_MS = 8_000L;
 	private static final long DAMAGE_WINDOW_MS = 15_000L;
 	private static final long TREND_REPEAT_MS = 8_000L;
 
@@ -169,6 +172,52 @@ public class AlertEngine
 	}
 
 	// ---------------------------------------------------------------- raise / clear
+
+	/**
+	 * A superior is standing and you have not attacked it: a sticky warning with where it is, and
+	 * the superior sound again every eight seconds until you do. Clears the moment you engage it.
+	 */
+	private void checkSuperior(long now)
+	{
+		NPC s = tracker.getSuperior();
+		if (s == null || tracker.isSuperiorEngaged())
+		{
+			clear(AlertKind.SUPERIOR_UP);
+			return;
+		}
+		String name = tracker.getSuperiorName() == null ? "Superior" : tracker.getSuperiorName();
+		String where = "";
+		Player me = client.getLocalPlayer();
+		WorldPoint a = me == null ? null : me.getWorldLocation();
+		WorldPoint b = s.getWorldLocation();
+		if (a != null && b != null && a.getPlane() == b.getPlane())
+		{
+			int d = a.distanceTo(b);
+			where = d <= 1 ? ", beside you" : ", " + d + " tiles " + direction(b.getX() - a.getX(), b.getY() - a.getY());
+		}
+		raise(AlertKind.SUPERIOR_UP, name + " is up" + where + ": attack it");
+		long since = now - tracker.getSuperiorSpawnAt();
+		if (since >= SUPERIOR_NUDGE_MS && now - superiorNudgeAt >= SUPERIOR_NUDGE_MS)
+		{
+			superiorNudgeAt = now;
+			raise(AlertKind.SUPERIOR, name + " still up: attack it");
+		}
+	}
+
+	private static String direction(int dx, int dy)
+	{
+		if (dx == 0 && dy == 0)
+		{
+			return "here";
+		}
+		String[] names = {"E", "NE", "N", "NW", "W", "SW", "S", "SE"};
+		double ang = Math.toDegrees(Math.atan2(dy, dx));
+		if (ang < 0)
+		{
+			ang += 360;
+		}
+		return names[(int) Math.round(ang / 45.0) % 8];
+	}
 
 	/** A marked drop of yours has half a minute left on the floor. */
 	private void checkFloor(long now)
@@ -341,6 +390,7 @@ public class AlertEngine
 		}
 		checkBank();
 		checkFloor(now);
+		checkSuperior(now);
 
 		// re-notify unresolved sticky alerts
 		for (Alert a : active.values())

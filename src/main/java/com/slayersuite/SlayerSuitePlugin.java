@@ -130,6 +130,8 @@ public class SlayerSuitePlugin extends Plugin
 	@Inject
 	private com.slayersuite.advisor.FairyDialOverlay fairyDialOverlay;
 	@Inject
+	private com.slayersuite.card.SuperiorOverlay superiorOverlay;
+	@Inject
 	private NpcHoverOverlay hoverOverlay;
 	@Inject
 	private TaskCompleteOverlay completeOverlay;
@@ -164,7 +166,7 @@ public class SlayerSuitePlugin extends Plugin
 				say("test: task complete card, sound and alert");
 				break;
 			case "superior":
-				eventBus.post(new SuperiorSpawned(task));
+				tracker.testSuperior();
 				say("test: superior card, sound and alert");
 				break;
 			case "level":
@@ -272,6 +274,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.add(routeMapOverlay);
 		overlayManager.add(floorLootOverlay);
 		overlayManager.add(fairyDialOverlay);
+		overlayManager.add(superiorOverlay);
 		eventBus.register(fairyDialOverlay);
 		eventBus.register(pathOverlay);
 		overlayManager.add(hoverOverlay);
@@ -316,6 +319,7 @@ public class SlayerSuitePlugin extends Plugin
 		overlayManager.remove(routeMapOverlay);
 		overlayManager.remove(floorLootOverlay);
 		overlayManager.remove(fairyDialOverlay);
+		overlayManager.remove(superiorOverlay);
 		eventBus.unregister(fairyDialOverlay);
 		eventBus.unregister(pathOverlay);
 		eventBus.unregister(routeService);

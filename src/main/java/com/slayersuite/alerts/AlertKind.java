@@ -10,6 +10,7 @@ public enum AlertKind
 	HP_TREND(98, Severity.CRITICAL, false, 6_000),
 	VENOM(95, Severity.CRITICAL, true, 0),
 	POISON(90, Severity.WARNING, true, 0),
+	SUPERIOR_UP(85, Severity.WARNING, true, 0),
 	LOW_PRAYER(80, Severity.WARNING, true, 0),
 	OFF_TASK(75, Severity.WARNING, false, 8_000),
 	MISSING_ITEMS(70, Severity.WARNING, true, 0),

@@ -349,13 +349,19 @@ public interface SlayerSuiteConfig extends Config
 		return 3;
 	}
 
-	@ConfigItem(keyName = "superiorBanner", name = "Superior card", description = "A short red SUPERIOR card when a superior spawns.", section = celebrateSection, position = 4)
+	@ConfigItem(keyName = "superiorBanner", name = "Superior cards", description = "A red SUPERIOR card when a superior spawns, and a gold SUPERIOR DOWN card when it dies.", section = celebrateSection, position = 4)
 	default boolean superiorBanner()
 	{
 		return true;
 	}
 
-	@ConfigItem(keyName = "levelCard", name = "Level up card", description = "The same card when a skill levels up while slaying (always for Slayer): kills, time, xp to the next level and the drops you picked up since that skill's last level.", section = celebrateSection, position = 5)
+	@ConfigItem(keyName = "superiorHighlight", name = "Superior highlight", description = "Until you attack it: the superior's outline and tile pulse red with SUPERIOR over its head, an arrow at the edge of the view points at it when it is off screen, a dot pulses on the minimap, and the alert and sound repeat every eight seconds. Amber once you have engaged it.", section = celebrateSection, position = 5)
+	default boolean superiorHighlight()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "levelCard", name = "Level up card", description = "The same card when a skill levels up while slaying (always for Slayer): kills, time, xp to the next level and the drops you picked up since that skill's last level.", section = celebrateSection, position = 6)
 	default boolean levelCard()
 	{
 		return true;

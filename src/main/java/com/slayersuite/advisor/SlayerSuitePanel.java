@@ -1820,7 +1820,7 @@ public class SlayerSuitePanel extends PluginPanel
 		JButton done = button("Task complete");
 		done.addActionListener(e -> clientThread.invokeLater(() -> eventBus.post(new com.slayersuite.task.TaskFinished(task, 20, 12, true))));
 		JButton sup = button("Superior");
-		sup.addActionListener(e -> clientThread.invokeLater(() -> eventBus.post(new com.slayersuite.task.SuperiorSpawned(task))));
+		sup.addActionListener(e -> clientThread.invokeLater(tracker::testSuperior));
 		JButton alert = button("Critical alert");
 		alert.addActionListener(e -> clientThread.invokeLater(alerts::testAlert));
 		JButton sound = button("Sound only");

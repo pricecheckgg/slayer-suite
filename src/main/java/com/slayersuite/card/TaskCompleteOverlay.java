@@ -5,6 +5,7 @@ import com.slayersuite.alerts.AlertEngine;
 import com.slayersuite.history.LevelReached;
 import com.slayersuite.history.TaskHistory;
 import net.runelite.client.game.SkillIconManager;
+import com.slayersuite.task.SuperiorGone;
 import com.slayersuite.task.SuperiorSpawned;
 import com.slayersuite.task.KillCounted;
 import com.slayersuite.history.TaskStats;
@@ -397,6 +398,22 @@ public class TaskCompleteOverlay extends Overlay
 		ribbon = "";
 		sparkles = false;
 		show("SUPERIOR", name, "", RED, 2200);
+	}
+
+	@Subscribe
+	public void onSuperiorGone(SuperiorGone e)
+	{
+		if (!config.superiorBanner() || !e.isDead())
+		{
+			return;
+		}
+		loadIcon();
+		stats = Collections.emptyList();
+		loot = Collections.emptyList();
+		missed = Collections.emptyList();
+		ribbon = "";
+		sparkles = false;
+		show("SUPERIOR DOWN", e.getName() == null ? "Superior" : e.getName(), "", GOLD, 1800);
 	}
 
 	@Subscribe

@@ -98,7 +98,7 @@ public class TaskCardOverlay extends Overlay
 		addMenuEntry(net.runelite.api.MenuAction.RUNELITE_OVERLAY, "Test", "task complete card and sound", e ->
 			eventBus.post(new com.slayersuite.task.TaskFinished(tracker.hasTask() ? tracker.getTaskName() : "Test task", 20, 12, true)));
 		addMenuEntry(net.runelite.api.MenuAction.RUNELITE_OVERLAY, "Test", "superior card and sound", e ->
-			eventBus.post(new com.slayersuite.task.SuperiorSpawned(tracker.getTaskName())));
+			tracker.testSuperior());
 		addMenuEntry(net.runelite.api.MenuAction.RUNELITE_OVERLAY, "Test", "critical alert", e -> alerts.testAlert());
 	}
 

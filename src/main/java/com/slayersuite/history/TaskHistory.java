@@ -1547,7 +1547,7 @@ public class TaskHistory
 	@Subscribe
 	public void onSuperiorSpawned(com.slayersuite.task.SuperiorSpawned e)
 	{
-		if (current != null)
+		if (current != null && !e.isTest())
 		{
 			current.setSuperiors(current.getSuperiors() + 1);
 			dirty = true;

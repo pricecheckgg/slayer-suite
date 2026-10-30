@@ -22,7 +22,11 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.InteractingChanged;
+import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.HitsplatApplied;
+import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.events.WidgetClosed;
 import net.runelite.api.events.WidgetLoaded;
@@ -122,6 +126,18 @@ public class TaskTracker
 	private long lastKillAt;
 	@Getter
 	private long lastSuperiorAt;
+	/** The superior standing now, from its spawn until it dies or leaves; null otherwise. */
+	@Getter
+	private NPC superior;
+	@Getter
+	private String superiorName;
+	@Getter
+	private long superiorSpawnAt;
+	/** True once you have targeted or hit it. */
+	@Getter
+	private boolean superiorEngaged;
+	/** A rehearsal superior (the nearest monster standing in) ends at this time; 0 for the real thing. */
+	private long superiorTestUntil;
 	/** Last time you attacked a task monster or one attacked you. */
 	@Getter
 	private long lastTargetContactAt;
@@ -279,6 +295,12 @@ public class TaskTracker
 	{
 		if (e.getGameState() == GameState.LOGIN_SCREEN || e.getGameState() == GameState.HOPPING)
 		{
+			superior = null;
+			superiorEngaged = false;
+			superiorTestUntil = 0;
+		}
+		if (e.getGameState() == GameState.LOGIN_SCREEN || e.getGameState() == GameState.HOPPING)
+		{
 			killTimes.clear();
 			// the client zeroes every varp here: that is not a task reaching zero
 			pendingFinishAt = 0;
@@ -300,6 +322,17 @@ public class TaskTracker
 	@Subscribe
 	public void onGameTick(GameTick tick)
 	{
+		if (superiorTestUntil > 0 && (superior == null || System.currentTimeMillis() > superiorTestUntil || superiorEngaged && System.currentTimeMillis() > superiorTestUntil - 15_000L))
+		{
+			String name = superiorName;
+			boolean had = superior != null;
+			superior = null;
+			superiorTestUntil = 0;
+			if (had)
+			{
+				eventBus.post(new SuperiorGone(name, true));
+			}
+		}
 		if (client.getGameState() == GameState.LOGGED_IN)
 		{
 			slayerPoints = client.getVarbitValue(VarbitID.SLAYER_POINTS);
@@ -929,6 +962,10 @@ public class TaskTracker
 		{
 			return;
 		}
+		if (superior != null && e.getTarget() == superior)
+		{
+			superiorEngaged = true;
+		}
 		String who = ((NPC) e.getTarget()).getName();
 		if (who != null && MASTER_NAMES.contains(who))
 		{
@@ -1020,7 +1057,7 @@ public class TaskTracker
 			return;
 		}
 		lastSuperiorAt = now;
-		eventBus.post(new SuperiorSpawned(taskName));
+		eventBus.post(new SuperiorSpawned(taskName, false));
 	}
 
 	@Subscribe
@@ -1040,9 +1077,82 @@ public class TaskTracker
 		{
 			if (sup != null && sup.equalsIgnoreCase(name))
 			{
+				superior = e.getNpc();
+				superiorName = name;
+				superiorSpawnAt = System.currentTimeMillis();
+				superiorEngaged = false;
+				superiorTestUntil = 0;
 				superiorSeen();
 				return;
 			}
+		}
+	}
+
+	/**
+	 * Rehearses the whole superior alert on the nearest monster: card, sound, sticky warning,
+	 * outline, arrow and minimap dot, for twenty-five seconds or until you attack it; then the
+	 * SUPERIOR DOWN card. Nothing is recorded. Client thread.
+	 */
+	public void testSuperior()
+	{
+		Player me = client.getLocalPlayer();
+		WorldView wv = client.getTopLevelWorldView();
+		NPC pick = null;
+		int best = Integer.MAX_VALUE;
+		if (me != null && wv != null)
+		{
+			WorldPoint here = me.getWorldLocation();
+			for (NPC n : wv.npcs())
+			{
+				if (n == null || n.getName() == null || n.getWorldLocation() == null || n.getWorldLocation().getPlane() != here.getPlane())
+				{
+					continue;
+				}
+				int d = here.distanceTo(n.getWorldLocation());
+				if (d < best)
+				{
+					best = d;
+					pick = n;
+				}
+			}
+		}
+		superior = pick;
+		superiorName = pick == null ? "Test superior" : pick.getName() + " (test)";
+		superiorSpawnAt = System.currentTimeMillis();
+		superiorEngaged = false;
+		superiorTestUntil = superiorSpawnAt + 25_000L;
+		eventBus.post(new SuperiorSpawned(taskName != null ? taskName : "Test task", true));
+	}
+
+	@Subscribe
+	public void onNpcDespawned(NpcDespawned e)
+	{
+		if (superior != null && e.getNpc() == superior)
+		{
+			boolean dead = superior.isDead() || superior.getHealthRatio() == 0;
+			String name = superiorName;
+			superior = null;
+			eventBus.post(new SuperiorGone(name, dead));
+		}
+	}
+
+	@Subscribe
+	public void onActorDeath(ActorDeath e)
+	{
+		if (superior != null && e.getActor() == superior)
+		{
+			String name = superiorName;
+			superior = null;
+			eventBus.post(new SuperiorGone(name, true));
+		}
+	}
+
+	@Subscribe
+	public void onHitsplatApplied(HitsplatApplied e)
+	{
+		if (superior != null && e.getActor() == superior && e.getHitsplat() != null && e.getHitsplat().isMine())
+		{
+			superiorEngaged = true;
 		}
 	}
 
