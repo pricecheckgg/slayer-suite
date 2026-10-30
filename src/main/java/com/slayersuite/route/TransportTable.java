@@ -66,7 +66,7 @@ public final class TransportTable
 		all.addAll(parse(resource("teleportation_portals.tsv"), Transport.Kind.PORTAL));
 		all.addAll(parse(resource("teleportation_levers.tsv"), Transport.Kind.LEVER));
 		all.addAll(parse(resource("spirit_trees.tsv"), Transport.Kind.SPIRIT_TREE));
-		all.addAll(parse(resource("fairy_rings.tsv"), Transport.Kind.FAIRY_RING));
+		all.addAll(withFairyCodes(parse(resource("fairy_rings.tsv"), Transport.Kind.FAIRY_RING)));
 		all.addAll(parse(resource("gnome_gliders.tsv"), Transport.Kind.GLIDER));
 		all.addAll(parse(resource("magic_mushtrees.tsv"), Transport.Kind.MUSHTREE));
 		all.addAll(parse(resource("quetzals.tsv"), Transport.Kind.QUETZAL));
@@ -77,6 +77,67 @@ public final class TransportTable
 	public boolean isStop(int packed)
 	{
 		return stopTiles.contains(packed);
+	}
+
+	private static final String FAIRY_CODES = "/com/slayersuite/data/fairy-codes.tsv";
+
+	/** Fairy ring stops get their code (CKS, BKP...) as display, from the wiki's code table matched by tile; a ride then reads "Fairy ring to CKS". */
+	static List<Transport> withFairyCodes(List<Transport> rings)
+	{
+		Map<Integer, String> codes = fairyCodes();
+		if (codes.isEmpty())
+		{
+			return rings;
+		}
+		List<Transport> out = new ArrayList<>(rings.size());
+		for (Transport t : rings)
+		{
+			String code = null;
+			for (Map.Entry<Integer, String> e : codes.entrySet())
+			{
+				int tile = e.getKey();
+				if (Packed.plane(tile) == Packed.plane(t.origin) && Packed.chebyshev(tile, t.origin) <= 3)
+				{
+					code = e.getValue();
+					break;
+				}
+			}
+			out.add(code == null ? t : new Transport(t.origin, t.destination, t.action, t.name, t.objectId, t.duration, code,
+				t.skills, t.quests, t.varbits, t.varplayers, t.needsItems, t.kind));
+		}
+		return out;
+	}
+
+	/** Ring tile (plane 0) -> code, from fairy-codes.tsv; empty when the file is missing. */
+	static Map<Integer, String> fairyCodes()
+	{
+		Map<Integer, String> out = new HashMap<>();
+		try (InputStream in = TransportTable.class.getResourceAsStream(FAIRY_CODES))
+		{
+			if (in == null)
+			{
+				return out;
+			}
+			java.io.BufferedReader r = new java.io.BufferedReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
+			String line;
+			while ((line = r.readLine()) != null)
+			{
+				if (line.isEmpty() || line.startsWith("#"))
+				{
+					continue;
+				}
+				String[] f = line.split("\t");
+				if (f.length >= 3)
+				{
+					out.put(Packed.of(Integer.parseInt(f[1].trim()), Integer.parseInt(f[2].trim()), 0), f[0].trim());
+				}
+			}
+		}
+		catch (IOException | RuntimeException e)
+		{
+			// no codes: rings stay unnamed
+		}
+		return out;
 	}
 
 	private static InputStream resource(String name)

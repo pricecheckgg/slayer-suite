@@ -101,6 +101,38 @@ public class TransportTableTest
 	}
 
 	@Test
+	public void fairyRingStopsCarryTheirCodeAndRidesNameIt()
+	{
+		Transport canifis = null;
+		Transport mudskipper = null;
+		for (Transport t : table.stops(Transport.Kind.FAIRY_RING))
+		{
+			if (t.origin == Packed.of(3447, 3470, 0))
+			{
+				canifis = t;
+			}
+			if (t.origin == Packed.of(2996, 3114, 0))
+			{
+				mudskipper = t;
+			}
+		}
+		assertNotNull(canifis);
+		assertNotNull(mudskipper);
+		assertEquals("CKS", canifis.display);
+		assertEquals("AIQ", mudskipper.display);
+		assertEquals("Fairy ring to CKS", Transport.ride(mudskipper, canifis).label());
+		int named = 0;
+		for (Transport t : table.stops(Transport.Kind.FAIRY_RING))
+		{
+			if (t.display.matches("[A-D][IJKLPQRS][PQRS]"))
+			{
+				named++;
+			}
+		}
+		assertTrue("only " + named + " rings carry a code", named >= 45);
+	}
+
+	@Test
 	public void fairyRingsAndShipsAreThere()
 	{
 		int zanaris = Packed.of(2412, 4434, 0);

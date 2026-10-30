@@ -102,9 +102,13 @@ public final class Transport
 			skills, quests, varbits, varplayers, from.needsItems || to.needsItems, from.kind);
 	}
 
-	/** "Climb-down Trapdoor", or just the action when the object has no name. */
+	/** "Climb-down Trapdoor", or just the action when the object has no name; a ride names where it goes: "Fairy ring to CKS". */
 	public String label()
 	{
+		if (kind.network() && display != null && !display.isEmpty())
+		{
+			return (name.isEmpty() ? action : name) + " to " + display;
+		}
 		return name.isEmpty() ? action : action + " " + name;
 	}
 

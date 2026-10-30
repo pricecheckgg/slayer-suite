@@ -40,6 +40,7 @@ OUT_ATTR = os.path.join(ROOT, "DATA-ATTRIBUTION.md")
 OUT_REPORT = os.path.join(ROOT, "tools", "report.txt")
 OUT_BANKS = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "banks.tsv")
 OUT_MASTERS = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "masters.tsv")
+OUT_FAIRY = os.path.join(ROOT, "src", "main", "resources", "com", "slayersuite", "data", "fairy-codes.tsv")
 OVERRIDES = os.path.join(ROOT, "tools", "overrides.json")
 CORE_NAMES = os.path.join(ROOT, "tools", "runelite-task-names.txt")
 TASK_ICONS = os.path.join(ROOT, "tools", "task-icons.txt")
@@ -225,6 +226,33 @@ def clean_requirement(cell):
     s = strip_markup(s).replace("<br>", "; ").replace("<br />", "; ").strip(" ;")
     s = re.sub(r"\s+", " ", s)
     return "" if s.lower() in ("", "none", "-") else s
+
+
+def build_fairy_codes(refresh, sources, report):
+    """fairy-codes.tsv: every fairy ring code with the ring's tile and where it is, from the wiki's Fairy ring page."""
+    title, text, rev = parse_page("Fairy ring", refresh)
+    if not text:
+        report.append("no Fairy ring page")
+        return
+    sources.append((title, rev))
+    rows = []
+    for m in re.finditer(r'\|-\s*id="([A-Z]{3})"\s*\n(.*?)(?=\n\|-|\n\|\})', text, re.S):
+        code, body = m.group(1), m.group(2)
+        xy = re.search(r"\{\{Map\|[^}]*?(\d{4}),(\d{4})[^}]*\}\}", body)
+        if not xy:
+            report.append(f"fairy ring {code} without coordinates")
+            continue
+        cells = [c.strip() for c in re.split(r"\n\|", "\n" + body) if c.strip()]
+        place = cells[2] if len(cells) > 2 else ""
+        place = re.sub(r"\[\[([^\]|]+)(?:\|[^\]]*)?\]\]", r"\1", place)
+        place = re.sub(r"\{\{[^}]*\}\}", "", place).replace("''", "")
+        place = re.sub(r"<[^>]+>", "", place).strip(" .:")
+        rows.append((code, int(xy.group(1)), int(xy.group(2)), place))
+    with open(OUT_FAIRY, "w") as f:
+        f.write("# code\tx\ty\tplace   (Old School RuneScape Wiki, Fairy ring; CC BY-NC-SA 3.0)\n")
+        for r in sorted(rows):
+            f.write("\t".join(str(v) for v in r) + "\n")
+    report.append(f"fairy ring codes: {len(rows)}")
 
 
 def build_travel_points(refresh, sources, report):
@@ -1229,6 +1257,7 @@ def main():
                 l["notes"] = [n for n in l["notes"] if not guidance.search(n)]
     # Every task needs at least one location with map regions, or the card cannot place you and the pin cannot be set.
     build_travel_points(args.refresh, sources, report)
+    build_fairy_codes(args.refresh, sources, report)
     with_drops = sum(1 for t in tasks if any(m.get("drops") for m in t["monsters"]))
     drop_rows = sum(len(m.get("drops", [])) for t in tasks for m in t["monsters"])
     report.append(f"drop tables: {with_drops} of {len(tasks)} tasks carry rare drops ({drop_rows} rows at 1/16 or rarer)")

@@ -140,6 +140,7 @@ Hand-maintained corrections and additions live in `tools/overrides.json` and `sr
 | [Elf Warrior](https://oldschool.runescape.wiki/w/Elf_Warrior) | 15352842 |
 | [Ent](https://oldschool.runescape.wiki/w/Ent) | 15366030 |
 | [Entrana firebird](https://oldschool.runescape.wiki/w/Entrana_firebird) | 15354020 |
+| [Fairy ring](https://oldschool.runescape.wiki/w/Fairy_ring) | 15366244 |
 | [Feral Vampyre](https://oldschool.runescape.wiki/w/Feral_Vampyre) | 15356500 |
 | [Fever spider](https://oldschool.runescape.wiki/w/Fever_spider) | 15275482 |
 | [Fire giant](https://oldschool.runescape.wiki/w/Fire_giant) | 15364222 |
