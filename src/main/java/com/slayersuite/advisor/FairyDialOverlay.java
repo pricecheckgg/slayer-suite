@@ -95,17 +95,30 @@ public class FairyDialOverlay extends Overlay
 				continue;
 			}
 			allSet = false;
-			Widget button = client.getWidget(turn[1] > 0 ? CLOCKWISE[i] : ANTICLOCKWISE[i]);
+			Widget cw = client.getWidget(CLOCKWISE[i]);
+			Widget acw = client.getWidget(ANTICLOCKWISE[i]);
+			Widget button = turn[1] > 0 ? cw : acw;
 			if (button == null || button.isHidden())
 			{
 				continue;
 			}
+			// the two rotate buttons are the halves of the dial: mark the whole dial once, above it,
+			// with a curved arrow the way to turn and the number of clicks
 			Rectangle b = button.getBounds();
-			outline(g, b, accent);
+			Rectangle other = (turn[1] > 0 ? acw : cw) == null ? b : (turn[1] > 0 ? acw : cw).getBounds();
+			int left = Math.min(b.x, other.x);
+			int right = Math.max(b.x + b.width, other.x + other.width);
+			int cx = (left + right) / 2;
+			int top = Math.min(b.y, other.y);
 			String n = turn[0] + "x";
-			int tx = b.x + (b.width - fm.stringWidth(n)) / 2;
-			int ty = turn[1] > 0 ? b.y - 4 : b.y + b.height + fm.getAscent() + 2;
-			shadowed(g, n, tx, ty, accent);
+			int r = 11;
+			int ax = cx - (r + 4 + fm.stringWidth(n)) / 2 + r;
+			int ay = top - r - 6;
+			arrow(g, ax, ay, r, turn[1] > 0, accent);
+			shadowed(g, n, ax + r + 6, ay + fm.getAscent() / 2 - 1, accent);
+			// the letter to reach, on the dial's own letter window
+			String want = FairyDial.DIALS[i][target];
+			shadowed(g, want, cx - fm.stringWidth(want) / 2, b.y + b.height + fm.getAscent() + 2, accent);
 		}
 		if (allSet)
 		{
@@ -133,6 +146,34 @@ public class FairyDialOverlay extends Overlay
 			shadowed(g, sub, top.x + (top.width - fs.stringWidth(sub)) / 2, hy + fs.getHeight(), new Color(220, 220, 220));
 		}
 		return null;
+	}
+
+	/** A three-quarter circle with an arrowhead, clockwise or anticlockwise, centred on (cx, cy). */
+	private static void arrow(Graphics2D g, int cx, int cy, int r, boolean clockwise, Color c)
+	{
+		Stroke old = g.getStroke();
+		Object aa = g.getRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING);
+		g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+		g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+		// arc from the bottom round to the right side; mirrored for anticlockwise
+		int start = clockwise ? 240 : -60;
+		int extent = clockwise ? -270 : 270;
+		g.setColor(Color.BLACK);
+		g.drawArc(cx - r + 1, cy - r + 1, 2 * r, 2 * r, start, extent);
+		g.setColor(c);
+		g.drawArc(cx - r, cy - r, 2 * r, 2 * r, start, extent);
+		// arrowhead at the arc's end (top of the circle), pointing the way round
+		int hx = cx;
+		int hy = cy - r;
+		int dir = clockwise ? 1 : -1;
+		int[] xs = {hx, hx - dir * 7, hx - dir * 1};
+		int[] ys = {hy, hy - 5, hy + 6};
+		g.setColor(Color.BLACK);
+		g.fillPolygon(new int[]{xs[0] + 1, xs[1] + 1, xs[2] + 1}, new int[]{ys[0] + 1, ys[1] + 1, ys[2] + 1}, 3);
+		g.setColor(c);
+		g.fillPolygon(xs, ys, 3);
+		g.setStroke(old);
+		g.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, aa == null ? java.awt.RenderingHints.VALUE_ANTIALIAS_DEFAULT : aa);
 	}
 
 	private static void outline(Graphics2D g, Rectangle b, Color c)

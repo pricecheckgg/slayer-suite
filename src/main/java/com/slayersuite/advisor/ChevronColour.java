@@ -29,7 +29,12 @@ public enum ChevronColour
 	public Color resolve(Color custom)
 	{
 		Color c = colour == null ? custom : colour;
-		return c == null ? CYAN.colour : new Color(c.getRed(), c.getGreen(), c.getBlue());
+		if (c == null || Math.max(c.getRed(), Math.max(c.getGreen(), c.getBlue())) < 48)
+		{
+			// nothing picked yet, or a near-black pick: invisible on a dungeon floor, so the default stands in
+			return CYAN.colour;
+		}
+		return new Color(c.getRed(), c.getGreen(), c.getBlue());
 	}
 
 	@Override
