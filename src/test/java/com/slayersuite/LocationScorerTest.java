@@ -190,6 +190,40 @@ public class LocationScorerTest
 	}
 
 	@Test
+	public void cannonAndMultiOnlyCountOnMonstersThatLast()
+	{
+		com.slayersuite.data.MonsterRecord hand = new com.slayersuite.data.MonsterRecord();
+		hand.setName("Crawling Hand");
+		hand.setHitpoints(16);
+		com.slayersuite.data.MonsterRecord bloodveld = new com.slayersuite.data.MonsterRecord();
+		bloodveld.setName("Bloodveld");
+		bloodveld.setHitpoints(120);
+		Stub acc = new Stub();
+		acc.quests.add("PRIEST_IN_PERIL");
+		acc.quests.add("DWARF_CANNON");
+		acc.quests.add("SINS_OF_THE_FATHER");
+		acc.cannon = true;
+		TaskRecord hands = new TaskRecord();
+		hands.setMonsters(Arrays.asList(hand));
+		hands.setLocations(Arrays.asList(
+			loc("Slayer Tower", false, false, true, 24, 13623),
+			loc("Meiyerditch Laboratories", true, true, true, 10, 14488)));
+		assertEquals(0.0, hands.cannonWorth(), 0.02);
+		List<ScoredLocation> r = new LocationScorer(travel()).rank(hands, acc, new LocationScorer.Options());
+		assertEquals("Slayer Tower", r.get(0).getLocation().getName());
+		assertTrue(r.get(1).getReasons().contains("cannon allowed, little use on monsters this weak"));
+		TaskRecord velds = new TaskRecord();
+		velds.setMonsters(Arrays.asList(bloodveld));
+		velds.setLocations(Arrays.asList(
+			loc("Slayer Tower", false, false, true, 24, 13623),
+			loc("Meiyerditch Laboratories", true, true, true, 10, 14488)));
+		assertEquals(1.0, velds.cannonWorth(), 0.001);
+		r = new LocationScorer(travel()).rank(velds, acc, new LocationScorer.Options());
+		assertEquals("Meiyerditch Laboratories", r.get(0).getLocation().getName());
+		assertTrue(r.get(0).getReasons().contains("cannon"));
+	}
+
+	@Test
 	public void locksSpotsBehindQuests()
 	{
 		TaskRecord rec = new TaskRecord();

@@ -793,7 +793,7 @@ public class Advisor
 	{
 		LocationRecord loc = destination;
 		com.slayersuite.data.TaskRecord rec = tracker.getRecord();
-		if (loc == null || !config.preferCannon() || !account.ownsCannon() || !Boolean.TRUE.equals(loc.getCannon()) || (rec != null && rec.cannonImmune()))
+		if (loc == null || !config.preferCannon() || !account.ownsCannon() || !Boolean.TRUE.equals(loc.getCannon()) || (rec != null && (rec.cannonImmune() || rec.cannonWorth() < 0.3)))
 		{
 			return null;
 		}

@@ -43,13 +43,14 @@ public class LocationScorer
 			return out;
 		}
 		boolean immune = rec.cannonImmune();
+		double worth = rec.cannonWorth();
 		for (LocationRecord loc : rec.getLocations())
 		{
 			if (Boolean.TRUE.equals(loc.getBoss()))
 			{
 				continue;
 			}
-			out.add(score(loc, account, opt, immune));
+			out.add(score(loc, account, opt, immune, worth));
 		}
 		out.sort((a, b) -> Integer.compare(b.getScore(), a.getScore()));
 		return out;
@@ -61,6 +62,12 @@ public class LocationScorer
 	}
 
 	public ScoredLocation score(LocationRecord loc, AccountView account, Options opt, boolean monstersCannonImmune)
+	{
+		return score(loc, account, opt, monstersCannonImmune, 1.0);
+	}
+
+	/** As above; cannonWorth (0 to 1) is how much a cannon or multi-target method helps on this task's monster. */
+	public ScoredLocation score(LocationRecord loc, AccountView account, Options opt, boolean monstersCannonImmune, double cannonWorth)
 	{
 		List<String> reasons = new ArrayList<>();
 		int score = 0;
@@ -104,29 +111,35 @@ public class LocationScorer
 			{
 				reasons.add("cannon allowed but the monsters are immune");
 			}
+			else if (cannonWorth < 0.3)
+			{
+				// a cannon on monsters that die in one hit only spends cannonballs
+				reasons.add("cannon allowed, little use on monsters this weak");
+			}
 			else if (opt.preferCannon && account.ownsCannon())
 			{
 				if (account.questFinished("DWARF_CANNON"))
 				{
-					score += 30;
+					score += (int) Math.round(30 * cannonWorth);
 					reasons.add("cannon");
 				}
 				else
 				{
-					score += 5;
+					score += (int) Math.round(5 * cannonWorth);
 					reasons.add("cannon (finish Dwarf Cannon first)");
 				}
 			}
 			else
 			{
-				score += 5;
+				score += (int) Math.round(5 * cannonWorth);
 			}
 		}
 		if (Boolean.TRUE.equals(loc.getMulticombat()))
 		{
-			// multi only pays with monsters to share it: a one-spawn multi area is no better than single
+			// multi only pays with monsters to share it and tough enough to be worth sharing: a one-spawn
+			// multi area is no better than single, and one-hit monsters gain nothing from it
 			boolean worthIt = loc.getSpawnCount() == 0 || loc.getSpawnCount() >= 3;
-			score += worthIt ? (opt.preferMulti ? 20 : 5) : 2;
+			score += worthIt ? (int) Math.round((opt.preferMulti ? 20 : 5) * Math.max(0.1, cannonWorth)) : 2;
 			reasons.add("multi");
 		}
 		if (Boolean.TRUE.equals(loc.getSafespot()))

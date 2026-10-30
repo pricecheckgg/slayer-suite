@@ -107,6 +107,22 @@ public class TaskRecord
 		return false;
 	}
 
+	/**
+	 * How much a cannon (or any multi-target method) helps on this task's monster, 0 to 1: nothing
+	 * on things that die in a hit (crawling hands, 16 Hitpoints), everything from about 90 Hitpoints
+	 * (bloodvelds, demons). Unknown Hitpoints count as full.
+	 */
+	public double cannonWorth()
+	{
+		MonsterRecord m = primaryMonster();
+		Integer hp = m == null ? null : m.getHitpoints();
+		if (hp == null || hp <= 0)
+		{
+			return 1.0;
+		}
+		return Math.max(0, Math.min(1, (hp - 15) / 75.0));
+	}
+
 	/** True when the monster you grind the task on cannot be hit by a cannon. */
 	public boolean cannonImmune()
 	{
