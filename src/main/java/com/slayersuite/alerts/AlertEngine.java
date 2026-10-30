@@ -25,6 +25,7 @@ import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.HitsplatID;
 import net.runelite.api.NPC;
 import net.runelite.api.NPCComposition;
 import net.runelite.api.Player;
@@ -69,6 +70,11 @@ public class AlertEngine
 	private final javax.inject.Provider<com.slayersuite.history.TaskHistory> history;
 	/** The vanish time of the floor drop last warned about, so each is called once. */
 	private long floorWarnedFor;
+	/** Damage you took, newest last: {time, amount}, kept for the trend window. */
+	private final java.util.ArrayDeque<long[]> damage = new java.util.ArrayDeque<>();
+	private long trendWarnedAt;
+	private static final long DAMAGE_WINDOW_MS = 15_000L;
+	private static final long TREND_REPEAT_MS = 8_000L;
 
 	private final Map<AlertKind, Alert> active = new EnumMap<>(AlertKind.class);
 	private final Map<Skill, Integer> peakBoost = new EnumMap<>(Skill.class);
@@ -285,6 +291,7 @@ public class AlertEngine
 		{
 			active.clear();
 			realLevels.clear();
+			damage.clear();
 			lastCombatAt = System.currentTimeMillis();
 		}
 	}
@@ -356,6 +363,46 @@ public class AlertEngine
 		else
 		{
 			clear(AlertKind.LOW_HP);
+			checkTrend(cur, max, System.currentTimeMillis());
+		}
+	}
+
+	/**
+	 * Your own Hitpoints trend: the damage you took in the last fifteen seconds, carried on at that
+	 * rate, reaches the low mark within the configured seconds. Nothing here looks at what a monster
+	 * is about to do; it is your own recent history, projected.
+	 */
+	private void checkTrend(int cur, int max, long now)
+	{
+		int seconds = config.hpTrendSeconds();
+		if (seconds <= 0 || max <= 0)
+		{
+			return;
+		}
+		while (!damage.isEmpty() && now - damage.peekFirst()[0] > DAMAGE_WINDOW_MS)
+		{
+			damage.pollFirst();
+		}
+		if (damage.size() < 2)
+		{
+			return;
+		}
+		long taken = 0;
+		for (long[] d : damage)
+		{
+			taken += d[1];
+		}
+		int threshold = (int) Math.ceil(config.hpPercent() * max / 100.0);
+		if (taken <= 0 || cur <= threshold)
+		{
+			return;
+		}
+		double perSecond = taken / (DAMAGE_WINDOW_MS / 1000.0);
+		double toMark = (cur - threshold) / perSecond;
+		if (toMark <= seconds && now - trendWarnedAt >= TREND_REPEAT_MS)
+		{
+			trendWarnedAt = now;
+			raise(AlertKind.HP_TREND, "Hitpoints " + cur + " falling fast: " + threshold + " in about " + Math.max(1, Math.round(toMark)) + "s at this rate");
 		}
 	}
 
@@ -490,7 +537,17 @@ public class AlertEngine
 	{
 		if (e.getActor() == client.getLocalPlayer())
 		{
-			lastCombatAt = System.currentTimeMillis();
+			long now = System.currentTimeMillis();
+			lastCombatAt = now;
+			int amount = e.getHitsplat() == null ? 0 : e.getHitsplat().getAmount();
+			if (amount > 0 && e.getHitsplat().getHitsplatType() != HitsplatID.HEAL)
+			{
+				damage.addLast(new long[]{now, amount});
+				while (damage.size() > 60)
+				{
+					damage.pollFirst();
+				}
+			}
 		}
 	}
 

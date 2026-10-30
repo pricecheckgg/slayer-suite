@@ -237,6 +237,14 @@ public interface SlayerSuiteConfig extends Config
 		return 10;
 	}
 
+	@Range(min = 0, max = 30)
+	@Units(Units.SECONDS)
+	@ConfigItem(keyName = "hpTrendSeconds", name = "Falling fast within", description = "Critical alert when the damage you took in the last fifteen seconds, carried on at that rate, would bring your Hitpoints to the low mark within this many seconds. 0 turns it off. Your own history only; nothing about what a monster will do.", section = alertsSection, position = 15)
+	default int hpTrendSeconds()
+	{
+		return 8;
+	}
+
 	@ConfigItem(keyName = "alertOffTask", name = "Off-task target", description = "Warn when you attack a monster that does not count for your task.", section = alertsSection, position = 20)
 	default boolean alertOffTask()
 	{

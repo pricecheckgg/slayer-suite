@@ -7,6 +7,7 @@ import lombok.Getter;
 public enum AlertKind
 {
 	LOW_HP(100, Severity.CRITICAL, true, 0),
+	HP_TREND(98, Severity.CRITICAL, false, 6_000),
 	VENOM(95, Severity.CRITICAL, true, 0),
 	POISON(90, Severity.WARNING, true, 0),
 	LOW_PRAYER(80, Severity.WARNING, true, 0),
