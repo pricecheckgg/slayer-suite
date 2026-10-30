@@ -67,10 +67,12 @@ public class SuperiorOverlay extends Overlay
 		}
 		long now = System.currentTimeMillis();
 		boolean engaged = tracker.isSuperiorEngaged();
-		float pulse = engaged ? 1f : 0.55f + 0.45f * (float) Math.abs(Math.sin(now / 160.0));
-		Color base = engaged ? Palette.WARN : Palette.BAD;
+		float pulse = engaged ? 1f : 0.6f + 0.4f * (float) Math.abs(Math.sin(now / 160.0));
+		Color base = engaged ? Palette.SUPERIOR_CALM : Palette.SUPERIOR;
 		Color c = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(255 * pulse));
-		Color fill = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(45 * pulse));
+		Color glow = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(70 * pulse));
+		Color fill = new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.round(40 * pulse));
+		Color inner = new Color(Palette.SUPERIOR_GLOW.getRed(), Palette.SUPERIOR_GLOW.getGreen(), Palette.SUPERIOR_GLOW.getBlue(), Math.round(200 * pulse));
 		String name = tracker.getSuperiorName() == null ? "Superior" : tracker.getSuperiorName();
 		WorldPoint mine = me.getWorldLocation();
 		WorldPoint theirs = s.getWorldLocation();
@@ -91,6 +93,9 @@ public class SuperiorOverlay extends Overlay
 		{
 			g.setColor(fill);
 			g.fill(tile);
+			g.setColor(glow);
+			g.setStroke(new BasicStroke(6f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.draw(tile);
 			g.setColor(c);
 			g.setStroke(new BasicStroke(2f));
 			g.draw(tile);
@@ -98,8 +103,15 @@ public class SuperiorOverlay extends Overlay
 		Shape hull = s.getConvexHull();
 		if (hull != null)
 		{
+			// a soft outer glow, the violet line, and a pale hairline inside it
+			g.setColor(glow);
+			g.setStroke(new BasicStroke(9f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.draw(hull);
 			g.setColor(c);
-			g.setStroke(new BasicStroke(3f));
+			g.setStroke(new BasicStroke(3f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+			g.draw(hull);
+			g.setColor(inner);
+			g.setStroke(new BasicStroke(1f));
 			g.draw(hull);
 		}
 		int plane = theirs == null ? 0 : theirs.getPlane();

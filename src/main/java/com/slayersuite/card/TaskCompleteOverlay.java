@@ -397,7 +397,7 @@ public class TaskCompleteOverlay extends Overlay
 		missed = Collections.emptyList();
 		ribbon = "";
 		sparkles = false;
-		show("SUPERIOR", name, "", RED, 2200);
+		show("SUPERIOR", name, "", Palette.SUPERIOR, 2200);
 	}
 
 	@Subscribe
