@@ -595,6 +595,19 @@ public class SlayerSuitePanel extends PluginPanel
 		cells.add(new String[]{"loot", TripMath.formatK(history.getAssignmentGp())});
 		cells.add(new String[]{"left", TripMath.formatK(history.getAssignmentMissedValue())});
 		p.add(tiles(cells));
+		List<TaskHistory.DryOdds> odds = history.dryOdds(8, 1.0 / 16);
+		if (!odds.isEmpty())
+		{
+			p.add(gap(6));
+			p.add(label("DRY ODDS", FontManager.getRunescapeSmallFont(), DIM));
+			p.add(gap(3));
+			for (TaskHistory.DryOdds o : odds)
+			{
+				String text = o.getName() + ": " + (o.getSeen() > 0 ? o.getSeen() + " seen, " + o.getKillsSince() + " kills since the last" : o.getKillsSince() + " kills dry")
+					+ ", " + Math.round(o.chanceByNow() * 100) + "% would have one by now";
+				p.add(kv(o.getRarity(), text, o.chanceByNow() >= 0.9 ? WARN : Color.WHITE));
+			}
+		}
 		List<TaskHistory.LootItem> picked = history.topLoot(15);
 		List<TaskHistory.LootItem> left = history.topMissed(10);
 		if (picked.isEmpty() && left.isEmpty())
@@ -690,6 +703,22 @@ public class SlayerSuitePanel extends PluginPanel
 		if (t.getSuperiors() > 0)
 		{
 			p.add(kv("Superiors", Integer.toString(t.getSuperiors()), DIM));
+		}
+		if (t.getDrops() != null && !t.getDrops().isEmpty())
+		{
+			List<String> bits = new ArrayList<>();
+			for (Map.Entry<String, long[]> e : t.getDrops().entrySet())
+			{
+				long[] m = e.getValue();
+				if (m != null && m.length >= 3 && m[0] > 0)
+				{
+					bits.add(e.getKey() + " x" + m[0] + (m[2] > 0 ? " (last " + when(m[2]) + ")" : ""));
+				}
+			}
+			if (!bits.isEmpty())
+			{
+				p.add(kv("Rare drops", String.join("; ", bits), DIM));
+			}
 		}
 		if (t.getSpots() != null && !t.getSpots().isEmpty())
 		{

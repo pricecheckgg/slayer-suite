@@ -112,7 +112,13 @@ public interface SlayerSuiteConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(keyName = "taskChoiceOverlay", name = "Task choice helper", description = "Beside the task choice screen: your history, xp per kill, items you lack and the best spot for each offered task, with a pick.", section = cardSection, position = 8)
+	@ConfigItem(keyName = "cardShowOdds", name = "Drop odds", description = "The task's rarest drops with your kills since the last one and the chance you would have had one by now, from the wiki rates and your own kills.", section = cardSection, position = 8)
+	default boolean cardShowOdds()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "taskChoiceOverlay", name = "Task choice helper", description = "Beside the task choice screen: your history, xp per kill, items you lack and the best spot for each offered task, with a pick.", section = cardSection, position = 9)
 	default boolean taskChoiceOverlay()
 	{
 		return true;

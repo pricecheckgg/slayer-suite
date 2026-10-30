@@ -28,4 +28,6 @@ public class MonsterRecord
 	private boolean superior;
 	private List<String> locations = new ArrayList<>();
 	private List<String> notes = new ArrayList<>();
+	/** Rare drops (1/16 or rarer) from the wiki table, rarest first. */
+	private List<DropRecord> drops = new ArrayList<>();
 }

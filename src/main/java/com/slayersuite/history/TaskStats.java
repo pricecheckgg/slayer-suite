@@ -38,6 +38,10 @@ public class TaskStats
 	private int superiors;
 	/** What you did at each spot of this task: kills, active time, Slayer xp and picked-up loot. */
 	private java.util.Map<String, SpotStats> spots = new java.util.LinkedHashMap<>();
+	/** Rare drops seen on this task, by item name: {times seen, kills of the monsters that drop it when it last came, wall time}. */
+	private java.util.Map<String, long[]> drops = new java.util.LinkedHashMap<>();
+	/** Kills per monster on this task (deaths that dropped loot), by dataset monster name. */
+	private java.util.Map<String, Long> monsterKills = new java.util.LinkedHashMap<>();
 
 	public static class SpotStats
 	{
@@ -66,6 +70,41 @@ public class TaskStats
 		{
 			return kills >= 15 && activeMs >= 120_000L;
 		}
+	}
+
+	public long[] drop(String key)
+	{
+		if (drops == null)
+		{
+			drops = new java.util.LinkedHashMap<>();
+		}
+		return drops.computeIfAbsent(key, k -> new long[3]);
+	}
+
+	/** The stored mark for an item, or null when never seen. */
+	public long[] dropMark(String key)
+	{
+		return drops == null ? null : drops.get(key);
+	}
+
+	public void monsterKill(String monster)
+	{
+		if (monsterKills == null)
+		{
+			monsterKills = new java.util.LinkedHashMap<>();
+		}
+		monsterKills.merge(monster, 1L, Long::sum);
+	}
+
+	public long monsterKills(String monster)
+	{
+		Long n = monsterKills == null ? null : monsterKills.get(monster);
+		return n == null ? 0 : n;
+	}
+
+	public boolean anyMonsterKills()
+	{
+		return monsterKills != null && !monsterKills.isEmpty();
 	}
 
 	public SpotStats spot(String name)
@@ -149,6 +188,15 @@ public class TaskStats
 		c.cannonKph = cannonKph;
 		c.plainKph = plainKph;
 		c.superiors = superiors;
+		c.monsterKills = monsterKills == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(monsterKills);
+		c.drops = new java.util.LinkedHashMap<>();
+		if (drops != null)
+		{
+			for (java.util.Map.Entry<String, long[]> e : drops.entrySet())
+			{
+				c.drops.put(e.getKey(), e.getValue() == null ? new long[3] : e.getValue().clone());
+			}
+		}
 		c.spots = new java.util.LinkedHashMap<>();
 		if (spots != null)
 		{

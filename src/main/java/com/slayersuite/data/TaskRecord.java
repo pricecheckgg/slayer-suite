@@ -129,6 +129,63 @@ public class TaskRecord
 		return true;
 	}
 
+	private transient List<DropRecord> rareCache;
+
+	/** The rare drops of the monsters you grind this task on (superiors left out; a boss task uses the boss), rarest first, one row per item. */
+	public List<DropRecord> rareDrops()
+	{
+		List<DropRecord> cached = rareCache;
+		if (cached != null)
+		{
+			return cached;
+		}
+		List<DropRecord> out = collectRare(true);
+		if (out.isEmpty())
+		{
+			out = collectRare(false);
+		}
+		out.sort((a, b) -> Double.compare(a.probability(), b.probability()));
+		rareCache = out;
+		return out;
+	}
+
+	private List<DropRecord> collectRare(boolean regularOnly)
+	{
+		List<DropRecord> out = new ArrayList<>();
+		Map<String, DropRecord> seen = new HashMap<>();
+		if (monsters != null)
+		{
+			for (MonsterRecord m : monsters)
+			{
+				if (m.isSuperior() || (regularOnly && !isRegular(m)) || m.getDrops() == null || m.getName() == null)
+				{
+					continue;
+				}
+				for (DropRecord d : m.getDrops())
+				{
+					if (d.getName() == null || d.probability() <= 0 || "superior".equals(d.getWhere()))
+					{
+						continue;
+					}
+					String k = ItemNames.key(d.getName()) + "|" + d.getWhere();
+					DropRecord first = seen.get(k);
+					if (first == null)
+					{
+						d.getFrom().clear();
+						d.getFrom().add(m.getName());
+						seen.put(k, d);
+						out.add(d);
+					}
+					else if (!first.getFrom().contains(m.getName()))
+					{
+						first.getFrom().add(m.getName());
+					}
+				}
+			}
+		}
+		return out;
+	}
+
 	/** The dataset monster matching an NPC name, or null. */
 	public MonsterRecord monsterNamed(String npcName)
 	{

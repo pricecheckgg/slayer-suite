@@ -233,6 +233,18 @@ public class TaskCardOverlay extends Overlay
 			y += 2;
 		}
 
+		// ---- the drops you are waiting on
+		if (config.cardShowOdds())
+		{
+			List<TaskHistory.DryOdds> odds = history.dryOdds(2, 1.0 / 64);
+			if (!odds.isEmpty())
+			{
+				y = rule(g, draw, x0, y, cw);
+				y = oddsRows(g, draw, x0, y, cw, odds, fn, fs);
+				y += 2;
+			}
+		}
+
 		// ---- where you are, or where to go
 		if (config.cardShowLocation())
 		{
@@ -484,6 +496,30 @@ public class TaskCardOverlay extends Overlay
 			x += cellW + gap;
 		}
 		return rowH * rows + 2 * (rows - 1);
+	}
+
+	/** One line per rare drop: the item and its rate on the left, your kills since the last one and the chance you would have had it by now on the right. */
+	private int oddsRows(Graphics2D g, boolean draw, int x0, int y, int cw, List<TaskHistory.DryOdds> odds, FontMetrics fn, FontMetrics fs)
+	{
+		for (TaskHistory.DryOdds o : odds)
+		{
+			String pct = Math.round(o.chanceByNow() * 100) + "%";
+			String since = o.getSeen() > 0 ? o.getSeen() + " seen,  " + o.getKillsSince() + " since" : o.getKillsSince() + " dry";
+			String rate = o.getRarity();
+			int pctW = fn.stringWidth(pct);
+			int sinceW = fs.stringWidth(since);
+			int rateW = fs.stringWidth(rate);
+			int nameMax = cw - pctW - 8 - sinceW - 10 - rateW - 6;
+			String name = fit(fn, o.getName(), Math.max(40, nameMax));
+			int base = y + fn.getAscent();
+			text(g, draw, std, name, x0, base, Color.WHITE);
+			text(g, draw, small, rate, x0 + fn.stringWidth(name) + 6, base, DIM);
+			Color pc = o.chanceByNow() >= 0.9 ? RECOMMENDED : Color.WHITE;
+			text(g, draw, std, pct, x0 + cw - pctW, base, pc);
+			text(g, draw, small, since, x0 + cw - pctW - 8 - sinceW, base, DIM);
+			y += fn.getHeight();
+		}
+		return y;
 	}
 
 	/** A coloured dot, text on the left, a status word on the right. */

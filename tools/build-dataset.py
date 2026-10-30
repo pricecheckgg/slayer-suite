@@ -21,6 +21,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -182,6 +183,189 @@ def render_template(tpl):
     if n == "sic":
         return pos[0] if pos else ""
     return " ".join(p for p in pos if p)
+
+
+# ---------------------------------------------------------------- drop tables
+
+def balanced_end(text, j):
+    """Index just past the }} closing the template that starts at text[j], or -1."""
+    depth, p, n = 0, j, len(text)
+    while p < n:
+        if text.startswith("{{", p):
+            depth += 1
+            p += 2
+            continue
+        if text.startswith("}}", p):
+            depth -= 1
+            p += 2
+            if depth == 0:
+                return p
+            continue
+        p += 1
+    return -1
+
+
+def num_text(v):
+    """A number as plain decimal text (no exponent), so it can go back into an expression."""
+    if v is None:
+        return ""
+    if float(v).is_integer():
+        return str(int(v))
+    return ("%.15f" % v).rstrip("0").rstrip(".")
+
+
+def to_number(s):
+    try:
+        return float(s.strip().replace(",", ""))
+    except (ValueError, AttributeError):
+        return None
+
+
+def eval_expr(s):
+    """A MediaWiki #expr body: + - * / ^, brackets, floor() and ceil(), and a trailing 'round N'."""
+    s = s.strip()
+    digits = None
+    m = re.match(r"^(.*?)\s+round\s+(-?\d+)\s*$", s, re.S)
+    if m:
+        s, digits = m.group(1), int(m.group(2))
+    s = s.replace("^", "**")
+    if not re.fullmatch(r"[\d\s.+\-*/()]*", re.sub(r"\b(floor|ceil)\b", "", s)):
+        return None
+    try:
+        v = eval(s, {"__builtins__": {}}, {"floor": math.floor, "ceil": math.ceil})
+    except Exception:
+        return None
+    if not isinstance(v, (int, float)):
+        return None
+    return float(round(v, digits)) if digits is not None else float(v)
+
+
+def expand(s, variables):
+    """Replaces {{#var:x}} with the page's value and evaluates {{#expr:...}} innermost first."""
+    for _ in range(20):
+        before = s
+        s = re.sub(r"\{\{#var:\s*([^{}|]+?)\s*\}\}", lambda m: num_text(variables.get(m.group(1).strip().lower())) if m.group(1).strip().lower() in variables else m.group(0), s)
+        s = re.sub(r"\{\{#expr:([^{}]*)\}\}", lambda m: num_text(eval_expr(m.group(1))) if eval_expr(m.group(1)) is not None else m.group(0), s)
+        if s == before:
+            break
+    return s
+
+
+def page_vars(text):
+    """{{#vardefine:name|value}} on a page, evaluated in order; drop tables use them for herb and seed rates."""
+    variables = {}
+    for m in re.finditer(r"\{\{#vardefine:\s*([^|{}]+?)\s*\|", text):
+        end = balanced_end(text, m.start())
+        if end < 0:
+            continue
+        v = to_number(expand(text[m.end():end - 2], variables))
+        if v is not None:
+            variables[m.group(1).strip().lower()] = v
+    return variables
+
+
+def brimstone_rate(level, bonus):
+    """Template:Brimstone rarity: the key's rate from the monster's combat level (0.8x denominator with the diary bonus)."""
+    if level >= 350:
+        base = 50
+    elif level >= 100:
+        base = 120 - math.floor(0.2 * level)
+    else:
+        base = 100 + math.floor(0.2 * (level - 100) ** 2)
+    d = math.floor(base * (0.8 if bonus else 1))
+    return 1.0 / d if d > 0 else None
+
+
+def fmt_ratio(a, b):
+    def f(x):
+        return str(int(x)) if float(x).is_integer() else ("%.1f" % x).rstrip("0").rstrip(".")
+    return f(a) + "/" + f(b)
+
+
+def parse_rarity(raw, variables):
+    """(display text, probability or None) for a DropsLine rarity cell."""
+    r = raw.strip()
+    if not r:
+        return "", None
+    if r.lower() == "always":
+        return "Always", 1.0
+    if re.match(r"^\{\{\s*brimstone rarity\s*\|", r, re.I):
+        name, params, pos = template_params(r)
+        lvl = to_number(expand(pos[0], variables)) if pos else None
+        if lvl is None:
+            return "", None
+        p = brimstone_rate(lvl, params.get("bonus", "").strip().lower() == "yes")
+        return (fmt_ratio(1, round(1 / p)), p) if p else ("", None)
+    s = expand(r, variables).replace(",", "").replace("~", "").strip()
+    m = re.fullmatch(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", s)
+    if m:
+        a, b = float(m.group(1)), float(m.group(2))
+        if a <= 0 or b <= 0:
+            return s, None
+        return fmt_ratio(a, b), min(1.0, a / b)
+    if re.fullmatch(r"[A-Za-z ]+", s):
+        return s.strip().capitalize(), None
+    return "", None
+
+
+DROP_MAX_P = 1.0 / 16
+HEADING_RE = re.compile(r"^(=+)\s*(.+?)\s*\1\s*$", re.M)
+
+
+def parse_drops(text):
+    """The rare drops a monster page lists: name, quantity, rarity as shown, probability per kill, and where it applies.
+
+    Rows under a rare or gem drop table heading are left out (those items are not what a player waits on at this
+    monster), and only rates of 1/16 or rarer are kept, so the record stays small. Rows that apply on some tasks
+    only are tagged: Brimstone keys (Konar), Wilderness Slayer tertiaries (Krystilia), Catacombs tertiaries."""
+    if not text or "DropsLine" not in text:
+        return []
+    variables = page_vars(text)
+    headings = [(m.start(), m.group(2).lower()) for m in HEADING_RE.finditer(text)]
+    out, seen = [], set()
+    for m in re.finditer(r"\{\{\s*DropsLine\s*\|", text):
+        end = balanced_end(text, m.start())
+        if end < 0:
+            continue
+        name, params, pos = template_params(text[m.start():end])
+        item = strip_markup(params.get("name", "")).strip()
+        if not item or item.lower() in ("nothing", "coins"):
+            continue
+        heading = ""
+        for pos_h, h in headings:
+            if pos_h < m.start():
+                heading = h
+        if "rare drop table" in heading or "gem drop table" in heading or "rare and gem" in heading:
+            continue
+        where = None
+        if "wilderness" in heading and "tertiary" in heading:
+            where = "wilderness"
+        elif "catacombs" in heading:
+            where = "catacombs"
+        elif "superior" in heading:
+            where = "superior"
+        if item.lower() == "brimstone key":
+            where = "konar"
+        shown, p = parse_rarity(params.get("rarity", ""), variables)
+        if p is None or p > DROP_MAX_P:
+            continue
+        rolls = to_number(params.get("rolls", "")) if params.get("rolls") else None
+        if rolls and rolls > 1 and p < 1:
+            p = 1 - (1 - p) ** rolls
+            shown += " x%d" % int(rolls)
+        key = (norm(item), where)
+        if key in seen:
+            continue
+        seen.add(key)
+        row = {"name": item, "rarity": shown, "p": round(p, 9)}
+        qty = strip_markup(params.get("quantity", "")).strip()
+        if qty and qty != "1":
+            row["qty"] = qty
+        if where:
+            row["where"] = where
+        out.append(row)
+    out.sort(key=lambda r: r["p"])
+    return out
 
 
 def strip_markup(s):
@@ -667,6 +851,7 @@ def main():
         rec = parse_monster_infobox(text) if text else None
         if rec:
             rec["page"] = title
+            rec["drops"] = parse_drops(text)
             sources.append((title, revid))
         else:
             report.append(f"no monster infobox: {page_title}")
@@ -742,6 +927,7 @@ def main():
                 "superior": v["superior"],
                 "locations": v["locations"],
                 "notes": v["notes"],
+                "drops": mon.get("drops", []),
             }
             rec["monsters"].append(entry)
             if v["superior"]:
@@ -873,7 +1059,8 @@ def main():
                 "hitpoints": found.get("hitpoints"), "hitpointsMax": found.get("hitpointsMax"), "maxHit": found.get("maxHit"),
                 "attackStyles": found.get("attackStyles", []), "attributes": found.get("attributes", []), "poisonous": found.get("poisonous", False),
                 "venomous": found.get("venomous", False), "cannonImmune": found.get("cannonImmune", False), "elementalWeakness": found.get("elementalWeakness"),
-                "category": found.get("category"), "superior": False, "locations": [l["name"] for l in page_locs], "notes": []}],
+                "category": found.get("category"), "superior": False, "locations": [l["name"] for l in page_locs], "notes": [],
+                "drops": parse_drops(found["text"])}],
             "superiors": list(ov.get("superiors", [])), "locations": page_locs + list(ov.get("extraLocations", [])),
             "requiredItems": ov.get("requiredItems", []), "finishingItem": ov.get("finishingItem"), "protection": ov.get("protection", []),
             "style": ov.get("style"), "notes": list(ov.get("notes", [])),
@@ -940,6 +1127,9 @@ def main():
             if l.get("notes"):
                 l["notes"] = [n for n in l["notes"] if not guidance.search(n)]
     # Every task needs at least one location with map regions, or the card cannot place you and the pin cannot be set.
+    with_drops = sum(1 for t in tasks if any(m.get("drops") for m in t["monsters"]))
+    drop_rows = sum(len(m.get("drops", [])) for t in tasks for m in t["monsters"])
+    report.append(f"drop tables: {with_drops} of {len(tasks)} tasks carry rare drops ({drop_rows} rows at 1/16 or rarer)")
     no_loc = [t["name"] for t in tasks if not t["locations"]]
     no_regions = [t["name"] for t in tasks if t["locations"] and not any(l.get("regions") for l in t["locations"])]
     report.append("")

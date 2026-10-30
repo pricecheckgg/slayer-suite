@@ -3,6 +3,9 @@ package com.slayersuite.history;
 import com.google.gson.Gson;
 import com.slayersuite.SlayerSuiteConfig;
 import com.slayersuite.alerts.AlertEngine;
+import com.slayersuite.data.DropRecord;
+import com.slayersuite.data.ItemNames;
+import com.slayersuite.data.MonsterRecord;
 import com.slayersuite.data.SlayerDataset;
 import com.slayersuite.data.TaskRecord;
 import com.slayersuite.guard.AttackGuard;
@@ -1556,6 +1559,12 @@ public class TaskHistory
 		long now = System.currentTimeMillis();
 		WorldPoint where = npc.getWorldLocation();
 		boolean killConfirmed = now - lastKillCountedAt <= KILL_MATCH_MS;
+		TaskRecord rec = tracker.getRecord();
+		String monsterKey = monsterKeyFor(rec, npc.getName());
+		if (monsterKey != null)
+		{
+			current.monsterKill(monsterKey);
+		}
 		for (ItemStack s : e.getItems())
 		{
 			int id = itemManager.canonicalize(s.getId());
@@ -1581,6 +1590,7 @@ public class TaskHistory
 					// name unknown
 				}
 			}
+			markRareDrop(rec, name, now);
 			// a carried herb sack or seed box swallows these on pickup without touching the inventory
 			if (name != null)
 			{
@@ -1594,6 +1604,122 @@ public class TaskHistory
 		sessionGp += gp;
 		assignmentGp += gp;
 		dirty = true;
+	}
+
+	/** The dataset name of the monster an NPC stands for, or its own name; null without a name. */
+	private static String monsterKeyFor(TaskRecord rec, String npcName)
+	{
+		if (npcName == null || npcName.isEmpty())
+		{
+			return null;
+		}
+		MonsterRecord m = rec == null ? null : rec.monsterNamed(npcName);
+		return m != null && m.getName() != null ? m.getName() : npcName;
+	}
+
+	/** Remembers a rare drop of this task the moment it hits the floor, with your kill count of the monsters that drop it. */
+	private void markRareDrop(TaskRecord rec, String name, long now)
+	{
+		if (rec == null || name == null || current == null)
+		{
+			return;
+		}
+		String k = ItemNames.key(name);
+		for (DropRecord d : rec.rareDrops())
+		{
+			if (ItemNames.key(d.getName()).equals(k))
+			{
+				long[] m = current.drop(d.getName());
+				m[0]++;
+				m[1] = killsOf(current, d);
+				m[2] = now;
+				dirty = true;
+				return;
+			}
+		}
+	}
+
+	/** Your kills on this task of the monsters that drop an item. */
+	private static long killsOf(TaskStats s, DropRecord d)
+	{
+		long n = 0;
+		for (String mon : d.getFrom())
+		{
+			n += s.monsterKills(mon);
+		}
+		return n;
+	}
+
+	/** One rare drop of the current task with your own numbers behind it. */
+	@lombok.Value
+	public static class DryOdds
+	{
+		String name;
+		String rarity;
+		double p;
+		long seen;
+		/** Kills of the monsters that drop it since you last saw it (all your kills when never). */
+		long killsSince;
+		long lastAt;
+
+		/** The chance you would have had at least one by now, over the kills since the last. */
+		public double chanceByNow()
+		{
+			return DropRecord.chanceBy(p, killsSince);
+		}
+
+		public long expectedEvery()
+		{
+			return p > 0 ? Math.round(1 / p) : 0;
+		}
+	}
+
+	/** The current task's rare drops at maxP or rarer, rarest first, from the monsters you have been killing on it (the main one before any kill), at most max rows. */
+	public List<DryOdds> dryOdds(int max, double maxP)
+	{
+		TaskRecord rec = tracker.getRecord();
+		if (rec == null || max <= 0)
+		{
+			return java.util.Collections.emptyList();
+		}
+		TaskStats s = current;
+		int master = tracker.currentMasterId();
+		com.slayersuite.data.LocationRecord here = tracker.getCurrentLocation();
+		String place = here == null ? null : here.getName();
+		boolean anyKills = s != null && s.anyMonsterKills();
+		MonsterRecord primary = rec.primaryMonster();
+		String primaryKey = primary == null ? null : primary.getName();
+		List<DryOdds> out = new ArrayList<>();
+		for (DropRecord d : rec.rareDrops())
+		{
+			if (d.probability() > maxP || !d.appliesTo(master, place))
+			{
+				continue;
+			}
+			boolean relevant = false;
+			for (String mon : d.getFrom())
+			{
+				if (anyKills ? s.monsterKills(mon) > 0 : mon.equals(primaryKey))
+				{
+					relevant = true;
+					break;
+				}
+			}
+			if (!relevant)
+			{
+				continue;
+			}
+			long[] m = s == null ? null : s.dropMark(d.getName());
+			long kills = s == null ? 0 : killsOf(s, d);
+			long seen = m == null ? 0 : m[0];
+			long since = m == null ? kills : Math.max(0, kills - m[1]);
+			out.add(new DryOdds(d.getName(), d.shownRarity(), d.probability(), seen, since, m == null ? 0 : m[2]));
+			if (out.size() >= max)
+			{
+				break;
+			}
+		}
+		return out;
 	}
 
 	@Subscribe
