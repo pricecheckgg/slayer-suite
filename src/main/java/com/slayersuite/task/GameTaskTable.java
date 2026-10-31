@@ -40,6 +40,7 @@ public class GameTaskTable
 	private final Map<Integer, String> nameCache = new LinkedHashMap<>();
 	private final Map<Integer, String> areaCache = new LinkedHashMap<>();
 	private final Map<Integer, Map<Integer, Integer>> weightCache = new LinkedHashMap<>();
+	private final Map<Integer, TaskModifier.Kind> kindCache = new LinkedHashMap<>();
 
 	@Inject
 	public GameTaskTable(Client client)
@@ -96,6 +97,80 @@ public class GameTaskTable
 		{
 			log.debug("slayer table lookup failed", e);
 			return null;
+		}
+	}
+
+	/** Mortimer's bonus on the current task, from the game's modifier values; NONE on another master's task or when logged out. */
+	public TaskModifier currentModifier()
+	{
+		return modifier(VarbitID.SLAYER_MODIFIER_ID, VarbitID.SLAYER_MODIFIER_VALUE, VarbitID.SLAYER_MODIFIER_NEGATIVE);
+	}
+
+	/** The bonus on the task you have stored, when there is one. */
+	public TaskModifier storedModifier()
+	{
+		return modifier(VarbitID.SLAYER_MODIFIER_ID_STORED, VarbitID.SLAYER_MODIFIER_VALUE_STORED, VarbitID.SLAYER_MODIFIER_NEGATIVE_STORED);
+	}
+
+	private TaskModifier modifier(int idVarbit, int valueVarbit, int negativeVarbit)
+	{
+		if (client.getGameState() != GameState.LOGGED_IN)
+		{
+			return TaskModifier.NONE;
+		}
+		try
+		{
+			int id = client.getVarbitValue(idVarbit);
+			if (id <= 0)
+			{
+				return TaskModifier.NONE;
+			}
+			return TaskModifier.of(modifierKind(id), client.getVarbitValue(valueVarbit), client.getVarbitValue(negativeVarbit) == 1);
+		}
+		catch (RuntimeException ex)
+		{
+			log.debug("Slayer Suite: modifier values unavailable", ex);
+			return TaskModifier.NONE;
+		}
+	}
+
+	/** Which bonus a modifier id is: the game's SlayerModifiers table when it can be read, else the table's known order. */
+	TaskModifier.Kind modifierKind(int id)
+	{
+		TaskModifier.Kind cached = kindCache.get(id);
+		if (cached != null)
+		{
+			return cached;
+		}
+		TaskModifier.Kind kind = TaskModifier.kindOf(id);
+		try
+		{
+			List<Integer> rows = client.getDBRowsByValue(DBTableID.SlayerModifiers.ID, DBTableID.SlayerModifiers.COL_ID, 0, id);
+			TaskModifier.Kind byRow = rows != null && rows.size() == 1 ? kindOfRow(rows.get(0)) : null;
+			if (byRow != null)
+			{
+				kind = byRow;
+			}
+		}
+		catch (RuntimeException ex)
+		{
+			log.debug("Slayer Suite: SlayerModifiers table unavailable", ex);
+		}
+		kindCache.put(id, kind);
+		return kind;
+	}
+
+	private static TaskModifier.Kind kindOfRow(int row)
+	{
+		switch (row)
+		{
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_NONE: return TaskModifier.Kind.NONE;
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_POINTS: return TaskModifier.Kind.POINTS;
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_QUANTITY: return TaskModifier.Kind.QUANTITY;
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_CLUES: return TaskModifier.Kind.CLUES;
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_SUPERIOR_CHANCE: return TaskModifier.Kind.SUPERIOR_CHANCE;
+			case DBTableID.SlayerModifiers.Row.SLAYER_MODIFIER_XP_BOOST: return TaskModifier.Kind.XP_BOOST;
+			default: return null;
 		}
 	}
 

@@ -6,12 +6,15 @@ import com.slayersuite.data.ItemRule;
 import com.slayersuite.data.LocationRecord;
 import com.slayersuite.data.SlayerDataset;
 import com.slayersuite.data.TaskRecord;
+import com.slayersuite.history.SuperiorMath;
 import com.slayersuite.history.TaskHistory;
 import com.slayersuite.history.TaskStats;
 import com.slayersuite.readiness.Missing;
 import com.slayersuite.readiness.ReadinessChecker;
+import com.slayersuite.task.TaskModifier;
 import com.slayersuite.task.TaskTracker;
 import com.slayersuite.trip.TripMath;
+import com.slayersuite.ui.Palette;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -1277,6 +1280,17 @@ public class SlayerSuitePanel extends PluginPanel
 				p.add(kv("Needs", rec.getSlayerLevel() + " Slayer" + (rec.getOtherRequirements() != null ? ", " + rec.getOtherRequirements() : ""), DIM));
 			}
 		}
+		TaskModifier mod = tracker.getModifier();
+		if (mod.present())
+		{
+			p.add(kv("Bonus", mod.label(), bonusColour(mod)));
+			if (mod.getKind() == TaskModifier.Kind.SUPERIOR_CHANCE && rec != null && rec.getSlayerLevel() != null)
+			{
+				int req = rec.getSlayerLevel();
+				p.add(kv("Per superior", "heart or gem " + SuperiorMath.odds(SuperiorMath.heartOrGem(req, mod.getValue())) + ", any unique " + SuperiorMath.odds(SuperiorMath.anyUnique(req, mod.getValue()))
+					+ " (plain " + SuperiorMath.odds(SuperiorMath.heartOrGem(req, 0)) + " and " + SuperiorMath.odds(SuperiorMath.anyUnique(req, 0)) + ")", DIM));
+			}
+		}
 		if (tracker.getGameTask() != null && tracker.rollChance() > 0)
 		{
 			p.add(kv("Rolled", Math.round(tracker.rollChance() * 100) + "% by " + com.slayersuite.task.GameTaskTable.masterName(tracker.getGameTask().getMasterId()), DIM));
@@ -1660,6 +1674,10 @@ public class SlayerSuitePanel extends PluginPanel
 		{
 			cells.add(new String[]{"Mortimer tasks", Integer.toString(mortimer)});
 		}
+		if (tracker.getModifier().getKind() == TaskModifier.Kind.POINTS)
+		{
+			cells.add(new String[]{"this task pays", "+" + tracker.getModifier().getValue()});
+		}
 		if (ps.getNextBonusPoints() > 0)
 		{
 			cells.add(new String[]{"task " + ps.getNextBonusTask(), "+" + ps.getNextBonusPoints()});
@@ -1870,6 +1888,19 @@ public class SlayerSuitePanel extends PluginPanel
 	}
 
 	/** Dim label in a fixed column, value beside it, so rows line up. */
+	/** Gold for points, violet for the superior table, blue for xp, amber for clues, white for a longer or shorter task. */
+	private static Color bonusColour(TaskModifier mod)
+	{
+		switch (mod.getKind())
+		{
+			case POINTS: return Palette.GOLD;
+			case SUPERIOR_CHANCE: return Palette.SUPERIOR_GLOW;
+			case XP_BOOST: return INFO;
+			case CLUES: return WARN;
+			default: return Color.WHITE;
+		}
+	}
+
 	private static JComponent kv(String k, String v, Color c)
 	{
 		JPanel row = new JPanel(new BorderLayout(6, 0));

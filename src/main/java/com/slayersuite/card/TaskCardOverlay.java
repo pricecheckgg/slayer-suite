@@ -8,11 +8,13 @@ import com.slayersuite.data.ItemRule;
 import com.slayersuite.data.LocationRecord;
 import com.slayersuite.data.SlayerDataset;
 import com.slayersuite.data.TaskRecord;
+import com.slayersuite.history.SuperiorMath;
 import com.slayersuite.history.TaskHistory;
 import com.slayersuite.history.TaskStats;
 import com.slayersuite.readiness.Missing;
 import com.slayersuite.readiness.ReadinessChecker;
 import com.slayersuite.task.GameTaskTable;
+import com.slayersuite.task.TaskModifier;
 import com.slayersuite.task.TaskTracker;
 import com.slayersuite.trip.TripMath;
 import com.slayersuite.trip.TripTracker;
@@ -235,6 +237,11 @@ public class TaskCardOverlay extends Overlay
 				fight.add(new Cell("SUPERIOR", rec.getSuperiors().get(0), Color.WHITE, null));
 			}
 		}
+		TaskModifier mod = tracker.getModifier();
+		if (mod.present())
+		{
+			fight.add(new Cell("BONUS", mod.label(), bonusColour(mod), null));
+		}
 		if (!fight.isEmpty())
 		{
 			y = rule(g, draw, x0, y, cw);
@@ -246,10 +253,19 @@ public class TaskCardOverlay extends Overlay
 		if (config.cardShowOdds())
 		{
 			List<TaskHistory.DryOdds> odds = history.dryOdds(2, 1.0 / 64);
-			if (!odds.isEmpty())
+			// Mortimer's superior boost: the unique table per superior, boosted and plain
+			boolean boosted = mod.getKind() == TaskModifier.Kind.SUPERIOR_CHANCE && rec != null && rec.getSlayerLevel() != null && !rec.getSuperiors().isEmpty();
+			if (!odds.isEmpty() || boosted)
 			{
 				y = rule(g, draw, x0, y, cw);
-				y = oddsRows(g, draw, x0, y, cw, odds, fn, fs);
+				if (!odds.isEmpty())
+				{
+					y = oddsRows(g, draw, x0, y, cw, odds, fn, fs);
+				}
+				if (boosted)
+				{
+					y = superiorRows(g, draw, x0, y, cw, rec.getSlayerLevel(), mod.getValue(), fn, fs);
+				}
 				y += 2;
 			}
 		}
@@ -548,6 +564,40 @@ public class TaskCardOverlay extends Overlay
 			x += cellW + gap;
 		}
 		return rowH * rows + 2 * (rows - 1);
+	}
+
+	/** Gold for points, violet for the superior table, blue for xp, amber for clues, white for a longer or shorter task. */
+	private static Color bonusColour(TaskModifier mod)
+	{
+		switch (mod.getKind())
+		{
+			case POINTS: return Palette.GOLD;
+			case SUPERIOR_CHANCE: return Palette.SUPERIOR_GLOW;
+			case XP_BOOST: return Palette.INFO;
+			case CLUES: return RECOMMENDED;
+			default: return Color.WHITE;
+		}
+	}
+
+	/** Two lines for a boosted superior table: the heart (or gem) and any unique, per superior, with the plain rate in small print. */
+	private int superiorRows(Graphics2D g, boolean draw, int x0, int y, int cw, int req, int boost, FontMetrics fn, FontMetrics fs)
+	{
+		String[][] rows = {
+			{"Imbued heart or gem", SuperiorMath.odds(SuperiorMath.heartOrGem(req, boost)), "plain " + SuperiorMath.odds(SuperiorMath.heartOrGem(req, 0))},
+			{"Any unique per superior", SuperiorMath.odds(SuperiorMath.anyUnique(req, boost)), "plain " + SuperiorMath.odds(SuperiorMath.anyUnique(req, 0))},
+		};
+		for (String[] r : rows)
+		{
+			int base = y + fn.getAscent();
+			int rateW = fn.stringWidth(r[1]);
+			int plainW = fs.stringWidth(r[2]);
+			String name = fit(fn, r[0], Math.max(40, cw - rateW - 8 - plainW - 10));
+			text(g, draw, std, name, x0, base, Color.WHITE);
+			text(g, draw, std, r[1], x0 + cw - rateW, base, Palette.SUPERIOR_GLOW);
+			text(g, draw, small, r[2], x0 + cw - rateW - 8 - plainW, base, DIM);
+			y += fn.getHeight();
+		}
+		return y;
 	}
 
 	/** One line per rare drop: the item and its rate on the left, your kills since the last one and the chance you would have had it by now on the right. */

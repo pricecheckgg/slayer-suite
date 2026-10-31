@@ -41,7 +41,7 @@ Slayer Suite reads the client, draws, and tells you things. It never attacks, pr
 
 ## While you fight
 
-- **Task card.** Kills left with a bar, ETA with the finish time, kills per hour, points and streak. The style to use, the superior, the finishing item. Where you are, with cannon, multi and safespot chips, or the pinned spot and the next step. A gear checklist: have, bring, missing.
+- **Task card.** Kills left with a bar, ETA with the finish time, kills per hour, points and streak. The style to use, the superior, the finishing item. On a Mortimer task, his bonus as the game words it: extra points, more or fewer kills, clue chance, Slayer xp or superior unique chance, and with that last one the odds of a heart or gem per superior, boosted and plain. Where you are, with cannon, multi and safespot chips, or the pinned spot and the next step. A gear checklist: have, bring, missing.
 - **Drop odds.** The monster's rarest drops with your kills since the last one and the chance you would have had it by now, from the wiki rates and your own kills.
 - **Hover card.** Hover a task monster: Hitpoints, max hit, attack style, weakness, Slayer xp, the finishing item, poison and cannon warnings. Out of the way of the game's own hover text.
 - **One alert at a time.** Low Hitpoints, Hitpoints falling fast (your own damage over the last fifteen seconds, carried on), venom, poison without a cure, low prayer, a boost wearing off, attacking the wrong thing, missing items, cannon empty or broken, the aggression timer, standing idle, supplies running out early, nearly done, superior, task done. Banner, RuneLite notification by severity, chat line, sound, a pause hotkey.

@@ -158,6 +158,9 @@ public class TaskTracker
 	private static final long SPEND_MATCH_MS = 10_000L;
 	@Getter
 	private boolean storageUnlocked;
+	/** Mortimer's bonus on the current task, from the game's own values each tick; NONE on another master's task. */
+	@Getter
+	private volatile TaskModifier modifier = TaskModifier.NONE;
 	/** Points when this session first read them, for "+N this session". */
 	@Getter
 	private int pointsAtSessionStart = -1;
@@ -339,6 +342,10 @@ public class TaskTracker
 			prevStreak = taskStreak;
 			taskStreak = client.getVarbitValue(VarbitID.SLAYER_TASKS_COMPLETED);
 			storageUnlocked = client.getVarbitValue(VarbitID.SLAYER_UNLOCK_STORAGE) > 0;
+			TaskModifier mod = table.currentModifier();
+			int masterOfTask = currentMasterId();
+			// the values can linger in the client, so only a task the tables put on Mortimer's list carries one
+			modifier = mod.present() && masterOfTask >= 0 && masterOfTask != 10 ? TaskModifier.NONE : mod;
 			if (pointsAtSessionStart < 0 && slayerPoints > 0)
 			{
 				pointsAtSessionStart = slayerPoints;

@@ -397,7 +397,15 @@ public class TaskCompleteOverlay extends Overlay
 		missed = Collections.emptyList();
 		ribbon = "";
 		sparkles = false;
-		show("SUPERIOR", name, "", Palette.SUPERIOR, 2200);
+		String detail = "";
+		com.slayersuite.task.TaskModifier mod = tracker.getModifier();
+		com.slayersuite.data.TaskRecord rec = tracker.getRecord();
+		if (mod.getKind() == com.slayersuite.task.TaskModifier.Kind.SUPERIOR_CHANCE && rec != null && rec.getSlayerLevel() != null)
+		{
+			detail = mod.label() + ":  heart or gem " + com.slayersuite.history.SuperiorMath.odds(com.slayersuite.history.SuperiorMath.heartOrGem(rec.getSlayerLevel(), mod.getValue()))
+				+ ",  any unique " + com.slayersuite.history.SuperiorMath.odds(com.slayersuite.history.SuperiorMath.anyUnique(rec.getSlayerLevel(), mod.getValue()));
+		}
+		show("SUPERIOR", name, detail, Palette.SUPERIOR, 2200);
 	}
 
 	@Subscribe
